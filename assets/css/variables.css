@@ -1,0 +1,371 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:wght@700;900&display=swap');
+
+/* ============================================
+   MEMOCAMPUS — Variables & Design Tokens
+   ...
+
+   
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Dashboard — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .materia-card {
+      background: var(--bg-card); border: 1px solid var(--borde);
+      border-radius: var(--radio-lg); overflow: hidden;
+      transition: var(--trans); cursor: pointer;
+    }
+    .materia-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); }
+    .materia-header { height: 8px; }
+    .materia-body { padding: 1.1rem 1.25rem; }
+    .materia-ico { font-size: 1.6rem; margin-bottom: 8px; }
+    .materia-nombre { font-size: 14px; font-weight: 700; color: var(--txt-primario); margin-bottom: 2px; }
+    .materia-docente { font-size: 12px; color: var(--txt-muted); margin-bottom: 10px; }
+    .materia-nota { display: flex; justify-content: space-between; align-items: center; }
+    .nota-num { font-size: 1.3rem; font-weight: 800; }
+    .nota-label { font-size: 10px; color: var(--txt-muted); text-align: right; }
+
+    .tarea-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--borde);
+    }
+    .tarea-item:last-child { border-bottom: none; }
+    .tarea-color { width: 4px; border-radius: 2px; flex-shrink: 0; align-self: stretch; min-height: 40px; }
+    .tarea-nombre { font-size: 14px; font-weight: 600; color: var(--txt-primario); margin-bottom: 3px; }
+    .tarea-meta { font-size: 12px; color: var(--txt-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .tarea-fecha { margin-left: auto; text-align: right; flex-shrink: 0; }
+    .tarea-fecha .dias { font-size: 11px; font-weight: 700; }
+    .tarea-fecha .fecha-str { font-size: 10px; color: var(--txt-muted); }
+
+    .comunicado-item {
+      display: flex; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--borde);
+    }
+    .comunicado-item:last-child { border-bottom: none; }
+    .com-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .com-titulo { font-size: 13.5px; font-weight: 600; color: var(--txt-primario); margin-bottom: 2px; }
+    .com-fecha  { font-size: 11px; color: var(--txt-muted); }
+
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--verde) 0%, #1e8048 100%);
+      border-radius: var(--radio-xl); padding: 1.75rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; margin-bottom: 1.75rem; overflow: hidden; position: relative;
+    }
+    .welcome-banner::before {
+      content: ''; position: absolute; right: -20px; top: -20px;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .welcome-banner h2 { color: #fff; font-size: 1.3rem; margin-bottom: 4px; }
+    .welcome-banner p  { color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 300; }
+    .welcome-deco { font-size: 3.5rem; opacity: 0.25; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text">
+        <div class="sidebar-logo-name">MemoCampus</div>
+        <div class="sidebar-logo-sub">IE La Armonía</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-title">Principal</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="activo"><span class="nav-ico">🏠</span> Mi inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">✅</span> Tareas <span class="sidebar-badge">3</span></a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Mis notas</a>
+    </nav>
+
+    <div class="sidebar-section-title">Más</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">📅</span> Calendario</a>
+      <a href="#"><span class="nav-ico">💬</span> Mensajes</a>
+      <a href="#"><span class="nav-ico">🔔</span> Notificaciones</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Valentina Gómez</div>
+        <div class="sidebar-user-rol" data-user-rol>Estudiante · 10°A</div>
+      </div>
+      <span class="sidebar-logout" data-logout title="Cerrar sesión">⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <!-- TOPBAR -->
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mi inicio</span>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn">
+          🔔
+          <div class="topbar-notif-dot"></div>
+        </button>
+        <div class="topbar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <div class="app-content">
+
+      <!-- Banner bienvenida -->
+      <div class="welcome-banner">
+        <div>
+          <h2>¡Hola, <span data-user-name>Valentina</span>! 👋</h2>
+          <p>Grado 10°A · IE La Armonía · Período 1 — 2026</p>
+        </div>
+        <div class="welcome-deco">🎒</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#eef2fd;">📚</div>
+          <div>
+            <div class="stat-label">Materias</div>
+            <div class="stat-value">11</div>
+            <div class="stat-sub">Este período</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7;">✅</div>
+          <div>
+            <div class="stat-label">Tareas pendientes</div>
+            <div class="stat-value" style="color:var(--alerta);">3</div>
+            <div class="stat-sub">Esta semana</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
+          <div>
+            <div class="stat-label">Promedio general</div>
+            <div class="stat-value" style="color:var(--verde);">4.1</div>
+            <div class="stat-sub">Período 1</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#f5eeff;">🎯</div>
+          <div>
+            <div class="stat-label">Asistencia</div>
+            <div class="stat-value" style="color:var(--color-padre);">94%</div>
+            <div class="stat-sub">Este mes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materias + Tareas -->
+      <div class="grid-2 mb-3" style="grid-template-columns: 1.4fr 1fr;">
+
+        <!-- Mis materias -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Mis materias</h3>
+            <a href="cursos.html" class="btn btn-ghost btn-sm">Ver todas →</a>
+          </div>
+          <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap:10px;">
+
+            <div class="materia-card" onclick="window.location.href='cursos.html'">
+              <div class="materia-header" style="background:var(--mat-matematicas);"></div>
+              <div class="materia-body">
+                <div class="materia-ico">➗</div>
+                <div class="materia-nombre">Matemáticas</div>
+                <div class="materia-docente">Prof. Ramírez</div>
+                <div class="materia-nota">
+                  <span class="nota-num" style="color:var(--mat-matematicas);">4.2</span>
+                  <div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="materia-card" onclick="window.location.href='cursos.html'">
+              <div class="materia-header" style="background:var(--mat-ciencias);"></div>
+              <div class="materia-body">
+                <div class="materia-ico">🔬</div>
+                <div class="materia-nombre">Ciencias Nat.</div>
+                <div class="materia-docente">Prof. Morales</div>
+                <div class="materia-nota">
+                  <span class="nota-num" style="color:var(--mat-ciencias);">4.5</span>
+                  <div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="materia-card" onclick="window.location.href='cursos.html'">
+              <div class="materia-header" style="background:var(--mat-ingles);"></div>
+              <div class="materia-body">
+                <div class="materia-ico">🌍</div>
+                <div class="materia-nombre">Inglés</div>
+                <div class="materia-docente">Prof. Torres</div>
+                <div class="materia-nota">
+                  <span class="nota-num" style="color:var(--mat-ingles);">3.8</span>
+                  <div class="nota-label">Período 1<br><span class="badge badge-alerta" style="font-size:9px;">Básico</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="materia-card" onclick="window.location.href='cursos.html'">
+              <div class="materia-header" style="background:var(--mat-español);"></div>
+              <div class="materia-body">
+                <div class="materia-ico">📖</div>
+                <div class="materia-nombre">Español</div>
+                <div class="materia-docente">Prof. Vargas</div>
+                <div class="materia-nota">
+                  <span class="nota-num" style="color:var(--mat-español);">4.0</span>
+                  <div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Tareas pendientes -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Tareas pendientes</h3>
+            <a href="tareas.html" class="btn btn-ghost btn-sm">Ver todas →</a>
+          </div>
+          <div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:var(--mat-matematicas);"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Ejercicios de trigonometría</div>
+                <div class="tarea-meta"><span>Matemáticas</span><span>Prof. Ramírez</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--error);">Hoy</div>
+                <div class="fecha-str">25 mar</div>
+              </div>
+            </div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:var(--mat-ciencias);"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Informe práctica de laboratorio</div>
+                <div class="tarea-meta"><span>Ciencias</span><span>Prof. Morales</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--alerta);">2 días</div>
+                <div class="fecha-str">27 mar</div>
+              </div>
+            </div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:var(--mat-ingles);"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Reading comprehension — Unit 3</div>
+                <div class="tarea-meta"><span>Inglés</span><span>Prof. Torres</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--verde);">5 días</div>
+                <div class="fecha-str">30 mar</div>
+              </div>
+            </div>
+          </div>
+          <a href="tareas.html" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:1rem;">Entregar tarea →</a>
+        </div>
+      </div>
+
+      <!-- Progreso período + Comunicados -->
+      <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
+
+        <!-- Progreso -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Rendimiento período 1</h3>
+            <a href="notas.html" class="btn btn-ghost btn-sm">Ver boletín →</a>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Matemáticas</span><span class="text-sm" style="color:var(--mat-matematicas); font-weight:700;">4.2</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:84%; background:var(--mat-matematicas);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Ciencias Naturales</span><span class="text-sm" style="color:var(--mat-ciencias); font-weight:700;">4.5</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:90%; background:var(--mat-ciencias);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Inglés</span><span class="text-sm" style="color:var(--mat-ingles); font-weight:700;">3.8</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:76%; background:var(--mat-ingles);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Español</span><span class="text-sm" style="color:var(--mat-español); font-weight:700;">4.0</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:80%; background:var(--mat-español);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Sociales</span><span class="text-sm" style="color:var(--mat-sociales); font-weight:700;">4.3</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:86%; background:var(--mat-sociales);"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
+            <span class="text-sm text-muted">Promedio general</span>
+            <span style="font-size:1.4rem; font-weight:800; color:var(--verde);">4.1</span>
+          </div>
+        </div>
+
+        <!-- Comunicados -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Comunicados</h3>
+            <span class="badge badge-azul">3 nuevos</span>
+          </div>
+          <div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--verde-suave);">📢</div>
+              <div>
+                <div class="com-titulo">Semana de recuperación — Período 1</div>
+                <div class="com-fecha">Coordinación Académica · 24 mar 2026</div>
+              </div>
+            </div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--amarillo-suave);">📅</div>
+              <div>
+                <div class="com-titulo">Cambio de horario — Educación Física</div>
+                <div class="com-fecha">Coordinación · 22 mar 2026</div>
+              </div>
+            </div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--color-estudiante-suave);">🎉</div>
+              <div>
+                <div class="com-titulo">Feria de Ciencias — Inscripciones abiertas</div>
+                <div class="com-fecha">Rectoría · 20 mar 2026</div>
+              </div>
+            </div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:#fef2f2;">⚠️</div>
+              <div>
+                <div class="com-titulo">Recordatorio entrega de formularios</div>
+                <div class="com-fecha">Secretaría · 18 mar 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /app-content -->
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar sesión — MemoCampus</title>
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    body { background: #0f1923; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+    .login-wrap { display: grid; grid-template-columns: 1fr 1fr; min-height: 100vh; width: 100%; max-width: 1000px; gap: 0; border-radius: 24px; overflow: hidden; box-shadow: 0 24px 80px rgba(0,0,0,0.4); }
+
+    /* Panel izquierdo — decorativo */
+    .login-left {
+      background: linear-gradient(155deg, var(--verde-oscuro, #0d4a25) 0%, var(--verde) 60%, #2b8a4e 100%);
+      padding: 3rem; display: flex; flex-direction: column; justify-content: space-between;
+      position: relative; overflow: hidden;
+    }
+    .login-left-dots {
+      position: absolute; inset: 0; opacity: 0.05;
+      background-image: radial-gradient(#fff 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .login-left-content { position: relative; z-index: 1; }
+    .login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 3rem; }
+    .login-mark {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: var(--amarillo);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 900; font-size: 20px; color: #0f1923;
+    }
+    .login-brand-name { font-size: 18px; font-weight: 800; color: #fff; }
+    .login-brand-sub  { font-size: 11px; color: rgba(255,255,255,0.5); display: block; }
+    .login-left h2 { font-size: 2rem; color: #fff; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+    .login-left p  { color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 300; line-height: 1.7; }
+    .login-left-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 2.5rem; }
+    .login-stat {
+      background: rgba(255,255,255,0.1); border-radius: 12px; padding: 1rem;
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+    .login-stat-num { font-size: 1.5rem; font-weight: 800; color: var(--amarillo); }
+    .login-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+    .login-left-footer { position: relative; z-index: 1; font-size: 11px; color: rgba(255,255,255,0.3); }
+
+    /* Panel derecho — formulario */
+    .login-right {
+      background: #fff; padding: 3rem 2.5rem;
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .login-right h3 { font-size: 1.5rem; font-weight: 800; color: var(--txt-primario); margin-bottom: 6px; }
+    .login-right .login-sub { font-size: 14px; color: var(--txt-muted); margin-bottom: 2rem; font-weight: 400; }
+
+    /* Selector de rol */
+    .rol-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.75rem; }
+    .rol-btn {
+      border: 2px solid var(--borde); border-radius: 12px; padding: 12px 10px;
+      background: transparent; cursor: pointer; transition: all 0.2s;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      font-family: var(--font-ui);
+    }
+    .rol-btn:hover { border-color: var(--verde-claro); background: var(--verde-suave); }
+    .rol-btn.selected { border-color: var(--verde); background: var(--verde-suave); }
+    .rol-btn .rol-emoji { font-size: 1.6rem; }
+    .rol-btn .rol-name  { font-size: 12px; font-weight: 600; color: var(--txt-primario); }
+    .rol-btn .rol-desc  { font-size: 10px; color: var(--txt-muted); }
+
+    /* Botón Google */
+    .btn-google {
+      width: 100%; padding: 13px 20px; border-radius: 10px;
+      border: 2px solid var(--borde); background: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      font-size: 14px; font-weight: 600; color: var(--txt-primario);
+      cursor: pointer; transition: all 0.2s; font-family: var(--font-ui);
+      margin-bottom: 12px;
+    }
+    .btn-google:hover { border-color: var(--verde); background: var(--verde-suave); }
+    .google-ico { width: 20px; height: 20px; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 1rem 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--borde); }
+    .divider span { font-size: 12px; color: var(--txt-muted); white-space: nowrap; }
+
+    /* Info dominio */
+    .dominio-info {
+      background: var(--verde-suave); border: 1px solid rgba(26,107,60,0.2);
+      border-radius: 10px; padding: 10px 14px; margin-bottom: 1.25rem;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .dominio-info p { font-size: 12px; color: var(--verde); font-weight: 400; margin: 0; }
+
+    /* Modo demo */
+    .demo-note {
+      background: var(--amarillo-suave); border: 1px solid rgba(200,150,26,0.3);
+      border-radius: 10px; padding: 10px 14px; margin-top: 1rem;
+    }
+    .demo-note p { font-size: 12px; color: var(--dorado); margin: 0; font-weight: 400; }
+
+    .login-footer-note { margin-top: 1.5rem; text-align: center; font-size: 12px; color: var(--txt-muted); }
+    .login-footer-note a { color: var(--verde); font-weight: 500; }
+
+    @media (max-width: 768px) {
+      .login-wrap { grid-template-columns: 1fr; border-radius: 16px; }
+      .login-left { display: none; }
+      .login-right { padding: 2.5rem 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-wrap">
+  <!-- Panel izquierdo -->
+  <div class="login-left">
+    <div class="login-left-dots"></div>
+    <div class="login-left-content">
+      <div class="login-brand">
+        <div class="login-mark">M</div>
+        <div>
+          <span class="login-brand-name">MemoCampus</span>
+          <span class="login-brand-sub">IE La Armonía · Mosquera</span>
+        </div>
+      </div>
+      <h2>Bienvenido a tu plataforma educativa</h2>
+      <p>Accede a materiales, tareas, notas y comunicados de IE La Armonía desde cualquier dispositivo, en cualquier momento.</p>
+      <div class="login-left-stats">
+        <div class="login-stat"><div class="login-stat-num">1.200+</div><div class="login-stat-lbl">Estudiantes activos</div></div>
+        <div class="login-stat"><div class="login-stat-num">45+</div><div class="login-stat-lbl">Docentes</div></div>
+        <div class="login-stat"><div class="login-stat-num">4</div><div class="login-stat-lbl">Perfiles de usuario</div></div>
+        <div class="login-stat"><div class="login-stat-num">100%</div><div class="login-stat-lbl">Acceso seguro</div></div>
+      </div>
+    </div>
+    <div class="login-left-footer">© 2026 MemoCampus · IE La Armonía, Mosquera, Cundinamarca</div>
+  </div>
+
+  <!-- Panel derecho -->
+  <div class="login-right">
+    <h3>Iniciar sesión</h3>
+    <p class="login-sub">Selecciona tu perfil y accede con tu cuenta de Google institucional.</p>
+
+    <!-- Selector de rol -->
+    <div class="rol-selector" id="rol-selector">
+      <button class="rol-btn selected" data-rol="estudiante" onclick="seleccionarRol(this)">
+        <span class="rol-emoji">🎒</span>
+        <span class="rol-name">Estudiante</span>
+        <span class="rol-desc">@iearmonia.edu.co</span>
+      </button>
+      <button class="rol-btn" data-rol="padre" onclick="seleccionarRol(this)">
+        <span class="rol-emoji">👨‍👩‍👧</span>
+        <span class="rol-name">Padre / Acudiente</span>
+        <span class="rol-desc">Correo personal</span>
+      </button>
+      <button class="rol-btn" data-rol="docente" onclick="seleccionarRol(this)">
+        <span class="rol-emoji">👩‍🏫</span>
+        <span class="rol-name">Docente</span>
+        <span class="rol-desc">@iearmonia.edu.co</span>
+      </button>
+      <button class="rol-btn" data-rol="admin" onclick="seleccionarRol(this)">
+        <span class="rol-emoji">🏫</span>
+        <span class="rol-name">Rectoría</span>
+        <span class="rol-desc">@iearmonia.edu.co</span>
+      </button>
+    </div>
+
+    <!-- Info dominio -->
+    <div class="dominio-info" id="dominio-info">
+      <span>🔐</span>
+      <p id="dominio-texto">Estudiantes y docentes ingresan con su correo <strong>@iearmonia.edu.co</strong> a través de Google.</p>
+    </div>
+
+    <!-- Botón Google -->
+    <button class="btn-google" onclick="loginConGoogle()">
+      <svg class="google-ico" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continuar con Google
+    </button>
+
+    <div class="divider"><span>o prueba el modo demo</span></div>
+
+    <!-- Demo rápido -->
+    <button class="btn" style="width:100%; background:var(--verde); color:#fff; justify-content:center; padding:13px;" onclick="loginDemo()">
+      🚀 Entrar en modo demo
+    </button>
+
+    <div class="demo-note">
+      <p>⚡ <strong>Modo demo:</strong> accede con datos de ejemplo según el perfil seleccionado. Sin necesidad de cuenta real.</p>
+    </div>
+
+    <p class="login-footer-note">
+      ¿Problemas para acceder? <a href="../contacto.html">Contáctanos</a> ·
+      <a href="../index.html">Volver al portal</a>
+    </p>
+  </div>
+</div>
+
+<script src="assets/js/auth.js"></script>
+<script>
+  let rolSeleccionado = 'estudiante';
+
+  /* Pre-seleccionar rol desde URL param */
+  const params = new URLSearchParams(window.location.search);
+  const rolParam = params.get('rol');
+  if (rolParam) {
+    rolSeleccionado = rolParam;
+    document.querySelectorAll('.rol-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.rol === rolParam);
+    });
+    actualizarInfoDominio(rolParam);
+  }
+
+  function seleccionarRol(btn) {
+    document.querySelectorAll('.rol-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    rolSeleccionado = btn.dataset.rol;
+    actualizarInfoDominio(rolSeleccionado);
+  }
+
+  function actualizarInfoDominio(rol) {
+    const textos = {
+      estudiante: 'Estudiantes ingresan con su correo <strong>@iearmonia.edu.co</strong> a través de Google Workspace.',
+      docente:    'Docentes ingresan con su correo <strong>@iearmonia.edu.co</strong> a través de Google Workspace.',
+      admin:      'Administradores ingresan con su correo <strong>@iearmonia.edu.co</strong> a través de Google Workspace.',
+      padre:      'Padres y acudientes pueden ingresar con <strong>cualquier cuenta de Google</strong> (Gmail u otro).'
+    };
+    document.getElementById('dominio-texto').innerHTML = textos[rol] || textos.estudiante;
+  }
+
+  function loginConGoogle() {
+    /* En producción: aquí iría Google OAuth 2.0
+       Por ahora simula el flujo con los datos demo */
+    const btn = document.querySelector('.btn-google');
+    btn.textContent = 'Conectando con Google...';
+    btn.disabled = true;
+    setTimeout(() => {
+      AUTH.login(rolSeleccionado);
+      AUTH.redirigirSegunRol(rolSeleccionado);
+    }, 1200);
+  }
+
+  function loginDemo() {
+    const btn = document.querySelector('[onclick="loginDemo()"]');
+    btn.textContent = 'Cargando...';
+    btn.disabled = true;
+    setTimeout(() => {
+      AUTH.login(rolSeleccionado);
+      AUTH.redirigirSegunRol(rolSeleccionado);
+    }, 800);
+  }
+
+  /* Si ya está autenticado, redirigir directamente */
+  if (AUTH.isAutenticado()) {
+    AUTH.redirigirSegunRol(AUTH.getUsuario().rol);
+  }
+</script>
+</body>
+</html>
