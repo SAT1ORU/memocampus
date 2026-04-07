@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mis Notas — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .periodo-tab-bar {
+      display: flex; gap: 4px; margin-bottom: 1.75rem;
+      border-bottom: 2px solid var(--borde); padding-bottom: 0;
+    }
+    .periodo-tab {
+      padding: 9px 22px; font-size: 13.5px; font-weight: 500;
+      color: var(--txt-muted); cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+      transition: var(--trans); background: none; border-top: none;
+      border-left: none; border-right: none; font-family: var(--font-ui);
+    }
+    .periodo-tab.active { color: var(--verde); border-bottom-color: var(--verde); font-weight: 600; }
+    .periodo-tab:hover:not(.active) { color: var(--txt-primario); }
+
+    .nota-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr;
+      gap: 0;
+      border-bottom: 1px solid var(--borde);
+      align-items: center;
+    }
+    .nota-row:last-child { border-bottom: none; }
+    .nota-row:hover { background: var(--bg-app); }
+    .nota-cell {
+      padding: 12px 14px; font-size: 13.5px;
+      color: var(--txt-secundario);
+    }
+    .nota-cell.header {
+      font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--txt-muted);
+      padding: 10px 14px; background: var(--bg-app);
+      border-bottom: 2px solid var(--borde);
+    }
+    .nota-materia-info { display: flex; align-items: center; gap: 10px; }
+    .nota-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .nota-num { font-size: 1.1rem; font-weight: 800; }
+    .nota-promedio-general {
+      background: linear-gradient(135deg, var(--verde) 0%, #1e8048 100%);
+      border-radius: var(--radio-xl); padding: 1.5rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.75rem; gap: 1rem;
+    }
+    .nota-promedio-general .label { color: rgba(255,255,255,0.75); font-size: 13px; font-weight: 300; margin-bottom: 4px; }
+    .nota-promedio-general .num  { color: #fff; font-size: 2.5rem; font-weight: 800; font-family: var(--font-display); }
+    .nota-promedio-general .sub  { color: rgba(255,255,255,0.6); font-size: 12px; }
+
+    /* Chart bars */
+    .chart-wrap { padding: 1rem 0; }
+    .chart-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .chart-label { font-size: 12px; color: var(--txt-muted); min-width: 130px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chart-bar-wrap { flex: 1; background: var(--bg-app); border-radius: 20px; height: 10px; overflow: hidden; }
+    .chart-bar { height: 100%; border-radius: 20px; transition: width 0.8s ease; }
+    .chart-val { font-size: 13px; font-weight: 700; min-width: 30px; text-align: right; }
+
+    /* Tabla responsive */
+    .notas-tabla-wrap { overflow-x: auto; border-radius: var(--radio-lg); border: 1px solid var(--borde); }
+
+    /* Periodo content */
+    .periodo-content { display: none; }
+    .periodo-content.active { display: block; }
+
+    .descarga-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--verde); color: #fff; padding: 10px 20px;
+      border-radius: var(--radio-md); font-size: 13px; font-weight: 500;
+      cursor: pointer; border: none; font-family: var(--font-ui);
+      transition: var(--trans);
+    }
+    .descarga-btn:hover { background: var(--verde-medio); transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text">
+        <div class="sidebar-logo-name">MemoCampus</div>
+        <div class="sidebar-logo-sub">IE La Armonía</div>
+      </div>
+    </div>
+    <div class="sidebar-section-title">Principal</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Mi inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">✅</span> Tareas <span class="sidebar-badge">3</span></a>
+      <a href="notas.html" class="activo"><span class="nav-ico">📊</span> Mis notas</a>
+    </nav>
+    <div class="sidebar-section-title">Más</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">📅</span> Calendario</a>
+      <a href="#"><span class="nav-ico">💬</span> Mensajes</a>
+      <a href="#"><span class="nav-ico">🔔</span> Notificaciones</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Valentina Gómez</div>
+        <div class="sidebar-user-rol" data-user-rol>Estudiante · 10°A</div>
+      </div>
+      <span class="sidebar-logout" data-logout title="Cerrar sesión">⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mis notas</span>
+      </div>
+      <div class="topbar-right">
+        <button class="descarga-btn" onclick="window.print()">📥 Descargar boletín</button>
+        <div class="topbar-avatar" data-user-avatar style="background:#3b6de8; margin-left:8px;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Resumen general -->
+      <div class="nota-promedio-general">
+        <div>
+          <div class="label">Estudiante</div>
+          <div style="color:#fff; font-size:16px; font-weight:600;" data-user-name>Valentina Gómez</div>
+          <div class="sub">Grado 10°A · IE La Armonía · Año 2026</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="label">Promedio general</div>
+          <div class="num">4.1</div>
+          <div class="sub">Período 1</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="label">Desempeño</div>
+          <div class="num" style="font-size:1.6rem;">Alto</div>
+          <div class="sub">Escala institucional</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="label">Asistencia</div>
+          <div class="num" style="font-size:1.6rem;">94%</div>
+          <div class="sub">Este período</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:1.75rem;">
+
+        <!-- Gráfica barras -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Rendimiento por materia</h3>
+            <span class="badge badge-verde">Período 1</span>
+          </div>
+          <div class="chart-wrap" id="chart-barras"></div>
+        </div>
+
+        <!-- Evolución por período -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Evolución del promedio</h3>
+            <span class="badge badge-azul">2026</span>
+          </div>
+          <div style="position:relative; height:180px; margin-top:1rem;">
+            <canvas id="chart-linea" width="100%" height="180"></canvas>
+          </div>
+          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between;">
+            <div style="text-align:center;"><div style="font-size:11px; color:var(--txt-muted);">P1</div><div style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.1</div></div>
+            <div style="text-align:center;"><div style="font-size:11px; color:var(--txt-muted);">P2</div><div style="font-size:1.1rem; font-weight:800; color:var(--txt-muted);">—</div></div>
+            <div style="text-align:center;"><div style="font-size:11px; color:var(--txt-muted);">P3</div><div style="font-size:1.1rem; font-weight:800; color:var(--txt-muted);">—</div></div>
+            <div style="text-align:center;"><div style="font-size:11px; color:var(--txt-muted);">P4</div><div style="font-size:1.1rem; font-weight:800; color:var(--txt-muted);">—</div></div>
+            <div style="text-align:center;"><div style="font-size:11px; color:var(--verde); font-weight:600;">Final</div><div style="font-size:1.1rem; font-weight:800; color:var(--txt-muted);">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de notas por período -->
+      <div class="card">
+        <div class="flex-between mb-3">
+          <h3>Boletín de notas</h3>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span class="badge badge-verde">Grado 10°A</span>
+            <span class="badge badge-azul">2026</span>
+          </div>
+        </div>
+
+        <div class="periodo-tab-bar">
+          <button class="periodo-tab active" onclick="switchPeriodo(this,'p1')">Período 1</button>
+          <button class="periodo-tab" onclick="switchPeriodo(this,'p2')">Período 2</button>
+          <button class="periodo-tab" onclick="switchPeriodo(this,'p3')">Período 3</button>
+          <button class="periodo-tab" onclick="switchPeriodo(this,'p4')">Período 4</button>
+          <button class="periodo-tab" onclick="switchPeriodo(this,'final')">Nota Final</button>
+        </div>
+
+        <!-- Período 1 -->
+        <div class="periodo-content active" id="tab-p1">
+          <div class="notas-tabla-wrap">
+            <div class="nota-row">
+              <div class="nota-cell header">Materia</div>
+              <div class="nota-cell header" style="text-align:center;">Ser (30%)</div>
+              <div class="nota-cell header" style="text-align:center;">Saber (40%)</div>
+              <div class="nota-cell header" style="text-align:center;">Hacer (30%)</div>
+              <div class="nota-cell header" style="text-align:center;">Nota P1</div>
+              <div class="nota-cell header" style="text-align:center;">Desempeño</div>
+            </div>
+            <div id="notas-p1"></div>
+            <div class="nota-row" style="background:var(--verde-suave);">
+              <div class="nota-cell" style="font-weight:700; color:var(--verde);">Promedio General</div>
+              <div class="nota-cell"></div><div class="nota-cell"></div><div class="nota-cell"></div>
+              <div class="nota-cell" style="text-align:center;"><span class="nota-num" style="color:var(--verde);">4.1</span></div>
+              <div class="nota-cell" style="text-align:center;"><span class="badge badge-exito">Alto</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Período 2, 3, 4 — pendiente -->
+        <div class="periodo-content" id="tab-p2">
+          <div style="text-align:center; padding:3rem; color:var(--txt-muted);">
+            <div style="font-size:2.5rem; margin-bottom:12px; opacity:0.3;">📊</div>
+            <p style="font-weight:500;">El período 2 aún no ha finalizado.</p>
+            <p style="font-size:13px; margin-top:6px;">Las notas estarán disponibles al cierre del período.</p>
+          </div>
+        </div>
+        <div class="periodo-content" id="tab-p3">
+          <div style="text-align:center; padding:3rem; color:var(--txt-muted);">
+            <div style="font-size:2.5rem; margin-bottom:12px; opacity:0.3;">📊</div>
+            <p style="font-weight:500;">El período 3 aún no ha iniciado.</p>
+          </div>
+        </div>
+        <div class="periodo-content" id="tab-p4">
+          <div style="text-align:center; padding:3rem; color:var(--txt-muted);">
+            <div style="font-size:2.5rem; margin-bottom:12px; opacity:0.3;">📊</div>
+            <p style="font-weight:500;">El período 4 aún no ha iniciado.</p>
+          </div>
+        </div>
+        <div class="periodo-content" id="tab-final">
+          <div style="text-align:center; padding:3rem; color:var(--txt-muted);">
+            <div style="font-size:2.5rem; margin-bottom:12px; opacity:0.3;">🎓</div>
+            <p style="font-weight:500;">La nota final se calculará al cerrar el período 4.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  // ── Datos de notas ──
+  const materias = [
+    { nombre: "Matemáticas",       color: "#3b6de8", ser: 4.3, saber: 4.0, hacer: 4.3 },
+    { nombre: "Ciencias Nat.",     color: "#1a9b6e", ser: 4.5, saber: 4.6, hacer: 4.4 },
+    { nombre: "Inglés",            color: "#9b3de8", ser: 4.0, saber: 3.6, hacer: 3.8 },
+    { nombre: "Español",           color: "#e84c3d", ser: 4.2, saber: 3.8, hacer: 4.0 },
+    { nombre: "Ciencias Sociales", color: "#e87d1e", ser: 4.4, saber: 4.2, hacer: 4.2 },
+    { nombre: "Ed. Artística",     color: "#e83d8a", ser: 5.0, saber: 4.7, hacer: 4.8 },
+    { nombre: "Física",            color: "#1e9ee8", ser: 4.0, saber: 3.8, hacer: 4.0 },
+    { nombre: "Ética y Valores",   color: "#6db83b", ser: 4.8, saber: 4.5, hacer: 4.5 },
+    { nombre: "Ed. Física",        color: "#888888", ser: 4.5, saber: 4.2, hacer: 4.4 },
+  ];
+
+  function calcNota(m) {
+    return Math.round((m.ser * 0.3 + m.saber * 0.4 + m.hacer * 0.3) * 10) / 10;
+  }
+
+  function desempeno(n) {
+    if (n >= 4.6) return { txt: "Superior", cls: "badge" + " " + "badge-exito", style: "background:#fdf4ff;color:#9b3de8;" };
+    if (n >= 4.0) return { txt: "Alto",     cls: "badge badge-exito", style: "" };
+    if (n >= 3.0) return { txt: "Básico",   cls: "badge badge-alerta", style: "" };
+    return              { txt: "Bajo",      cls: "badge badge-error",  style: "" };
+  }
+
+  // ── Tabla notas P1 ──
+  const tbody = document.getElementById('notas-p1');
+  materias.forEach(m => {
+    const nota = calcNota(m);
+    const d    = desempeno(nota);
+    const row  = document.createElement('div');
+    row.className = 'nota-row';
+    row.innerHTML = `
+      <div class="nota-cell">
+        <div class="nota-materia-info">
+          <div class="nota-dot" style="background:${m.color};"></div>
+          <span style="font-weight:500; color:var(--txt-primario);">${m.nombre}</span>
+        </div>
+      </div>
+      <div class="nota-cell" style="text-align:center;">${m.ser.toFixed(1)}</div>
+      <div class="nota-cell" style="text-align:center;">${m.saber.toFixed(1)}</div>
+      <div class="nota-cell" style="text-align:center;">${m.hacer.toFixed(1)}</div>
+      <div class="nota-cell" style="text-align:center;">
+        <span class="nota-num" style="color:${m.color};">${nota.toFixed(1)}</span>
+      </div>
+      <div class="nota-cell" style="text-align:center;">
+        <span class="${d.cls}" style="${d.style}">${d.txt}</span>
+      </div>`;
+    tbody.appendChild(row);
+  });
+
+  // ── Barras ──
+  const chartWrap = document.getElementById('chart-barras');
+  materias.forEach(m => {
+    const nota = calcNota(m);
+    const pct  = (nota / 5 * 100).toFixed(0);
+    chartWrap.innerHTML += `
+      <div class="chart-row">
+        <div class="chart-label">${m.nombre}</div>
+        <div class="chart-bar-wrap">
+          <div class="chart-bar" style="width:${pct}%; background:${m.color};"></div>
+        </div>
+        <div class="chart-val" style="color:${m.color};">${nota.toFixed(1)}</div>
+      </div>`;
+  });
+
+  // ── Tabs período ──
+  function switchPeriodo(btn, id) {
+    document.querySelectorAll('.periodo-tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.periodo-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+</script>
+</body>
+</html>

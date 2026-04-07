@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes — MemoCampus Admin</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .welcome-banner { background:linear-gradient(135deg,var(--verde-oscuro,#0d4a25) 0%,var(--verde) 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; }
+    .welcome-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
+    .welcome-banner p { color:rgba(255,255,255,0.7); font-size:13px; font-weight:300; }
+    .chart-row { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+    .chart-label { font-size:12px; color:var(--txt-muted); min-width:100px; font-weight:500; }
+    .chart-bar-wrap { flex:1; background:var(--bg-app); border-radius:20px; height:10px; overflow:hidden; }
+    .chart-bar { height:100%; border-radius:20px; }
+    .chart-val { font-size:13px; font-weight:700; min-width:30px; text-align:right; }
+    .reporte-card { background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); padding:1.25rem 1.4rem; cursor:pointer; transition:var(--trans); display:flex; align-items:center; gap:14px; }
+    .reporte-card:hover { transform:translateY(-2px); box-shadow:var(--sombra-md); border-color:var(--verde-claro); }
+    .reporte-ico { width:44px; height:44px; border-radius:var(--radio-md); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .reporte-card h4 { font-size:14px; font-weight:600; color:var(--txt-primario); margin-bottom:3px; }
+    .reporte-card p { font-size:12px; color:var(--txt-muted); font-weight:300; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía · Admin</div></div>
+    </div>
+    <div class="sidebar-section-title">Administración</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Dashboard</a>
+      <a href="usuarios.html"><span class="nav-ico">👥</span> Usuarios</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Cursos y grupos</a>
+      <a href="reportes.html" class="activo"><span class="nav-ico">📊</span> Reportes</a>
+      <a href="comunicados.html"><span class="nav-ico">📢</span> Comunicados</a>
+    </nav>
+    <div class="sidebar-section-title">Sistema</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">⚙️</span> Configuración</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--verde);">RA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Rectoría</div>
+        <div class="sidebar-user-rol">Administrador</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Reportes institucionales</span>
+      </div>
+      <div class="topbar-right">
+        <select style="padding:7px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none;">
+          <option>Período 1 — 2026</option><option>Período 2 — 2026</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" style="margin-left:8px;">📥 Exportar</button>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--verde); margin-left:8px;">RA</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div class="welcome-banner">
+        <div><h2>Reportes — Período 1, 2026 📊</h2><p>IE La Armonía · Mosquera, Cundinamarca · Vista administrativa</p></div>
+      </div>
+
+      <!-- Stats globales -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card"><div class="stat-icon" style="background:var(--verde-suave);">📊</div><div><div class="stat-label">Promedio institucional</div><div class="stat-value" style="color:var(--verde);">4.0</div><div class="stat-sub">Período 1</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">✅</div><div><div class="stat-label">Asistencia promedio</div><div class="stat-value" style="color:var(--exito);">91%</div><div class="stat-sub">Este mes</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div><div><div class="stat-label">Estudiantes en riesgo</div><div class="stat-value" style="color:var(--alerta);">38</div><div class="stat-sub">Desempeño Bajo</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--color-estudiante-suave);">🎯</div><div><div class="stat-label">Tareas entregadas</div><div class="stat-value" style="color:var(--color-estudiante);">87%</div><div class="stat-sub">Del total asignado</div></div></div>
+      </div>
+
+      <div class="grid-2 mb-3">
+
+        <!-- Rendimiento por grado -->
+        <div class="card">
+          <div class="flex-between mb-3"><h3>Promedio por grado</h3><span class="badge badge-verde">Período 1</span></div>
+          <div>
+            <div class="chart-row"><div class="chart-label">Grado 11°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:84%; background:var(--verde);"></div></div><div class="chart-val" style="color:var(--verde);">4.2</div></div>
+            <div class="chart-row"><div class="chart-label">Grado 10°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:82%; background:var(--mat-matematicas);"></div></div><div class="chart-val" style="color:var(--mat-matematicas);">4.1</div></div>
+            <div class="chart-row"><div class="chart-label">Grado 9°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:78%; background:var(--mat-ciencias);"></div></div><div class="chart-val" style="color:var(--mat-ciencias);">3.9</div></div>
+            <div class="chart-row"><div class="chart-label">Grado 8°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:80%; background:var(--mat-ingles);"></div></div><div class="chart-val" style="color:var(--mat-ingles);">4.0</div></div>
+            <div class="chart-row"><div class="chart-label">Grado 7°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:76%; background:var(--mat-sociales);"></div></div><div class="chart-val" style="color:var(--mat-sociales);">3.8</div></div>
+            <div class="chart-row"><div class="chart-label">Grado 6°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:74%; background:var(--mat-artistica);"></div></div><div class="chart-val" style="color:var(--mat-artistica);">3.7</div></div>
+          </div>
+          <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
+            <span class="text-sm text-muted">Promedio institucional</span>
+            <span style="font-size:1.4rem; font-weight:800; color:var(--verde);">4.0</span>
+          </div>
+        </div>
+
+        <!-- Distribución de desempeño -->
+        <div class="card">
+          <div class="flex-between mb-3"><h3>Distribución de desempeño</h3></div>
+          <div style="display:flex; flex-direction:column; gap:14px; margin-top:0.5rem;">
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:#9b3de8;">Superior (4.6 – 5.0)</span><span class="text-sm fw-600" style="color:#9b3de8;">18%</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:18%; background:#9b3de8;"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);">224 estudiantes</span>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--verde);">Alto (4.0 – 4.5)</span><span class="text-sm fw-600" style="color:var(--verde);">45%</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:45%; background:var(--verde);"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);">559 estudiantes</span>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--alerta);">Básico (3.0 – 3.9)</span><span class="text-sm fw-600" style="color:var(--alerta);">34%</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:34%; background:var(--alerta);"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);">422 estudiantes</span>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--error);">Bajo (1.0 – 2.9)</span><span class="text-sm fw-600" style="color:var(--error);">3%</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:3%; background:var(--error);"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);">38 estudiantes</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reportes descargables -->
+      <div class="card">
+        <div class="flex-between mb-3"><h3>Reportes disponibles</h3><span class="badge badge-verde">Período 1 — 2026</span></div>
+        <div class="grid-3">
+          <div class="reporte-card"><div class="reporte-ico" style="background:var(--verde-suave);">📋</div><div><h4>Boletines por grado</h4><p>Boletín completo de todos los estudiantes por grado</p></div></div>
+          <div class="reporte-card"><div class="reporte-ico" style="background:var(--color-estudiante-suave);">📊</div><div><h4>Estadísticas académicas</h4><p>Promedios, distribución y tendencias por materia</p></div></div>
+          <div class="reporte-card"><div class="reporte-ico" style="background:var(--alerta-suave);">⚠️</div><div><h4>Estudiantes en riesgo</h4><p>Lista de estudiantes con desempeño Bajo para seguimiento</p></div></div>
+          <div class="reporte-card"><div class="reporte-ico" style="background:var(--color-padre-suave);">📅</div><div><h4>Reporte de asistencia</h4><p>Asistencia por grado, sede y período</p></div></div>
+          <div class="reporte-card"><div class="reporte-ico" style="background:var(--color-docente-suave);">📤</div><div><h4>Entrega de tareas</h4><p>Porcentaje de entrega por materia y grado</p></div></div>
+          <div class="reporte-card"><div class="reporte-ico" style="background:var(--verde-suave);">🏫</div><div><h4>Informe institucional</h4><p>Resumen ejecutivo para rendición de cuentas</p></div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('admin');
+  if (usuario) AUTH.pintarUsuario(usuario);
+</script>
+</body>
+</html>

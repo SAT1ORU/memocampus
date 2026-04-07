@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienestar del Grupo — MemoCampus Docente</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .alerta-card {
+      border-radius: var(--radio-lg); padding: 1rem 1.25rem;
+      display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px;
+      border: 1px solid;
+    }
+    .alerta-roja   { background: var(--error-suave);  border-color: #fecaca; }
+    .alerta-amarilla { background: var(--alerta-suave); border-color: #fed7aa; }
+    .alerta-ico { font-size: 1.4rem; flex-shrink: 0; }
+    .alerta-nombre { font-size: 14px; font-weight: 600; color: var(--txt-primario); margin-bottom: 2px; }
+    .alerta-desc   { font-size: 12px; color: var(--txt-muted); font-weight: 300; }
+
+    /* Mapa de calor del grupo */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(8, 1fr);
+      gap: 4px;
+      margin-top: 1rem;
+    }
+    .hm-header { font-size: 10px; color: var(--txt-muted); text-align: center; padding: 4px 0; font-weight: 600; }
+    .hm-label  { font-size: 12px; color: var(--txt-secundario); display: flex; align-items: center; font-weight: 500; }
+    .hm-cell {
+      height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; cursor: pointer; transition: transform 0.15s;
+    }
+    .hm-cell:hover { transform: scale(1.15); }
+    .hm-5 { background: #d1fae5; }
+    .hm-4 { background: #bbf7d0; }
+    .hm-3 { background: #fef9c3; }
+    .hm-2 { background: #fed7aa; }
+    .hm-1 { background: #fecaca; }
+    .hm-0 { background: var(--bg-app); border: 1px dashed var(--borde); }
+
+    .leyenda { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+    .leyenda-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--txt-muted); }
+    .leyenda-color { width: 14px; height: 14px; border-radius: 3px; }
+
+    .curso-pill-sel {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem;
+    }
+    .cp { padding:6px 16px; border-radius:var(--radio-full); border:1.5px solid var(--borde); background:transparent; font-size:13px; font-weight:400; color:var(--txt-secundario); cursor:pointer; transition:var(--trans); font-family:var(--font-ui); }
+    .cp.active { background:var(--color-docente); color:#fff; border-color:var(--color-docente); }
+    .cp:hover:not(.active) { background:var(--color-docente-suave); border-color:var(--color-docente); color:var(--color-docente); }
+
+    .tendencia-num { font-size: 1.8rem; font-weight: 800; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
+    </div>
+    <div class="sidebar-section-title">Mis cursos</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">📤</span> Tareas recibidas</a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Registrar notas</a>
+      <a href="bienestar.html" class="activo"><span class="nav-ico">🧠</span> Bienestar del grupo</a>
+    </nav>
+    <div class="sidebar-section-title">Comunidad</div>
+    <nav class="sidebar-nav">
+      <a href="mensajes.html"><span class="nav-ico">💬</span> Mensajes</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-docente);">AM</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Prof. Andrés Morales</div>
+        <div class="sidebar-user-rol">Docente · Ciencias Nat.</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Bienestar del grupo</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar" data-user-avatar style="background:var(--color-docente);">AM</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Aviso de privacidad -->
+      <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:var(--radio-md); padding:10px 16px; margin-bottom:1.5rem; display:flex; gap:10px; align-items:center;">
+        <span style="font-size:1.2rem;">🔒</span>
+        <p style="font-size:13px; color:#1e40af; margin:0;">Los datos se muestran de forma <strong>agregada y anónima</strong>. Los nombres individuales solo son visibles para la orientadora escolar cuando hay una alerta activa.</p>
+      </div>
+
+      <div class="curso-pill-sel">
+        <button class="cp active" onclick="selCurso(this)">Ciencias 10°A</button>
+        <button class="cp" onclick="selCurso(this)">Ciencias 10°B</button>
+        <button class="cp" onclick="selCurso(this)">Física 11°A</button>
+        <button class="cp" onclick="selCurso(this)">Física 11°B</button>
+      </div>
+
+      <!-- Stats rápidos -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#d1fae5;">😊</div>
+          <div>
+            <div class="stat-label">Bienestar promedio</div>
+            <div class="tendencia-num" style="color:var(--verde);">3.8<span style="font-size:1rem;">/5</span></div>
+            <div class="stat-sub">Esta semana · Ciencias 10°A</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--exito-suave);">✅</div>
+          <div>
+            <div class="stat-label">Participación</div>
+            <div class="tendencia-num" style="color:var(--exito);">82%</div>
+            <div class="stat-sub">34 de 38 completaron</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div>
+          <div>
+            <div class="stat-label">Alertas activas</div>
+            <div class="tendencia-num" style="color:var(--alerta);">2</div>
+            <div class="stat-sub">Enviadas a orientación</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--error-suave);">📉</div>
+          <div>
+            <div class="stat-label">Tendencia</div>
+            <div class="tendencia-num" style="color:var(--verde);">↑</div>
+            <div class="stat-sub">Mejoró vs semana anterior</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-3">
+
+        <!-- Mapa de calor -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Mapa de bienestar semanal</h3>
+            <span class="badge badge-naranja">Anónimo</span>
+          </div>
+          <p class="text-sm text-muted mb-2">Promedio emocional del grupo por semana. No muestra datos individuales.</p>
+
+          <div class="heatmap-grid">
+            <!-- Headers -->
+            <div class="hm-header"></div>
+            <div class="hm-header">29 ene</div>
+            <div class="hm-header">5 feb</div>
+            <div class="hm-header">12 feb</div>
+            <div class="hm-header">19 feb</div>
+            <div class="hm-header">26 feb</div>
+            <div class="hm-header">5 mar</div>
+            <div class="hm-header">12 mar</div>
+            <div class="hm-header">19 mar</div>
+
+            <!-- Ciencias 10°A -->
+            <div class="hm-label">10°A</div>
+            <div class="hm-cell hm-4" title="Bien · semana 29 ene">😊</div>
+            <div class="hm-cell hm-4" title="Bien">😊</div>
+            <div class="hm-cell hm-5" title="Excelente">🤩</div>
+            <div class="hm-cell hm-3" title="Regular">😐</div>
+            <div class="hm-cell hm-3" title="Regular — carga de evaluaciones">😐</div>
+            <div class="hm-cell hm-4" title="Bien">😊</div>
+            <div class="hm-cell hm-4" title="Bien">😊</div>
+            <div class="hm-cell hm-4" title="Esta semana">😊</div>
+
+            <!-- Ciencias 10°B -->
+            <div class="hm-label">10°B</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-2">😔</div>
+            <div class="hm-cell hm-2">😔</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-3">😐</div>
+
+            <!-- Física 11°A -->
+            <div class="hm-label">11°A</div>
+            <div class="hm-cell hm-5">🤩</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-5">🤩</div>
+            <div class="hm-cell hm-4">😊</div>
+
+            <!-- Física 11°B -->
+            <div class="hm-label">11°B</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-4">😊</div>
+            <div class="hm-cell hm-1">😣</div>
+            <div class="hm-cell hm-2">😔</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-3">😐</div>
+            <div class="hm-cell hm-4">😊</div>
+          </div>
+
+          <div class="leyenda">
+            <div class="leyenda-item"><div class="leyenda-color" style="background:#d1fae5;"></div>Excelente</div>
+            <div class="leyenda-item"><div class="leyenda-color" style="background:#bbf7d0;"></div>Bien</div>
+            <div class="leyenda-item"><div class="leyenda-color" style="background:#fef9c3;"></div>Regular</div>
+            <div class="leyenda-item"><div class="leyenda-color" style="background:#fed7aa;"></div>Mal</div>
+            <div class="leyenda-item"><div class="leyenda-color" style="background:#fecaca;"></div>Muy mal</div>
+          </div>
+        </div>
+
+        <!-- Alertas y distribución -->
+        <div>
+          <div class="card mb-3">
+            <div class="flex-between mb-3">
+              <h3>Alertas enviadas a orientación</h3>
+              <span class="badge badge-error">2 activas</span>
+            </div>
+            <div class="alerta-card alerta-roja">
+              <div class="alerta-ico">🚨</div>
+              <div>
+                <div class="alerta-nombre">Estudiante anónimo — 11°B</div>
+                <div class="alerta-desc">Ha marcado "Muy mal" o "Mal" 3 semanas seguidas. Alertado a orientadora el 19 mar.</div>
+              </div>
+            </div>
+            <div class="alerta-card alerta-amarilla">
+              <div class="alerta-ico">⚠️</div>
+              <div>
+                <div class="alerta-nombre">Estudiante anónimo — 10°B</div>
+                <div class="alerta-desc">Ha marcado "Mal" 2 semanas seguidas. En seguimiento preventivo por orientación.</div>
+              </div>
+            </div>
+            <p style="font-size:11px; color:var(--txt-muted); margin-top:10px;">Las alertas se generan automáticamente cuando un estudiante marca bienestar bajo 2+ semanas consecutivas. Solo orientación tiene acceso al nombre.</p>
+          </div>
+
+          <div class="card">
+            <h3 class="mb-3">Distribución esta semana — Ciencias 10°A</h3>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div><div class="flex-between mb-1"><span class="text-sm fw-600">🤩 Excelente</span><span class="text-sm fw-600" style="color:#059669;">8 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:21%; background:#059669;"></div></div></div>
+              <div><div class="flex-between mb-1"><span class="text-sm fw-600">😊 Bien</span><span class="text-sm fw-600" style="color:var(--verde);">20 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:53%; background:var(--verde);"></div></div></div>
+              <div><div class="flex-between mb-1"><span class="text-sm fw-600">😐 Regular</span><span class="text-sm fw-600" style="color:var(--alerta);">6 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:16%; background:var(--alerta);"></div></div></div>
+              <div><div class="flex-between mb-1"><span class="text-sm fw-600">😔 Mal</span><span class="text-sm fw-600" style="color:var(--error);">0 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:0%; background:var(--error);"></div></div></div>
+              <div><div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--txt-muted);">Sin respuesta</span><span class="text-sm" style="color:var(--txt-muted);">4 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:10%; background:var(--borde);"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('docente');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  function selCurso(btn) {
+    document.querySelectorAll('.cp').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

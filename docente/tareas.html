@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tareas Recibidas — MemoCampus Docente</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .entrega-row { display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--borde); }
+    .entrega-row:last-child { border-bottom:none; }
+    .avatar-mini { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; flex-shrink:0; }
+    .calif-input { width:64px; padding:5px 8px; border:1.5px solid var(--borde); border-radius:var(--radio-sm); font-size:13px; font-weight:600; text-align:center; font-family:var(--font-ui); outline:none; transition:var(--trans); }
+    .calif-input:focus { border-color:var(--color-docente); box-shadow:0 0 0 2px rgba(232,125,30,0.15); }
+    .tab-bar { display:flex; gap:4px; border-bottom:2px solid var(--borde); margin-bottom:1.5rem; }
+    .tbtn { padding:8px 20px; font-size:13.5px; font-weight:500; color:var(--txt-muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--trans); background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-ui); }
+    .tbtn.active { color:var(--color-docente); border-bottom-color:var(--color-docente); font-weight:600; }
+    .tpanel { display:none; }
+    .tpanel.active { display:block; }
+    .nueva-tarea-form { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    @media(max-width:600px){ .nueva-tarea-form { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
+    </div>
+    <div class="sidebar-section-title">Mis cursos</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html" class="activo"><span class="nav-ico">📤</span> Tareas recibidas <span class="sidebar-badge">8</span></a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Registrar notas</a>
+      <a href="material.html"><span class="nav-ico">📎</span> Subir material</a>
+    </nav>
+    <div class="sidebar-section-title">Comunidad</div>
+    <nav class="sidebar-nav">
+      <a href="mensajes.html"><span class="nav-ico">💬</span> Mensajes <span class="sidebar-badge">3</span></a>
+      <a href="#"><span class="nav-ico">📢</span> Comunicados</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-docente);">AM</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Prof. Andrés Morales</div>
+        <div class="sidebar-user-rol">Docente · Ciencias Nat.</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Tareas recibidas</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="document.querySelector('.tab-bar .tbtn:last-child').click()">+ Crear tarea</button>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--color-docente); margin-left:8px;">AM</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div class="tab-bar">
+        <button class="tbtn active" onclick="swt(this,'pendientes')">Sin revisar (8)</button>
+        <button class="tbtn" onclick="swt(this,'revisadas')">Revisadas</button>
+        <button class="tbtn" onclick="swt(this,'crear')">+ Crear nueva tarea</button>
+      </div>
+
+      <!-- SIN REVISAR -->
+      <div class="tpanel active" id="tp-pendientes">
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Entregas pendientes de revisión</h3>
+            <span class="badge badge-alerta">8 sin revisar</span>
+          </div>
+          <div>
+            <div class="entrega-row">
+              <div class="avatar-mini" style="background:#3b6de8;">VG</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Valentina Gómez</div>
+                <div style="font-size:12px; color:var(--txt-muted);">Informe práctica de laboratorio · Ciencias 10°A</div>
+              </div>
+              <span style="font-size:11px; color:var(--txt-muted);">Hace 1h</span>
+              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
+              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
+              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
+            </div>
+            <div class="entrega-row">
+              <div class="avatar-mini" style="background:#e84c3d;">CM</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Carlos Martínez</div>
+                <div style="font-size:12px; color:var(--txt-muted);">Informe práctica de laboratorio · Ciencias 10°A</div>
+              </div>
+              <span style="font-size:11px; color:var(--txt-muted);">Hace 2h</span>
+              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
+              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
+              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
+            </div>
+            <div class="entrega-row">
+              <div class="avatar-mini" style="background:#1a9b6e;">LR</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Laura Rodríguez</div>
+                <div style="font-size:12px; color:var(--txt-muted);">Cuestionario átomo · Ciencias 10°B</div>
+              </div>
+              <span style="font-size:11px; color:var(--txt-muted);">Hace 3h</span>
+              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
+              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
+              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
+            </div>
+            <div class="entrega-row">
+              <div class="avatar-mini" style="background:#9b3de8;">JP</div>
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Juan Pérez</div>
+                <div style="font-size:12px; color:var(--txt-muted);">Ejercicios cinemática MRU · Física 11°A</div>
+              </div>
+              <span style="font-size:11px; color:var(--txt-muted);">Ayer</span>
+              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
+              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
+              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REVISADAS -->
+      <div class="tpanel" id="tp-revisadas">
+        <div class="card">
+          <table class="tabla">
+            <thead><tr><th>Estudiante</th><th>Tarea</th><th>Curso</th><th>Entrega</th><th>Calificación</th></tr></thead>
+            <tbody>
+              <tr><td style="display:flex; align-items:center; gap:8px; padding:12px 14px;"><div class="avatar-mini" style="background:#1a9b6e;">LR</div>Laura Rodríguez</td><td>Cuestionario átomo</td><td>Ciencias 10°A</td><td>18 mar</td><td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.5</span></td></tr>
+              <tr><td style="display:flex; align-items:center; gap:8px; padding:12px 14px;"><div class="avatar-mini" style="background:#9b3de8;">JP</div>Juan Pérez</td><td>Cuestionario átomo</td><td>Ciencias 10°A</td><td>18 mar</td><td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.2</span></td></tr>
+              <tr><td style="display:flex; align-items:center; gap:8px; padding:12px 14px;"><div class="avatar-mini" style="background:#e87d1e;">ML</div>María López</td><td>Guía cinemática</td><td>Física 11°B</td><td>15 mar</td><td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.8</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CREAR TAREA -->
+      <div class="tpanel" id="tp-crear">
+        <div class="card">
+          <h3 style="margin-bottom:4px;">Crear nueva tarea</h3>
+          <p class="text-sm text-muted mb-3">La tarea aparecerá en el panel de los estudiantes de los cursos seleccionados.</p>
+          <div class="nueva-tarea-form">
+            <div class="form-group">
+              <label class="form-label">Título de la tarea *</label>
+              <input type="text" class="form-control" placeholder="Ej: Informe práctica laboratorio">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Curso(s) *</label>
+              <select class="form-control">
+                <option>Ciencias Naturales — 10°A</option>
+                <option>Ciencias Naturales — 10°B</option>
+                <option>Física — 11°A</option>
+                <option>Física — 11°B</option>
+                <option>Todos mis cursos</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Fecha límite de entrega *</label>
+              <input type="date" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Tipo de entrega</label>
+              <select class="form-control">
+                <option>Archivo adjunto (PDF, imagen)</option>
+                <option>Texto en línea</option>
+                <option>Enlace externo</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:span 2;">
+              <label class="form-label">Descripción / Instrucciones *</label>
+              <textarea class="form-control" rows="4" placeholder="Describe las instrucciones de la tarea con detalle..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Material de apoyo (opcional)</label>
+              <input type="file" class="form-control" style="padding:8px;">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Valor en la nota (1-5)</label>
+              <input type="number" class="form-control" min="1" max="5" step="0.5" placeholder="Ej: 5.0">
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
+            <button class="btn btn-ghost">Guardar borrador</button>
+            <button class="btn btn-primary" onclick="publicarTarea(this)">📢 Publicar tarea</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('docente');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  function swt(btn, id) {
+    document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tp-'+id).classList.add('active');
+  }
+
+  function marcarRevisada(btn) {
+    const row = btn.closest('.entrega-row');
+    const nota = row.querySelector('.calif-input').value;
+    if (!nota || isNaN(nota)) { alert('Ingresa una calificación primero'); return; }
+    btn.textContent = '✔ Calificada';
+    btn.style.background = 'var(--exito)';
+    btn.disabled = true;
+    row.style.opacity = '0.6';
+    row.style.pointerEvents = 'none';
+  }
+
+  function publicarTarea(btn) {
+    btn.textContent = '✔ Tarea publicada';
+    btn.style.background = 'var(--exito)';
+    setTimeout(()=>{ btn.textContent='📢 Publicar tarea'; btn.style.background=''; }, 3000);
+  }
+</script>
+</body>
+</html>

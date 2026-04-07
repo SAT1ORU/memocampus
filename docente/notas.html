@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Notas — MemoCampus Docente</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .notas-tabla { width:100%; border-collapse:collapse; }
+    .notas-tabla th { background:var(--bg-sidebar); color:#fff; padding:10px 12px; font-size:12px; font-weight:500; text-align:left; position:sticky; top:0; }
+    .notas-tabla td { padding:8px 12px; border-bottom:1px solid var(--borde); font-size:13px; vertical-align:middle; }
+    .notas-tabla tr:hover td { background:var(--bg-app); }
+    .nota-input {
+      width:60px; padding:5px 8px; border:1.5px solid var(--borde);
+      border-radius:var(--radio-sm); font-size:13px; font-weight:600;
+      text-align:center; font-family:var(--font-ui); outline:none;
+      transition:var(--trans);
+    }
+    .nota-input:focus { border-color:var(--color-docente); box-shadow:0 0 0 2px rgba(232,125,30,0.15); }
+    .nota-calculada { font-size:14px; font-weight:800; min-width:40px; display:inline-block; text-align:center; }
+    .avatar-mini {
+      width:28px; height:28px; border-radius:50%;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:10px; font-weight:700; color:#fff; margin-right:8px; flex-shrink:0;
+    }
+    .curso-selector {
+      display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.5rem;
+    }
+    .curso-pill {
+      padding:7px 18px; border-radius:var(--radio-full);
+      border:1.5px solid var(--borde); background:transparent;
+      font-size:13px; font-weight:400; color:var(--txt-secundario);
+      cursor:pointer; transition:var(--trans); font-family:var(--font-ui);
+    }
+    .curso-pill.active { background:var(--color-docente); color:#fff; border-color:var(--color-docente); font-weight:500; }
+    .curso-pill:hover:not(.active) { background:var(--color-docente-suave); border-color:var(--color-docente); color:var(--color-docente); }
+    .tabla-wrap { overflow-x:auto; border-radius:var(--radio-lg); border:1px solid var(--borde); max-height:520px; overflow-y:auto; }
+    .guardar-banner {
+      position:sticky; bottom:0; background:var(--bg-card);
+      border-top:1px solid var(--borde); padding:12px 1.5rem;
+      display:flex; justify-content:space-between; align-items:center;
+      margin: 0 -1.5rem;
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
+    </div>
+    <div class="sidebar-section-title">Mis cursos</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">📤</span> Tareas recibidas <span class="sidebar-badge">8</span></a>
+      <a href="notas.html" class="activo"><span class="nav-ico">📊</span> Registrar notas</a>
+      <a href="material.html"><span class="nav-ico">📎</span> Subir material</a>
+    </nav>
+    <div class="sidebar-section-title">Comunidad</div>
+    <nav class="sidebar-nav">
+      <a href="mensajes.html"><span class="nav-ico">💬</span> Mensajes <span class="sidebar-badge">3</span></a>
+      <a href="#"><span class="nav-ico">📢</span> Comunicados</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-docente);">AM</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Prof. Andrés Morales</div>
+        <div class="sidebar-user-rol">Docente · Ciencias Nat.</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Registrar notas</span>
+      </div>
+      <div class="topbar-right">
+        <select style="padding:7px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none;">
+          <option>Período 1</option><option>Período 2</option>
+          <option>Período 3</option><option>Período 4</option>
+        </select>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--color-docente); margin-left:8px;">AM</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div style="background:var(--color-docente-suave); border:1px solid rgba(232,125,30,0.25); border-radius:var(--radio-md); padding:10px 16px; margin-bottom:1.5rem; font-size:13px; color:var(--color-docente);">
+        ⚠️ <strong>Importante:</strong> Las notas se calculan automáticamente con los pesos: Ser 30% · Saber 40% · Hacer 30%. Presiona "Guardar notas" para confirmar los cambios.
+      </div>
+
+      <div class="curso-selector">
+        <button class="curso-pill active" onclick="selCurso(this)">Ciencias 10°A (38 est.)</button>
+        <button class="curso-pill" onclick="selCurso(this)">Ciencias 10°B (36 est.)</button>
+        <button class="curso-pill" onclick="selCurso(this)">Física 11°A (35 est.)</button>
+        <button class="curso-pill" onclick="selCurso(this)">Física 11°B (34 est.)</button>
+      </div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="tabla-wrap">
+          <table class="notas-tabla" id="tabla-notas">
+            <thead>
+              <tr>
+                <th style="min-width:200px;">Estudiante</th>
+                <th style="text-align:center; min-width:90px;">Ser (30%)</th>
+                <th style="text-align:center; min-width:90px;">Saber (40%)</th>
+                <th style="text-align:center; min-width:90px;">Hacer (30%)</th>
+                <th style="text-align:center; min-width:90px;">Nota final</th>
+                <th style="text-align:center; min-width:100px;">Desempeño</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-notas"></tbody>
+          </table>
+        </div>
+        <div class="guardar-banner">
+          <div>
+            <span style="font-size:13px; color:var(--txt-muted);">Promedio del curso: </span>
+            <span id="promedio-curso" style="font-size:15px; font-weight:700; color:var(--verde);">4.0</span>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-ghost">Exportar Excel</button>
+            <button class="btn btn-primary" onclick="guardarNotas()">💾 Guardar notas</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('docente');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  const estudiantes = [
+    { nombre: "Valentina Gómez",  color:"#3b6de8", ser:4.3, saber:4.0, hacer:4.3 },
+    { nombre: "Carlos Martínez",  color:"#e84c3d", ser:3.8, saber:3.5, hacer:3.7 },
+    { nombre: "Laura Rodríguez",  color:"#1a9b6e", ser:4.8, saber:4.7, hacer:4.6 },
+    { nombre: "Juan Pérez",       color:"#9b3de8", ser:4.0, saber:3.8, hacer:3.9 },
+    { nombre: "María López",      color:"#e87d1e", ser:4.5, saber:4.3, hacer:4.4 },
+    { nombre: "Andrés Torres",    color:"#e83d8a", ser:3.5, saber:3.2, hacer:3.4 },
+    { nombre: "Sofía Vargas",     color:"#6db83b", ser:5.0, saber:4.9, hacer:4.8 },
+    { nombre: "Diego Ramírez",    color:"#1e9ee8", ser:4.2, saber:4.0, hacer:4.1 },
+    { nombre: "Paula Jiménez",    color:"#888",    ser:4.6, saber:4.4, hacer:4.5 },
+    { nombre: "Santiago Castro",  color:"#3b6de8", ser:3.2, saber:2.9, hacer:3.0 },
+    { nombre: "Camila Herrera",   color:"#e84c3d", ser:4.4, saber:4.2, hacer:4.3 },
+    { nombre: "Felipe Moreno",    color:"#1a9b6e", ser:4.1, saber:3.9, hacer:4.0 },
+  ];
+
+  function calc(e) {
+    return Math.round((e.ser*0.3 + e.saber*0.4 + e.hacer*0.3)*10)/10;
+  }
+  function desemp(n) {
+    if(n>=4.6) return {txt:"Superior", style:"background:#fdf4ff;color:#9b3de8;"};
+    if(n>=4.0) return {txt:"Alto",     style:"background:var(--exito-suave);color:#16a34a;"};
+    if(n>=3.0) return {txt:"Básico",   style:"background:var(--alerta-suave);color:#d97706;"};
+    return            {txt:"Bajo",     style:"background:var(--error-suave);color:#dc2626;"};
+  }
+  function iniciales(n) { return n.split(" ").map(p=>p[0]).join("").substring(0,2).toUpperCase(); }
+
+  function renderTabla() {
+    const tbody = document.getElementById('tbody-notas');
+    tbody.innerHTML = '';
+    let total = 0;
+    estudiantes.forEach((e, i) => {
+      const nota = calc(e);
+      total += nota;
+      const d = desemp(nota);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="display:flex; align-items:center; padding:8px 12px;">
+          <div class="avatar-mini" style="background:${e.color};">${iniciales(e.nombre)}</div>
+          <span style="font-weight:500; color:var(--txt-primario);">${e.nombre}</span>
+        </td>
+        <td style="text-align:center;"><input class="nota-input" type="number" min="0" max="5" step="0.1" value="${e.ser.toFixed(1)}" data-idx="${i}" data-campo="ser" oninput="actualizar(this)"></td>
+        <td style="text-align:center;"><input class="nota-input" type="number" min="0" max="5" step="0.1" value="${e.saber.toFixed(1)}" data-idx="${i}" data-campo="saber" oninput="actualizar(this)"></td>
+        <td style="text-align:center;"><input class="nota-input" type="number" min="0" max="5" step="0.1" value="${e.hacer.toFixed(1)}" data-idx="${i}" data-campo="hacer" oninput="actualizar(this)"></td>
+        <td style="text-align:center;" id="nota-final-${i}"><span class="nota-calculada" style="color:${nota>=4?'var(--verde)':'var(--alerta)'};">${nota.toFixed(1)}</span></td>
+        <td style="text-align:center;" id="desem-${i}"><span class="badge" style="${d.style}">${d.txt}</span></td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('promedio-curso').textContent = (total/estudiantes.length).toFixed(1);
+  }
+
+  function actualizar(input) {
+    const i = parseInt(input.dataset.idx);
+    const campo = input.dataset.campo;
+    const val = Math.min(5, Math.max(0, parseFloat(input.value)||0));
+    estudiantes[i][campo] = val;
+    const nota = calc(estudiantes[i]);
+    const d = desemp(nota);
+    document.getElementById('nota-final-'+i).innerHTML = `<span class="nota-calculada" style="color:${nota>=4?'var(--verde)':'var(--alerta)'};">${nota.toFixed(1)}</span>`;
+    document.getElementById('desem-'+i).innerHTML = `<span class="badge" style="${d.style}">${d.txt}</span>`;
+    const total = estudiantes.reduce((s,e)=>s+calc(e),0);
+    document.getElementById('promedio-curso').textContent = (total/estudiantes.length).toFixed(1);
+  }
+
+  function selCurso(btn) {
+    document.querySelectorAll('.curso-pill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function guardarNotas() {
+    const btn = document.querySelector('[onclick="guardarNotas()"]');
+    btn.textContent = '✔ Notas guardadas';
+    btn.style.background = 'var(--exito)';
+    setTimeout(()=>{ btn.textContent='💾 Guardar notas'; btn.style.background=''; }, 3000);
+  }
+
+  renderTabla();
+</script>
+</body>
+</html>

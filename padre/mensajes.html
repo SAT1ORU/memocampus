@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mensajes — MemoCampus Padre</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .chat-layout { display:grid; grid-template-columns:280px 1fr; height:calc(100vh - 64px); overflow:hidden; }
+    .chat-list { border-right:1px solid var(--borde); overflow-y:auto; background:var(--bg-card); }
+    .chat-item { display:flex; gap:10px; padding:12px 14px; border-bottom:1px solid var(--borde); cursor:pointer; transition:var(--trans); align-items:flex-start; }
+    .chat-item:hover { background:var(--bg-app); }
+    .chat-item.active { background:var(--color-padre-suave); border-left:3px solid var(--color-padre); }
+    .chat-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+    .chat-item-name { font-size:13px; font-weight:600; color:var(--txt-primario); margin-bottom:2px; }
+    .chat-item-preview { font-size:12px; color:var(--txt-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chat-hora { font-size:10px; color:var(--txt-muted); flex-shrink:0; }
+
+    .chat-window { display:flex; flex-direction:column; height:100%; }
+    .chat-header { padding:12px 18px; border-bottom:1px solid var(--borde); display:flex; align-items:center; gap:10px; background:var(--bg-card); }
+    .chat-messages { flex:1; overflow-y:auto; padding:1.25rem; display:flex; flex-direction:column; gap:10px; background:var(--bg-app); }
+    .msg { max-width:68%; padding:10px 14px; border-radius:var(--radio-lg); font-size:13.5px; line-height:1.5; }
+    .msg-recv { background:var(--bg-card); border:1px solid var(--borde); color:var(--txt-primario); align-self:flex-start; border-radius:4px var(--radio-lg) var(--radio-lg) var(--radio-lg); }
+    .msg-sent { background:var(--color-padre); color:#fff; align-self:flex-end; border-radius:var(--radio-lg) 4px var(--radio-lg) var(--radio-lg); }
+    .msg-hora { font-size:10px; opacity:0.6; margin-top:4px; }
+    .chat-input-area { padding:12px 16px; border-top:1px solid var(--borde); display:flex; gap:10px; background:var(--bg-card); }
+    .chat-input-area input { flex:1; padding:10px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-full); font-family:var(--font-ui); font-size:14px; outline:none; transition:var(--trans); }
+    .chat-input-area input:focus { border-color:var(--color-padre); }
+    .btn-send { width:40px; height:40px; border-radius:50%; background:var(--color-padre); border:none; color:#fff; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--trans); }
+    .btn-send:hover { background:var(--verde); transform:scale(1.05); }
+    @media(max-width:768px){ .chat-layout { grid-template-columns:1fr; } .chat-list { height:200px; } }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
+    </div>
+    <div class="sidebar-section-title">Mi hijo/a</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Notas</a>
+      <a href="dashboard.html#asistencia"><span class="nav-ico">📅</span> Asistencia</a>
+      <a href="#"><span class="nav-ico">📎</span> Adjuntar excusa</a>
+    </nav>
+    <div class="sidebar-section-title">Comunicación</div>
+    <nav class="sidebar-nav">
+      <a href="mensajes.html" class="activo"><span class="nav-ico">💬</span> Mensajes al docente</a>
+      <a href="dashboard.html#comunicados"><span class="nav-ico">📢</span> Comunicados <span class="sidebar-badge">2</span></a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-padre);">CG</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Carlos Gómez</div>
+        <div class="sidebar-user-rol">Padre de familia</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main" style="overflow:hidden;">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mensajes a docentes</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar" style="background:var(--color-padre);">CG</div>
+      </div>
+    </header>
+
+    <div class="chat-layout">
+      <div class="chat-list">
+        <div style="padding:10px 14px; border-bottom:1px solid var(--borde); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--txt-muted);">Conversaciones</div>
+
+        <div class="chat-item active" onclick="selChat(this)">
+          <div class="chat-avatar" style="background:var(--mat-ciencias);">AM</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">Prof. Andrés Morales</div>
+            <div class="chat-item-preview">Consulta sobre nota del informe de lab...</div>
+          </div>
+          <div class="chat-hora">10:24</div>
+        </div>
+
+        <div class="chat-item" onclick="selChat(this)">
+          <div class="chat-avatar" style="background:var(--mat-matematicas);">PR</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">Prof. Ramírez</div>
+            <div class="chat-item-preview">Gracias por comunicarse, con gusto...</div>
+          </div>
+          <div class="chat-hora">Ayer</div>
+        </div>
+
+        <div class="chat-item" onclick="selChat(this)">
+          <div class="chat-avatar" style="background:var(--mat-ingles);">LT</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">Prof. Torres (Inglés)</div>
+            <div class="chat-item-preview">Orientación vocacional disponible los...</div>
+          </div>
+          <div class="chat-hora">18 mar</div>
+        </div>
+
+        <div style="padding:12px 14px; border-top:1px solid var(--borde); margin-top:auto;">
+          <button class="btn btn-primary" style="width:100%; justify-content:center; font-size:12px;" onclick="nuevoMsg()">+ Nuevo mensaje</button>
+        </div>
+      </div>
+
+      <div class="chat-window">
+        <div class="chat-header">
+          <div class="chat-avatar" style="background:var(--mat-ciencias); width:36px; height:36px; font-size:12px;">AM</div>
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Prof. Andrés Morales</div>
+            <div style="font-size:12px; color:var(--txt-muted);">Ciencias Naturales · Grado 10°A</div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chat-msgs">
+          <div class="msg msg-sent">
+            Buenas tardes profe Morales. Quería preguntarle sobre la nota que le puso a Valentina en el informe del laboratorio. Ella me dice que entregó todo completo.
+            <div class="msg-hora">10:24 am · Hoy</div>
+          </div>
+          <div class="msg msg-sent">
+            ¿Hay alguna observación específica que ella deba mejorar para el próximo período?
+            <div class="msg-hora">10:25 am · Hoy</div>
+          </div>
+          <div class="msg msg-recv">
+            Buenas tardes señor Gómez. Sí, Valentina entregó el informe completo. La nota refleja que le faltó profundizar más en las conclusiones. Le sugiero que en el próximo informe dedique más espacio al análisis de los resultados.
+            <div class="msg-hora">11:02 am · Hoy</div>
+          </div>
+          <div class="msg msg-recv">
+            En general, ella va muy bien en la materia. No hay de qué preocuparse. 👍
+            <div class="msg-hora">11:03 am · Hoy</div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="padre-input" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter') enviar()">
+          <button class="btn-send" onclick="enviar()">➤</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('padre');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  function selChat(el) {
+    document.querySelectorAll('.chat-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function enviar() {
+    const input = document.getElementById('padre-input');
+    const text = input.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('chat-msgs');
+    const div = document.createElement('div');
+    div.className = 'msg msg-sent';
+    const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+    div.innerHTML = `${text}<div class="msg-hora">${hora} · Hoy</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+  }
+
+  function nuevoMsg() {
+    alert('Selecciona un docente de la lista para iniciar una nueva conversación.');
+  }
+</script>
+</body>
+</html>

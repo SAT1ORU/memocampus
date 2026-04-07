@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Usuarios — MemoCampus Admin</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .welcome-banner { background:linear-gradient(135deg,var(--verde-oscuro,#0d4a25) 0%,var(--verde) 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; }
+    .welcome-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
+    .welcome-banner p { color:rgba(255,255,255,0.7); font-size:13px; font-weight:300; }
+
+    .filtros-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.25rem; align-items:center; }
+    .filtros-bar input { flex:1; min-width:200px; padding:8px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none; transition:var(--trans); }
+    .filtros-bar input:focus { border-color:var(--verde-medio); }
+    .filtros-bar select { padding:8px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none; background:var(--bg-card); }
+
+    .u-row { display:grid; grid-template-columns:2fr 2.5fr 1.2fr 1.2fr 1fr; align-items:center; border-bottom:1px solid var(--borde); transition:var(--trans); }
+    .u-row:last-child { border-bottom:none; }
+    .u-row:hover { background:var(--bg-app); }
+    .u-cell { padding:11px 14px; font-size:13.5px; color:var(--txt-secundario); }
+    .u-cell.hdr { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--txt-muted); background:var(--bg-app); border-bottom:2px solid var(--borde); padding:10px 14px; }
+    .u-avatar { width:32px; height:32px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; margin-right:8px; flex-shrink:0; }
+    .user-info { display:flex; align-items:center; }
+    .user-name { font-weight:500; color:var(--txt-primario); }
+    .user-meta { font-size:11px; color:var(--txt-muted); display:block; }
+
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; align-items:center; justify-content:center; padding:1.5rem; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--bg-card); border-radius:var(--radio-xl); padding:2rem; width:100%; max-width:480px; box-shadow:var(--sombra-lg); }
+    .modal h3 { margin-bottom:6px; }
+    .modal-sub { font-size:13px; color:var(--txt-muted); margin-bottom:1.5rem; }
+    .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:1.25rem; }
+
+    .tab-bar2 { display:flex; gap:4px; border-bottom:2px solid var(--borde); margin-bottom:1.25rem; }
+    .tb2 { padding:8px 18px; font-size:13px; font-weight:500; color:var(--txt-muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--trans); background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-ui); }
+    .tb2.active { color:var(--verde); border-bottom-color:var(--verde); font-weight:600; }
+    .tp2 { display:none; }
+    .tp2.active { display:block; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía · Admin</div></div>
+    </div>
+    <div class="sidebar-section-title">Administración</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Dashboard</a>
+      <a href="usuarios.html" class="activo"><span class="nav-ico">👥</span> Usuarios</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Cursos y grupos</a>
+      <a href="reportes.html"><span class="nav-ico">📊</span> Reportes</a>
+      <a href="comunicados.html"><span class="nav-ico">📢</span> Comunicados</a>
+    </nav>
+    <div class="sidebar-section-title">Sistema</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">⚙️</span> Configuración</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--verde);">RA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Rectoría</div>
+        <div class="sidebar-user-rol">Administrador</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Gestión de usuarios</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="abrirModalNuevo()">+ Nuevo usuario</button>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--verde); margin-left:8px;">RA</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div class="welcome-banner">
+        <div><h2>Gestión de usuarios 👥</h2><p>IE La Armonía · Mosquera, Cundinamarca · Año 2026</p></div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <div class="stat-card" style="padding:10px 16px; gap:8px;"><div class="stat-icon" style="background:var(--color-estudiante-suave); width:36px; height:36px; font-size:16px;">🎒</div><div><div class="stat-label">Estudiantes</div><div class="stat-value" style="font-size:1.3rem;">1.243</div></div></div>
+          <div class="stat-card" style="padding:10px 16px; gap:8px;"><div class="stat-icon" style="background:var(--color-docente-suave); width:36px; height:36px; font-size:16px;">👩‍🏫</div><div><div class="stat-label">Docentes</div><div class="stat-value" style="font-size:1.3rem;">48</div></div></div>
+          <div class="stat-card" style="padding:10px 16px; gap:8px;"><div class="stat-icon" style="background:var(--color-padre-suave); width:36px; height:36px; font-size:16px;">👨‍👩‍👧</div><div><div class="stat-label">Padres</div><div class="stat-value" style="font-size:1.3rem;">986</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tab-bar2">
+          <button class="tb2 active" onclick="swU(this,'todos')">Todos</button>
+          <button class="tb2" onclick="swU(this,'estudiantes')">Estudiantes</button>
+          <button class="tb2" onclick="swU(this,'docentes')">Docentes</button>
+          <button class="tb2" onclick="swU(this,'padres')">Padres</button>
+        </div>
+
+        <div class="filtros-bar">
+          <input type="text" id="buscador-u" placeholder="🔍  Buscar por nombre o correo..." oninput="filtrarUsuarios()">
+          <select id="filtro-grado" onchange="filtrarUsuarios()">
+            <option value="">Todos los grados</option>
+            <option>Grado 10°</option><option>Grado 11°</option>
+            <option>Grado 9°</option><option>Grado 8°</option>
+          </select>
+          <select id="filtro-estado" onchange="filtrarUsuarios()">
+            <option value="">Todos los estados</option>
+            <option>Activo</option><option>Inactivo</option>
+          </select>
+        </div>
+
+        <div class="tp2 active" id="tp2-todos">
+          <div style="overflow-x:auto;">
+            <div class="u-row">
+              <div class="u-cell hdr">Usuario</div>
+              <div class="u-cell hdr">Correo</div>
+              <div class="u-cell hdr">Rol</div>
+              <div class="u-cell hdr">Estado</div>
+              <div class="u-cell hdr">Acciones</div>
+            </div>
+            <div id="tabla-usuarios"></div>
+          </div>
+        </div>
+
+        <div class="tp2" id="tp2-estudiantes"><div style="text-align:center; padding:2rem; color:var(--txt-muted);">Lista filtrada por estudiantes — misma tabla</div></div>
+        <div class="tp2" id="tp2-docentes"><div style="text-align:center; padding:2rem; color:var(--txt-muted);">Lista filtrada por docentes — misma tabla</div></div>
+        <div class="tp2" id="tp2-padres"><div style="text-align:center; padding:2rem; color:var(--txt-muted);">Lista filtrada por padres — misma tabla</div></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- MODAL NUEVO USUARIO -->
+<div class="modal-overlay" id="modal-nuevo">
+  <div class="modal">
+    <h3>+ Nuevo usuario</h3>
+    <p class="modal-sub">El usuario recibirá una invitación en su correo para activar su cuenta.</p>
+    <div class="form-group">
+      <label class="form-label">Nombre completo *</label>
+      <input type="text" class="form-control" placeholder="Nombre completo">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Correo institucional *</label>
+      <input type="email" class="form-control" placeholder="nombre@iearmonia.edu.co">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Rol *</label>
+        <select class="form-control">
+          <option>Estudiante</option><option>Padre / Acudiente</option>
+          <option>Docente</option><option>Administrador</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grado (si es estudiante)</label>
+        <select class="form-control">
+          <option>—</option>
+          <option>Preescolar</option><option>Grado 1°</option><option>Grado 6°</option>
+          <option>Grado 10°</option><option>Grado 11°</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="crearUsuario(this)">✔ Crear usuario</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('admin');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  const usuarios = [
+    { nombre:"Valentina Gómez",     correo:"valentina.gomez@iearmonia.edu.co",    rol:"Estudiante", color:"#3b6de8", ini:"VG", activo:true },
+    { nombre:"Carlos Martínez",     correo:"carlos.martinez@iearmonia.edu.co",     rol:"Estudiante", color:"#e84c3d", ini:"CM", activo:true },
+    { nombre:"Laura Rodríguez",     correo:"laura.rodriguez@iearmonia.edu.co",     rol:"Estudiante", color:"#1a9b6e", ini:"LR", activo:true },
+    { nombre:"Prof. Andrés Morales",correo:"andres.morales@iearmonia.edu.co",      rol:"Docente",    color:"#e87d1e", ini:"AM", activo:true },
+    { nombre:"Prof. Laura Torres",  correo:"laura.torres@iearmonia.edu.co",         rol:"Docente",    color:"#e84c3d", ini:"LT", activo:true },
+    { nombre:"Prof. Ramírez",       correo:"juan.ramirez@iearmonia.edu.co",         rol:"Docente",    color:"#3b6de8", ini:"JR", activo:true },
+    { nombre:"Carlos Gómez",        correo:"carlos.gomez@gmail.com",               rol:"Padre",      color:"#9b3de8", ini:"CG", activo:true },
+    { nombre:"María López",         correo:"maria.lopez@gmail.com",                rol:"Padre",      color:"#e87d1e", ini:"ML", activo:true },
+    { nombre:"Pedro Rodríguez",     correo:"pedro.rodriguez@gmail.com",            rol:"Padre",      color:"#1a9b6e", ini:"PR", activo:false },
+  ];
+
+  function rolBadge(rol) {
+    const map = { Estudiante:"badge-azul", Docente:"badge-naranja", Padre:"badge-morado", Administrador:"badge-verde" };
+    return `<span class="badge ${map[rol]||'badge-verde'}">${rol}</span>`;
+  }
+
+  function renderUsuarios(lista) {
+    const tbody = document.getElementById('tabla-usuarios');
+    tbody.innerHTML = '';
+    lista.forEach(u => {
+      const row = document.createElement('div');
+      row.className = 'u-row';
+      row.innerHTML = `
+        <div class="u-cell user-info">
+          <div class="u-avatar" style="background:${u.color};">${u.ini}</div>
+          <div><span class="user-name">${u.nombre}</span></div>
+        </div>
+        <div class="u-cell" style="font-size:12px;">${u.correo}</div>
+        <div class="u-cell">${rolBadge(u.rol)}</div>
+        <div class="u-cell"><span class="badge ${u.activo?'badge-exito':'badge-error'}">${u.activo?'Activo':'Inactivo'}</span></div>
+        <div class="u-cell" style="display:flex; gap:6px;">
+          <button class="btn btn-ghost btn-sm">Editar</button>
+          <button class="btn btn-danger btn-sm">Desactivar</button>
+        </div>`;
+      tbody.appendChild(row);
+    });
+  }
+
+  function filtrarUsuarios() {
+    const q = document.getElementById('buscador-u').value.toLowerCase();
+    renderUsuarios(usuarios.filter(u =>
+      u.nombre.toLowerCase().includes(q) || u.correo.toLowerCase().includes(q)
+    ));
+  }
+
+  function swU(btn, id) {
+    document.querySelectorAll('.tb2').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tp2').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tp2-'+id).classList.add('active');
+    if (id === 'todos') renderUsuarios(usuarios);
+  }
+
+  function abrirModalNuevo() { document.getElementById('modal-nuevo').classList.add('open'); }
+  function cerrarModal() { document.getElementById('modal-nuevo').classList.remove('open'); }
+  function crearUsuario(btn) {
+    btn.textContent = '✔ Usuario creado';
+    btn.style.background = 'var(--exito)';
+    setTimeout(()=>{ cerrarModal(); btn.textContent='✔ Crear usuario'; btn.style.background=''; }, 2000);
+  }
+
+  document.getElementById('modal-nuevo').addEventListener('click', e=>{
+    if(e.target===e.currentTarget) cerrarModal();
+  });
+
+  renderUsuarios(usuarios);
+</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mensajes — MemoCampus Docente</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .chat-layout { display:grid; grid-template-columns:300px 1fr; height:calc(100vh - 64px); overflow:hidden; }
+    .chat-list { border-right:1px solid var(--borde); overflow-y:auto; background:var(--bg-card); }
+    .chat-item { display:flex; gap:11px; padding:13px 16px; border-bottom:1px solid var(--borde); cursor:pointer; transition:var(--trans); align-items:flex-start; }
+    .chat-item:hover { background:var(--bg-app); }
+    .chat-item.active { background:var(--color-docente-suave); border-left:3px solid var(--color-docente); }
+    .chat-item.unread .chat-item-name { font-weight:700; color:var(--txt-primario); }
+    .chat-avatar { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:#fff; flex-shrink:0; }
+    .chat-item-name { font-size:13.5px; font-weight:500; color:var(--txt-primario); margin-bottom:2px; }
+    .chat-item-preview { font-size:12px; color:var(--txt-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .chat-item-meta { margin-left:auto; text-align:right; flex-shrink:0; }
+    .chat-item-hora { font-size:10px; color:var(--txt-muted); }
+    .unread-dot { width:8px; height:8px; border-radius:50%; background:var(--color-docente); margin-top:4px; margin-left:auto; }
+
+    .chat-window { display:flex; flex-direction:column; height:100%; }
+    .chat-header { padding:14px 20px; border-bottom:1px solid var(--borde); display:flex; align-items:center; gap:12px; background:var(--bg-card); }
+    .chat-messages { flex:1; overflow-y:auto; padding:1.25rem; display:flex; flex-direction:column; gap:10px; background:var(--bg-app); }
+    .msg { max-width:68%; padding:10px 14px; border-radius:var(--radio-lg); font-size:13.5px; line-height:1.5; }
+    .msg-recibido { background:var(--bg-card); border:1px solid var(--borde); color:var(--txt-primario); align-self:flex-start; border-radius:4px var(--radio-lg) var(--radio-lg) var(--radio-lg); }
+    .msg-enviado  { background:var(--color-docente); color:#fff; align-self:flex-end; border-radius:var(--radio-lg) 4px var(--radio-lg) var(--radio-lg); }
+    .msg-hora { font-size:10px; opacity:0.6; margin-top:4px; }
+    .chat-input-area { padding:12px 16px; border-top:1px solid var(--borde); display:flex; gap:10px; background:var(--bg-card); }
+    .chat-input-area input { flex:1; padding:10px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-full); font-family:var(--font-ui); font-size:14px; outline:none; transition:var(--trans); }
+    .chat-input-area input:focus { border-color:var(--color-docente); }
+    .btn-send { width:40px; height:40px; border-radius:50%; background:var(--color-docente); border:none; color:#fff; font-size:16px; cursor:pointer; transition:var(--trans); display:flex; align-items:center; justify-content:center; }
+    .btn-send:hover { background:var(--verde); transform:scale(1.05); }
+
+    @media(max-width:768px){ .chat-layout { grid-template-columns:1fr; } .chat-list { height:220px; } }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
+    </div>
+    <div class="sidebar-section-title">Mis cursos</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">📤</span> Tareas recibidas <span class="sidebar-badge">8</span></a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Registrar notas</a>
+      <a href="material.html"><span class="nav-ico">📎</span> Subir material</a>
+    </nav>
+    <div class="sidebar-section-title">Comunidad</div>
+    <nav class="sidebar-nav">
+      <a href="mensajes.html" class="activo"><span class="nav-ico">💬</span> Mensajes <span class="sidebar-badge">3</span></a>
+      <a href="#"><span class="nav-ico">📢</span> Comunicados</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-docente);">AM</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Prof. Andrés Morales</div>
+        <div class="sidebar-user-rol">Docente · Ciencias Nat.</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main" style="overflow:hidden;">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mensajes de padres</span>
+      </div>
+      <div class="topbar-right">
+        <span class="badge badge-naranja">3 sin responder</span>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--color-docente); margin-left:8px;">AM</div>
+      </div>
+    </header>
+
+    <div class="chat-layout">
+      <!-- Lista de conversaciones -->
+      <div class="chat-list">
+        <div style="padding:10px 16px; border-bottom:1px solid var(--borde); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--txt-muted);">Conversaciones</div>
+
+        <div class="chat-item active unread" onclick="selChat(this,'carlos')">
+          <div class="chat-avatar" style="background:#9b3de8;">CG</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">Carlos Gómez</div>
+            <div class="chat-item-preview">Consulta sobre la nota del informe de laboratorio</div>
+          </div>
+          <div class="chat-item-meta">
+            <div class="chat-item-hora">10:24 am</div>
+            <div class="unread-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-item unread" onclick="selChat(this,'maria')">
+          <div class="chat-avatar" style="background:#e87d1e;">ML</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">María López</div>
+            <div class="chat-item-preview">Inasistencia del día 21, adjunto excusa</div>
+          </div>
+          <div class="chat-item-meta">
+            <div class="chat-item-hora">Ayer</div>
+            <div class="unread-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-item unread" onclick="selChat(this,'pedro')">
+          <div class="chat-avatar" style="background:#3b6de8;">PR</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">Pedro Rodríguez</div>
+            <div class="chat-item-preview">Muchas gracias por el apoyo con Laura 🙏</div>
+          </div>
+          <div class="chat-item-meta">
+            <div class="chat-item-hora">20 mar</div>
+            <div class="unread-dot"></div>
+          </div>
+        </div>
+
+        <div class="chat-item" onclick="selChat(this,'ana')">
+          <div class="chat-avatar" style="background:#1a9b6e;">AT</div>
+          <div style="flex:1; min-width:0;">
+            <div class="chat-item-name">Ana Torres</div>
+            <div class="chat-item-preview">Entendido, muchas gracias profe</div>
+          </div>
+          <div class="chat-item-meta">
+            <div class="chat-item-hora">18 mar</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ventana de chat -->
+      <div class="chat-window">
+        <div class="chat-header">
+          <div class="chat-avatar" style="background:#9b3de8; width:36px; height:36px; font-size:12px;">CG</div>
+          <div>
+            <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Carlos Gómez</div>
+            <div style="font-size:12px; color:var(--txt-muted);">Padre de Valentina Gómez · 10°A</div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+          <div class="msg msg-recibido">
+            Buenas tardes profe Morales. Quería preguntarle sobre la nota que le puso a Valentina en el informe del laboratorio. Ella me dice que entregó todo completo.
+            <div class="msg-hora">10:24 am</div>
+          </div>
+          <div class="msg msg-recibido">
+            ¿Hay alguna observación específica que deba mejorar?
+            <div class="msg-hora">10:25 am</div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" placeholder="Escribe una respuesta..." onkeydown="if(event.key==='Enter') enviarMsg()">
+          <button class="btn-send" onclick="enviarMsg()">➤</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('docente');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  function selChat(el, id) {
+    document.querySelectorAll('.chat-item').forEach(i=>i.classList.remove('active'));
+    el.classList.add('active');
+    el.classList.remove('unread');
+    el.querySelector('.unread-dot')?.remove();
+  }
+
+  function enviarMsg() {
+    const input = document.getElementById('chat-input');
+    const text  = input.value.trim();
+    if (!text) return;
+    const msgs = document.getElementById('chat-messages');
+    const div  = document.createElement('div');
+    div.className = 'msg msg-enviado';
+    const hora = new Date().toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+    div.innerHTML = `${text}<div class="msg-hora">${hora}</div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Bienestar — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    /* ── Check-in emocional ── */
+    .checkin-card {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%);
+      border-radius: var(--radio-xl); padding: 2.5rem;
+      margin-bottom: 1.75rem; position: relative; overflow: hidden;
+    }
+    .checkin-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 80% 20%, rgba(59,109,232,0.25) 0%, transparent 60%);
+    }
+    .checkin-card h2 { color: #fff; font-size: 1.4rem; margin-bottom: 6px; position: relative; }
+    .checkin-card p  { color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 300; margin-bottom: 2rem; position: relative; }
+
+    .emociones-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 12px; position: relative;
+    }
+    .emocion-btn {
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.12);
+      border-radius: var(--radio-lg); padding: 1rem 0.5rem;
+      cursor: pointer; transition: all 0.2s; text-align: center;
+      font-family: var(--font-ui);
+    }
+    .emocion-btn:hover { background: rgba(255,255,255,0.16); transform: translateY(-3px); }
+    .emocion-btn.selected { border-color: var(--amarillo); background: rgba(245,197,24,0.15); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(245,197,24,0.2); }
+    .emocion-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+    .emocion-label { font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 500; }
+    .emocion-btn.selected .emocion-label { color: var(--amarillo); }
+
+    .checkin-detail {
+      margin-top: 1.5rem; position: relative;
+      display: none;
+    }
+    .checkin-detail.visible { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+    .checkin-textarea {
+      width: 100%; padding: 12px 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1.5px solid rgba(255,255,255,0.15);
+      border-radius: var(--radio-md);
+      color: #fff; font-family: var(--font-ui); font-size: 14px;
+      resize: none; outline: none; transition: var(--trans);
+    }
+    .checkin-textarea:focus { border-color: var(--amarillo); }
+    .checkin-textarea::placeholder { color: rgba(255,255,255,0.35); }
+
+    .checkin-opciones {
+      display: flex; gap: 10px; flex-wrap: wrap; margin: 1rem 0;
+    }
+    .opcion-pill {
+      padding: 6px 14px; border-radius: var(--radio-full);
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.7); font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: var(--trans); font-family: var(--font-ui);
+    }
+    .opcion-pill.sel { background: rgba(245,197,24,0.2); border-color: var(--amarillo); color: var(--amarillo); }
+
+    .anonimo-toggle {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 1rem; color: rgba(255,255,255,0.6); font-size: 13px;
+    }
+    .toggle-switch {
+      width: 40px; height: 22px; background: rgba(255,255,255,0.2);
+      border-radius: 11px; cursor: pointer; position: relative; transition: var(--trans);
+    }
+    .toggle-switch.on { background: var(--amarillo); }
+    .toggle-knob {
+      width: 18px; height: 18px; background: #fff; border-radius: 50%;
+      position: absolute; top: 2px; left: 2px; transition: var(--trans);
+    }
+    .toggle-switch.on .toggle-knob { left: 20px; }
+
+    .btn-enviar-checkin {
+      width: 100%; padding: 13px; margin-top: 1.25rem;
+      background: var(--amarillo); color: var(--txt-primario);
+      border: none; border-radius: var(--radio-md);
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: var(--font-ui); transition: var(--trans);
+    }
+    .btn-enviar-checkin:hover { background: #e8b200; transform: translateY(-1px); }
+
+    /* ── Historial ── */
+    .semana-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0; border-bottom: 1px solid var(--borde);
+    }
+    .semana-item:last-child { border-bottom: none; }
+    .semana-emoji { font-size: 1.8rem; }
+    .semana-info { flex: 1; }
+    .semana-fecha { font-size: 11px; color: var(--txt-muted); }
+    .semana-nota  { font-size: 13px; color: var(--txt-secundario); font-weight: 300; margin-top: 2px; }
+
+    /* ── Recursos ── */
+    .recurso-card {
+      background: var(--bg-card); border: 1px solid var(--borde);
+      border-radius: var(--radio-lg); padding: 1.25rem;
+      display: flex; gap: 14px; align-items: flex-start;
+      transition: var(--trans); cursor: pointer;
+    }
+    .recurso-card:hover { transform: translateY(-2px); box-shadow: var(--sombra-md); }
+    .recurso-ico { width: 44px; height: 44px; border-radius: var(--radio-md); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .recurso-card h4 { font-size: 14px; font-weight: 600; color: var(--txt-primario); margin-bottom: 3px; }
+    .recurso-card p  { font-size: 12px; color: var(--txt-muted); font-weight: 300; }
+
+    /* ── Racha ── */
+    .racha-bar { display: flex; gap: 4px; margin-top: 0.75rem; flex-wrap: wrap; }
+    .racha-dia {
+      width: 32px; height: 32px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .racha-ok  { background: var(--verde-suave); }
+    .racha-hoy { background: var(--amarillo); }
+    .racha-no  { background: var(--bg-app); border: 1px dashed var(--borde); }
+
+    @media (max-width: 600px) {
+      .emociones-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text">
+        <div class="sidebar-logo-name">MemoCampus</div>
+        <div class="sidebar-logo-sub">IE La Armonía</div>
+      </div>
+    </div>
+    <div class="sidebar-section-title">Principal</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Mi inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">✅</span> Tareas <span class="sidebar-badge">3</span></a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Mis notas</a>
+      <a href="bienestar.html" class="activo"><span class="nav-ico">🧠</span> Mi bienestar</a>
+    </nav>
+    <div class="sidebar-section-title">Más</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">📅</span> Calendario</a>
+      <a href="#"><span class="nav-ico">💬</span> Mensajes</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Valentina Gómez</div>
+        <div class="sidebar-user-rol" data-user-rol>Estudiante · 10°A</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mi bienestar</span>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-btn">🔔<div class="topbar-notif-dot"></div></button>
+        <div class="topbar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- CHECK-IN SEMANAL -->
+      <div class="checkin-card" id="checkin-section">
+        <h2>¿Cómo te sientes hoy, <span data-user-name>Valentina</span>? 💙</h2>
+        <p>Tu respuesta es confidencial. Nos ayuda a apoyarte mejor. Check-in de esta semana.</p>
+
+        <div class="emociones-grid">
+          <button class="emocion-btn" onclick="selEmocion(this,'excelente')" data-valor="excelente">
+            <span class="emocion-emoji">🤩</span>
+            <span class="emocion-label">Excelente</span>
+          </button>
+          <button class="emocion-btn" onclick="selEmocion(this,'bien')" data-valor="bien">
+            <span class="emocion-emoji">😊</span>
+            <span class="emocion-label">Bien</span>
+          </button>
+          <button class="emocion-btn" onclick="selEmocion(this,'regular')" data-valor="regular">
+            <span class="emocion-emoji">😐</span>
+            <span class="emocion-label">Regular</span>
+          </button>
+          <button class="emocion-btn" onclick="selEmocion(this,'mal')" data-valor="mal">
+            <span class="emocion-emoji">😔</span>
+            <span class="emocion-label">Mal</span>
+          </button>
+          <button class="emocion-btn" onclick="selEmocion(this,'muy-mal')" data-valor="muy-mal">
+            <span class="emocion-emoji">😣</span>
+            <span class="emocion-label">Muy mal</span>
+          </button>
+        </div>
+
+        <!-- Detalle (aparece al seleccionar) -->
+        <div class="checkin-detail" id="checkin-detail">
+          <p style="color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:10px;">¿Qué lo está causando? (opcional)</p>
+          <div class="checkin-opciones" id="opciones-causas"></div>
+          <textarea class="checkin-textarea" rows="3" placeholder="Cuéntanos más si quieres... (opcional)" id="checkin-texto"></textarea>
+
+          <div class="anonimo-toggle">
+            <div class="toggle-switch on" id="toggle-anonimo" onclick="toggleAnonimo()">
+              <div class="toggle-knob"></div>
+            </div>
+            <span id="lbl-anonimo">Respuesta anónima activada — solo la orientadora puede ver tus datos</span>
+          </div>
+
+          <button class="btn-enviar-checkin" onclick="enviarCheckin()">Enviar check-in →</button>
+        </div>
+      </div>
+
+      <!-- Confirmación (oculta) -->
+      <div id="checkin-ok" style="display:none; background:var(--verde); border-radius:var(--radio-xl); padding:2rem; text-align:center; margin-bottom:1.75rem;">
+        <div style="font-size:3rem; margin-bottom:12px;">✅</div>
+        <h3 style="color:#fff; margin-bottom:6px;">¡Gracias por tu check-in de esta semana!</h3>
+        <p style="color:rgba(255,255,255,0.75); font-size:14px;">Recuerda: si necesitas hablar con alguien, la orientadora siempre está disponible.</p>
+      </div>
+
+      <div class="grid-2 mb-3">
+
+        <!-- Racha y historial -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Mi historial emocional</h3>
+            <span class="badge badge-verde">Últimas 8 semanas</span>
+          </div>
+
+          <div style="margin-bottom:1.25rem; padding-bottom:1rem; border-bottom:1px solid var(--borde);">
+            <p class="text-sm text-muted mb-1">Racha de check-ins completados</p>
+            <div class="racha-bar">
+              <div class="racha-dia racha-ok">😊</div>
+              <div class="racha-dia racha-ok">🤩</div>
+              <div class="racha-dia racha-ok">😊</div>
+              <div class="racha-dia racha-ok">😐</div>
+              <div class="racha-dia racha-ok">😊</div>
+              <div class="racha-dia racha-ok">😊</div>
+              <div class="racha-dia racha-ok">😊</div>
+              <div class="racha-dia racha-hoy" title="Esta semana">🕐</div>
+            </div>
+            <p style="font-size:12px; color:var(--verde); font-weight:600; margin-top:8px;">🔥 7 semanas seguidas — ¡sigue así!</p>
+          </div>
+
+          <div class="semana-item">
+            <div class="semana-emoji">🤩</div>
+            <div class="semana-info">
+              <div style="font-weight:600; font-size:13px; color:var(--txt-primario);">Excelente</div>
+              <div class="semana-fecha">Semana del 17 de marzo</div>
+              <div class="semana-nota">Me fue bien en el examen de ciencias 🎉</div>
+            </div>
+          </div>
+          <div class="semana-item">
+            <div class="semana-emoji">😊</div>
+            <div class="semana-info">
+              <div style="font-weight:600; font-size:13px; color:var(--txt-primario);">Bien</div>
+              <div class="semana-fecha">Semana del 10 de marzo</div>
+              <div class="semana-nota">Todo tranquilo en el colegio</div>
+            </div>
+          </div>
+          <div class="semana-item">
+            <div class="semana-emoji">😐</div>
+            <div class="semana-info">
+              <div style="font-weight:600; font-size:13px; color:var(--txt-primario);">Regular</div>
+              <div class="semana-fecha">Semana del 3 de marzo</div>
+              <div class="semana-nota">Mucha carga de tareas ese semana</div>
+            </div>
+          </div>
+          <div class="semana-item">
+            <div class="semana-emoji">😊</div>
+            <div class="semana-info">
+              <div style="font-weight:600; font-size:13px; color:var(--txt-primario);">Bien</div>
+              <div class="semana-fecha">Semana del 24 de febrero</div>
+              <div class="semana-nota">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recursos de apoyo -->
+        <div class="card">
+          <h3 class="mb-3">Recursos de apoyo 💙</h3>
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div class="recurso-card">
+              <div class="recurso-ico" style="background:#f0f4ff;">🧘</div>
+              <div>
+                <h4>Técnicas de manejo del estrés</h4>
+                <p>Respiración, mindfulness y estrategias para momentos de presión académica.</p>
+              </div>
+            </div>
+            <div class="recurso-card">
+              <div class="recurso-ico" style="background:#fff0f4;">💬</div>
+              <div>
+                <h4>Hablar con orientación escolar</h4>
+                <p>Agenda una cita con la orientadora del colegio. Completamente confidencial.</p>
+              </div>
+            </div>
+            <div class="recurso-card">
+              <div class="recurso-ico" style="background:#f0fff4;">📚</div>
+              <div>
+                <h4>Guía de organización del tiempo</h4>
+                <p>Cómo planear el estudio para reducir la sensación de sobrecarga.</p>
+              </div>
+            </div>
+            <div class="recurso-card">
+              <div class="recurso-ico" style="background:#fffbf0;">🆘</div>
+              <div>
+                <h4>Línea de apoyo emocional</h4>
+                <p>Línea 106 — Salud Mental Colombia. Gratuita, 24/7, confidencial.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje de la orientadora -->
+      <div class="card" style="border-left: 4px solid var(--verde); background: var(--verde-suave);">
+        <div style="display:flex; gap:14px; align-items:flex-start;">
+          <div style="width:44px; height:44px; border-radius:50%; background:var(--verde); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; flex-shrink:0;">OR</div>
+          <div>
+            <div style="font-size:13px; font-weight:600; color:var(--verde); margin-bottom:2px;">Orientación escolar</div>
+            <div style="font-size:12px; color:var(--txt-muted); margin-bottom:8px;">Lunes, 24 de marzo · 9:00 am</div>
+            <p style="font-size:13.5px; color:var(--txt-secundario);">Hola Valentina, vi que la semana del 3 de marzo fue un poco difícil. Recuerda que puedes acercarte al cubículo de orientación cualquier día en el descanso. Estoy para apoyarte. 💙</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  const causasPorEmocion = {
+    'excelente': ['Buenas notas 🎉','Actividades del colegio','Mis amigos','Logré algo importante','En casa todo bien'],
+    'bien':      ['Todo normal','Buen descanso','Actividades divertidas','Avancé en mis metas','Sin razón especial'],
+    'regular':   ['Mucha carga de tareas','Cansancio','Algo con amigos','Problemas en casa','Presión por notas'],
+    'mal':       ['Problemas en casa','Conflicto con alguien','Bajo rendimiento','Me siento solo/a','Algo me preocupa'],
+    'muy-mal':   ['Situación familiar difícil','Me siento muy solo/a','Problemas serios','Prefiero no decirlo']
+  };
+
+  let emocionSel = null;
+  let anonimo = true;
+
+  function selEmocion(btn, valor) {
+    document.querySelectorAll('.emocion-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    emocionSel = valor;
+
+    const detalle = document.getElementById('checkin-detail');
+    detalle.classList.add('visible');
+
+    const opciones = document.getElementById('opciones-causas');
+    opciones.innerHTML = '';
+    (causasPorEmocion[valor] || []).forEach(c => {
+      const pill = document.createElement('button');
+      pill.className = 'opcion-pill';
+      pill.textContent = c;
+      pill.onclick = () => pill.classList.toggle('sel');
+      opciones.appendChild(pill);
+    });
+  }
+
+  function toggleAnonimo() {
+    anonimo = !anonimo;
+    const t = document.getElementById('toggle-anonimo');
+    const l = document.getElementById('lbl-anonimo');
+    t.classList.toggle('on', anonimo);
+    l.textContent = anonimo
+      ? 'Respuesta anónima activada — solo la orientadora puede ver tus datos'
+      : 'Respuesta con nombre — el docente y orientadora pueden verla';
+  }
+
+  function enviarCheckin() {
+    if (!emocionSel) return;
+    document.getElementById('checkin-section').style.display = 'none';
+    document.getElementById('checkin-ok').style.display = 'block';
+  }
+</script>
+</body>
+</html>

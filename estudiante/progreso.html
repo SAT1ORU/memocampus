@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Progreso — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .progreso-hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
+      border-radius: var(--radio-xl); padding: 2rem;
+      margin-bottom: 1.75rem; display: flex;
+      justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+    }
+    .progreso-hero h2 { color: #fff; margin-bottom: 4px; font-size: 1.3rem; }
+    .progreso-hero p  { color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 300; }
+
+    .delta-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: var(--radio-full);
+      font-size: 12px; font-weight: 700;
+    }
+    .delta-up   { background: var(--exito-suave); color: #059669; }
+    .delta-down { background: var(--error-suave);  color: #dc2626; }
+    .delta-same { background: var(--bg-app);        color: var(--txt-muted); }
+
+    .comparar-row {
+      display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--borde); align-items: center;
+    }
+    .comparar-row:last-child { border-bottom: none; }
+    .comparar-row:hover { background: var(--bg-app); }
+    .cc { padding: 11px 14px; font-size: 13.5px; }
+    .cc.hdr { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--txt-muted); background: var(--bg-app); border-bottom: 2px solid var(--borde); }
+
+    .barra-doble { display: flex; gap: 3px; align-items: center; }
+    .barra-seg { height: 8px; border-radius: 4px; min-width: 4px; }
+
+    .logro-card {
+      background: var(--bg-card); border: 1px solid var(--borde);
+      border-radius: var(--radio-lg); padding: 1rem 1.25rem;
+      display: flex; align-items: center; gap: 12px; transition: var(--trans);
+    }
+    .logro-card:hover { box-shadow: var(--sombra-sm); }
+    .logro-ico { font-size: 1.8rem; flex-shrink: 0; }
+    .logro-card h4 { font-size: 13.5px; font-weight: 600; color: var(--txt-primario); margin-bottom: 2px; }
+    .logro-card p  { font-size: 12px; color: var(--txt-muted); font-weight: 300; }
+    .logro-card.ganado { border-color: var(--amarillo); background: var(--amarillo-suave); }
+    .logro-card.pendiente { opacity: 0.55; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
+    </div>
+    <div class="sidebar-section-title">Principal</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Mi inicio</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
+      <a href="tareas.html"><span class="nav-ico">✅</span> Tareas <span class="sidebar-badge">3</span></a>
+      <a href="notas.html"><span class="nav-ico">📊</span> Mis notas</a>
+      <a href="bienestar.html"><span class="nav-ico">🧠</span> Mi bienestar</a>
+      <a href="progreso.html" class="activo"><span class="nav-ico">🚀</span> Mi progreso</a>
+    </nav>
+    <div class="sidebar-section-title">Más</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">📅</span> Calendario</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Valentina Gómez</div>
+        <div class="sidebar-user-rol" data-user-rol>Estudiante · 10°A</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mi progreso</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Hero -->
+      <div class="progreso-hero">
+        <div>
+          <h2>🚀 Tu evolución académica, <span data-user-name>Valentina</span></h2>
+          <p>Comparativa entre períodos · Grado 10°A · IE La Armonía · 2026</p>
+        </div>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="color:rgba(255,255,255,0.6); font-size:11px; margin-bottom:4px;">Grado 9° (2025)</div>
+            <div style="color:#fff; font-size:2rem; font-weight:800;">3.8</div>
+          </div>
+          <div style="color:rgba(255,255,255,0.3); font-size:2rem; align-self:center;">→</div>
+          <div style="text-align:center;">
+            <div style="color:var(--amarillo); font-size:11px; font-weight:600; margin-bottom:4px;">Grado 10° P1 (2026)</div>
+            <div style="color:var(--amarillo); font-size:2rem; font-weight:800;">4.1</div>
+          </div>
+          <div style="align-self:center;"><span class="delta-badge delta-up">↑ +0.3</span></div>
+        </div>
+      </div>
+
+      <!-- Stats de mejora -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--exito-suave);">📈</div>
+          <div>
+            <div class="stat-label">Materias mejoradas</div>
+            <div class="stat-value" style="color:var(--exito);">6</div>
+            <div class="stat-sub">vs año pasado</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--error-suave);">📉</div>
+          <div>
+            <div class="stat-label">Materias bajaron</div>
+            <div class="stat-value" style="color:var(--error);">2</div>
+            <div class="stat-sub">vs año pasado</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--amarillo-suave);">⭐</div>
+          <div>
+            <div class="stat-label">Mejor materia</div>
+            <div class="stat-value" style="color:var(--dorado); font-size:1rem;">Artística</div>
+            <div class="stat-sub">4.8 · Superior</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--color-estudiante-suave);">🎯</div>
+          <div>
+            <div class="stat-label">Meta del año</div>
+            <div class="stat-value" style="color:var(--color-estudiante);">4.3</div>
+            <div class="stat-sub">Llevas 4.1 · ¡Cerca!</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-3">
+
+        <!-- Tabla comparativa -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Comparativa por materia</h3>
+            <div style="display:flex; gap:8px; align-items:center; font-size:11px; color:var(--txt-muted);">
+              <span style="display:flex; align-items:center; gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#888;"></div>2025</span>
+              <span style="display:flex; align-items:center; gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:var(--verde);"></div>2026 P1</span>
+            </div>
+          </div>
+          <div style="border:1px solid var(--borde); border-radius:var(--radio-md); overflow:hidden;">
+            <div class="comparar-row">
+              <div class="cc hdr">Materia</div>
+              <div class="cc hdr" style="text-align:center;">2025</div>
+              <div class="cc hdr" style="text-align:center;">2026 P1</div>
+              <div class="cc hdr" style="text-align:center;">Cambio</div>
+            </div>
+            <div id="tabla-comparativa"></div>
+          </div>
+        </div>
+
+        <!-- Logros desbloqueados -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Logros académicos</h3>
+            <span class="badge badge-amarillo">5 / 8 obtenidos</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div class="logro-card ganado">
+              <div class="logro-ico">🏆</div>
+              <div><h4>Primera nota Superior del año</h4><p>Obtuviste 4.8 en Educación Artística · Período 1</p></div>
+            </div>
+            <div class="logro-card ganado">
+              <div class="logro-ico">📈</div>
+              <div><h4>Mejora sostenida</h4><p>Subiste tu promedio general 0.3 puntos respecto al año anterior</p></div>
+            </div>
+            <div class="logro-card ganado">
+              <div class="logro-ico">✅</div>
+              <div><h4>Entregador constante</h4><p>Entregaste el 90%+ de tareas del período 1 a tiempo</p></div>
+            </div>
+            <div class="logro-card ganado">
+              <div class="logro-ico">🧠</div>
+              <div><h4>7 semanas de check-in</h4><p>Completaste 7 check-ins de bienestar consecutivos</p></div>
+            </div>
+            <div class="logro-card ganado">
+              <div class="logro-ico">⭐</div>
+              <div><h4>Sin materias en Bajo</h4><p>Cerraste el período 1 sin ninguna materia en desempeño Bajo</p></div>
+            </div>
+            <div class="logro-card pendiente">
+              <div class="logro-ico">🎯</div>
+              <div><h4>Promedio 4.3 o más</h4><p>Alcanza un promedio de 4.3 en cualquier período. ¡Vas en 4.1!</p></div>
+            </div>
+            <div class="logro-card pendiente">
+              <div class="logro-ico">🌟</div>
+              <div><h4>Desempeño Superior en 2 materias</h4><p>Lleva Artística al otro. Te falta una más para desbloquear.</p></div>
+            </div>
+            <div class="logro-card pendiente">
+              <div class="logro-ico">🔥</div>
+              <div><h4>Año perfecto en asistencia</h4><p>Asiste el 100% de los días del año sin falta.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  const datos = [
+    { materia:"Matemáticas",       color:"#3b6de8", ant:3.8, act:4.2 },
+    { materia:"Ciencias Nat.",     color:"#1a9b6e", ant:4.2, act:4.5 },
+    { materia:"Inglés",            color:"#9b3de8", ant:4.0, act:3.8 },
+    { materia:"Español",           color:"#e84c3d", ant:3.7, act:4.0 },
+    { materia:"Ciencias Sociales", color:"#e87d1e", ant:4.1, act:4.3 },
+    { materia:"Ed. Artística",     color:"#e83d8a", ant:4.5, act:4.8 },
+    { materia:"Física",            color:"#1e9ee8", ant:4.0, act:3.9 },
+    { materia:"Ética y Valores",   color:"#6db83b", ant:4.3, act:4.6 },
+    { materia:"Ed. Física",        color:"#888",    ant:4.2, act:4.4 },
+  ];
+
+  const tbody = document.getElementById('tabla-comparativa');
+  datos.forEach(d => {
+    const diff  = Math.round((d.act - d.ant) * 10) / 10;
+    const cls   = diff > 0 ? 'delta-up' : diff < 0 ? 'delta-down' : 'delta-same';
+    const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+    const row = document.createElement('div');
+    row.className = 'comparar-row';
+    row.innerHTML = `
+      <div class="cc" style="display:flex;align-items:center;gap:8px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:${d.color};flex-shrink:0;"></div>
+        <span style="font-weight:500;color:var(--txt-primario);">${d.materia}</span>
+      </div>
+      <div class="cc" style="text-align:center; color:var(--txt-muted); font-weight:600;">${d.ant.toFixed(1)}</div>
+      <div class="cc" style="text-align:center;"><span style="font-size:1.1rem;font-weight:800;color:${d.color};">${d.act.toFixed(1)}</span></div>
+      <div class="cc" style="text-align:center;"><span class="delta-badge ${cls}">${arrow} ${Math.abs(diff).toFixed(1)}</span></div>`;
+    tbody.appendChild(row);
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asistencia — MemoCampus Admin</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .hm-tabla { width:100%; border-collapse:collapse; }
+    .hm-tabla th { font-size:11px; font-weight:600; color:var(--txt-muted); padding:6px 8px; text-align:center; border-bottom:2px solid var(--borde); text-transform:uppercase; letter-spacing:0.5px; }
+    .hm-tabla td { padding:4px; text-align:center; }
+    .hm-tabla .grado-lbl { font-size:12px; font-weight:600; color:var(--txt-secundario); text-align:left; padding:6px 10px; white-space:nowrap; }
+
+    .celda-asist {
+      width: 36px; height: 28px; border-radius:6px;
+      display:inline-flex; align-items:center; justify-content:center;
+      font-size:11px; font-weight:700; cursor:pointer;
+      transition: transform 0.15s;
+    }
+    .celda-asist:hover { transform:scale(1.15); z-index:1; position:relative; }
+    .ca-95 { background:#d1fae5; color:#065f46; }
+    .ca-90 { background:#bbf7d0; color:#065f46; }
+    .ca-85 { background:#fef9c3; color:#854d0e; }
+    .ca-80 { background:#fed7aa; color:#7c2d12; }
+    .ca-75 { background:#fecaca; color:#7f1d1d; }
+    .ca-65 { background:#fee2e2; color:#7f1d1d; }
+
+    .dia-col { writing-mode:initial; }
+
+    .top-ausencias { display:flex; flex-direction:column; gap:8px; }
+    .ausencia-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--borde); }
+    .ausencia-item:last-child { border-bottom:none; }
+    .ausencia-dia { font-size:12px; font-weight:700; color:var(--txt-primario); min-width:90px; }
+    .ausencia-bar-w { flex:1; background:var(--bg-app); border-radius:var(--radio-full); height:8px; overflow:hidden; }
+    .ausencia-bar { height:100%; border-radius:var(--radio-full); background:var(--error); }
+    .ausencia-pct { font-size:12px; font-weight:700; color:var(--error); min-width:36px; text-align:right; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">M</div>
+      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía · Admin</div></div>
+    </div>
+    <div class="sidebar-section-title">Administración</div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html"><span class="nav-ico">🏠</span> Dashboard</a>
+      <a href="usuarios.html"><span class="nav-ico">👥</span> Usuarios</a>
+      <a href="cursos.html"><span class="nav-ico">📚</span> Cursos y grupos</a>
+      <a href="reportes.html"><span class="nav-ico">📊</span> Reportes</a>
+      <a href="comunicados.html"><span class="nav-ico">📢</span> Comunicados</a>
+      <a href="asistencia.html" class="activo"><span class="nav-ico">📅</span> Mapa de asistencia</a>
+    </nav>
+    <div class="sidebar-section-title">Sistema</div>
+    <nav class="sidebar-nav">
+      <a href="#"><span class="nav-ico">⚙️</span> Configuración</a>
+      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
+    </nav>
+    <div class="sidebar-user">
+      <div class="sidebar-avatar" data-user-avatar style="background:var(--verde);">RA</div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name" data-user-name>Rectoría</div>
+        <div class="sidebar-user-rol">Administrador</div>
+      </div>
+      <span class="sidebar-logout" data-logout>⏏</span>
+    </div>
+  </aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Mapa de asistencia</span>
+      </div>
+      <div class="topbar-right">
+        <select style="padding:7px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none;">
+          <option>Marzo 2026</option><option>Febrero 2026</option><option>Enero 2026</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" style="margin-left:8px;">📥 Exportar</button>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--verde); margin-left:8px;">RA</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Stats -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">✅</div><div><div class="stat-label">Asistencia promedio</div><div class="stat-value" style="color:var(--exito);">91%</div><div class="stat-sub">Marzo 2026</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--error-suave);">📉</div><div><div class="stat-label">Día con más ausencias</div><div class="stat-value" style="color:var(--error); font-size:1rem;">Lunes</div><div class="stat-sub">Promedio 12% ausencia</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div><div><div class="stat-label">Grado crítico</div><div class="stat-value" style="color:var(--alerta); font-size:1rem;">Grado 8°</div><div class="stat-sub">Promedio 83%</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--verde-suave);">🏆</div><div><div class="stat-label">Grado con mejor asist.</div><div class="stat-value" style="color:var(--verde); font-size:1rem;">Grado 11°</div><div class="stat-sub">Promedio 97%</div></div></div>
+      </div>
+
+      <div class="grid-2 mb-3">
+
+        <!-- Mapa de calor por grado y semana -->
+        <div class="card" style="overflow-x:auto;">
+          <div class="flex-between mb-3">
+            <h3>Asistencia por grado — Marzo 2026</h3>
+            <span class="badge badge-verde">% asistencia</span>
+          </div>
+
+          <table class="hm-tabla">
+            <thead>
+              <tr>
+                <th style="text-align:left;">Grado</th>
+                <th>Sem. 1<br><span style="font-weight:400;">3-7 mar</span></th>
+                <th>Sem. 2<br><span style="font-weight:400;">10-14 mar</span></th>
+                <th>Sem. 3<br><span style="font-weight:400;">17-21 mar</span></th>
+                <th>Sem. 4<br><span style="font-weight:400;">24-28 mar</span></th>
+                <th>Prom.</th>
+              </tr>
+            </thead>
+            <tbody id="hm-tbody"></tbody>
+          </table>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; font-size:11px; color:var(--txt-muted);">
+            <span>Leyenda:</span>
+            <span style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:2px;background:#d1fae5;"></div>≥95%</span>
+            <span style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:2px;background:#fef9c3;"></div>85-94%</span>
+            <span style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:2px;background:#fed7aa;"></div>80-84%</span>
+            <span style="display:flex;align-items:center;gap:4px;"><div style="width:12px;height:12px;border-radius:2px;background:#fecaca;"></div>&lt;80%</span>
+          </div>
+        </div>
+
+        <!-- Ausencias por día de la semana -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>¿Qué días faltan más?</h3>
+            <span class="badge badge-error">% ausencia</span>
+          </div>
+          <p class="text-sm text-muted mb-3">Promedio de inasistencias por día de la semana en Marzo 2026.</p>
+          <div class="top-ausencias">
+            <div class="ausencia-item">
+              <div class="ausencia-dia">🔴 Lunes</div>
+              <div class="ausencia-bar-w"><div class="ausencia-bar" style="width:80%;"></div></div>
+              <div class="ausencia-pct">12%</div>
+            </div>
+            <div class="ausencia-item">
+              <div class="ausencia-dia">🟠 Viernes</div>
+              <div class="ausencia-bar-w"><div class="ausencia-bar" style="width:60%; background:var(--alerta);"></div></div>
+              <div class="ausencia-pct" style="color:var(--alerta);">9%</div>
+            </div>
+            <div class="ausencia-item">
+              <div class="ausencia-dia">🟡 Miércoles</div>
+              <div class="ausencia-bar-w"><div class="ausencia-bar" style="width:40%; background:#eab308;"></div></div>
+              <div class="ausencia-pct" style="color:#854d0e;">6%</div>
+            </div>
+            <div class="ausencia-item">
+              <div class="ausencia-dia">🟢 Martes</div>
+              <div class="ausencia-bar-w"><div class="ausencia-bar" style="width:25%; background:var(--verde);"></div></div>
+              <div class="ausencia-pct" style="color:var(--verde);">4%</div>
+            </div>
+            <div class="ausencia-item">
+              <div class="ausencia-dia">🟢 Jueves</div>
+              <div class="ausencia-bar-w"><div class="ausencia-bar" style="width:20%; background:var(--verde);"></div></div>
+              <div class="ausencia-pct" style="color:var(--verde);">3%</div>
+            </div>
+          </div>
+
+          <div style="margin-top:1.25rem; padding:12px; background:var(--alerta-suave); border-radius:var(--radio-md); border:1px solid #fed7aa;">
+            <p style="font-size:13px; color:#854d0e; font-weight:500;">💡 Recomendación: Los lunes concentran el 12% de las inasistencias. Se recomienda programar actividades motivadoras los lunes para aumentar la asistencia.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('admin');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  const grados = [
+    { g:"Grado 11°", s:[97, 96, 98, 97] },
+    { g:"Grado 10°", s:[94, 92, 95, 91] },
+    { g:"Grado 9°",  s:[91, 90, 88, 92] },
+    { g:"Grado 8°",  s:[85, 83, 82, 84] },
+    { g:"Grado 7°",  s:[88, 87, 90, 89] },
+    { g:"Grado 6°",  s:[92, 91, 93, 90] },
+    { g:"Primaria",  s:[96, 95, 97, 96] },
+  ];
+
+  function clase(v) {
+    if(v>=95) return 'ca-95';
+    if(v>=90) return 'ca-90';
+    if(v>=85) return 'ca-85';
+    if(v>=80) return 'ca-80';
+    if(v>=75) return 'ca-75';
+    return 'ca-65';
+  }
+
+  const tbody = document.getElementById('hm-tbody');
+  grados.forEach(g => {
+    const prom = Math.round(g.s.reduce((a,b)=>a+b,0)/g.s.length);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="grado-lbl">${g.g}</td>` +
+      g.s.map(v=>`<td><div class="celda-asist ${clase(v)}" title="${v}%">${v}%</div></td>`).join('') +
+      `<td><strong style="font-size:13px; color:${prom>=90?'var(--verde)':prom>=85?'var(--alerta)':'var(--error)'};">${prom}%</strong></td>`;
+    tbody.appendChild(tr);
+  });
+</script>
+</body>
+</html>
