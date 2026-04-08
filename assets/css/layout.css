@@ -1,0 +1,309 @@
+/* ============================================================
+   layout.css — Estilos específicos de página
+   Importar DESPUÉS de variables.css y base.css
+   ============================================================ */
+
+/* --- Page header (título de sección) --- */
+.page-header {
+  margin-bottom: 1.75rem;
+}
+.page-header h1,
+.page-header h2 {
+  color: var(--txt-primario);
+  margin-bottom: 4px;
+}
+.page-header p {
+  font-size: 14px;
+  color: var(--txt-muted);
+}
+
+/* --- Section title dentro del contenido --- */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--txt-muted);
+  margin-bottom: 12px;
+}
+
+/* --- Card con header interno --- */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 8px;
+}
+.card-header h3 { margin: 0; }
+.card-header a {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--verde-claro);
+  white-space: nowrap;
+}
+.card-header a:hover { text-decoration: underline; }
+
+/* --- Materia card (estudiante/cursos) --- */
+.materia-card {
+  background: var(--bg-card);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 1.25rem 1.4rem;
+  transition: var(--trans);
+}
+.materia-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sombra-md);
+}
+.materia-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.materia-ico {
+  width: 40px; height: 40px;
+  border-radius: var(--radio-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.materia-nota {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--txt-primario);
+  line-height: 1;
+}
+.materia-nota-sub {
+  font-size: 10px;
+  color: var(--txt-muted);
+  text-align: right;
+}
+.materia-nombre {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--txt-primario);
+  margin-bottom: 2px;
+}
+.materia-prof {
+  font-size: 12px;
+  color: var(--txt-muted);
+}
+.materia-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--borde);
+}
+.materia-materiales {
+  font-size: 12px;
+  color: var(--txt-muted);
+}
+
+/* --- Lista de tareas --- */
+.tarea-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--borde);
+}
+.tarea-item:last-child { border-bottom: none; }
+.tarea-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--borde);
+  flex-shrink: 0; margin-top: 2px;
+  cursor: pointer;
+  transition: var(--trans);
+}
+.tarea-check:hover { border-color: var(--verde); }
+.tarea-check.done {
+  background: var(--verde);
+  border-color: var(--verde);
+}
+.tarea-nombre {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--txt-primario);
+  margin-bottom: 3px;
+}
+.tarea-meta {
+  font-size: 11px;
+  color: var(--txt-muted);
+}
+.tarea-fecha {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tarea-fecha.urgente { color: var(--error); }
+.tarea-fecha.pronto  { color: var(--alerta); }
+.tarea-fecha.ok      { color: var(--exito); }
+
+/* --- Barra de nota (boletín) --- */
+.nota-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--borde);
+}
+.nota-row:last-child { border-bottom: none; }
+.nota-materia-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--txt-primario);
+  width: 160px;
+  flex-shrink: 0;
+}
+.nota-bar-wrap {
+  flex: 1;
+  background: var(--bg-app);
+  border-radius: var(--radio-full);
+  height: 7px;
+  overflow: hidden;
+}
+.nota-bar {
+  height: 100%;
+  border-radius: var(--radio-full);
+  background: var(--verde-claro);
+  transition: width 0.7s ease;
+}
+.nota-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--txt-primario);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* --- Comunicados / mensajes --- */
+.comunicado-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--borde);
+}
+.comunicado-item:last-child { border-bottom: none; }
+.comunicado-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--verde-claro);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.comunicado-titulo {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--txt-primario);
+  margin-bottom: 2px;
+}
+.comunicado-meta {
+  font-size: 11px;
+  color: var(--txt-muted);
+}
+
+/* --- Avatar colores por rol --- */
+.av-estudiante { background: var(--color-estudiante); }
+.av-padre      { background: var(--color-padre); }
+.av-docente    { background: var(--color-docente); }
+.av-admin      { background: var(--color-admin); }
+.av-verde      { background: var(--verde); }
+
+/* --- Desempeño label --- */
+.desempeno {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: var(--radio-full);
+}
+.desempeno-superior { background: #ede9fe; color: #6d28d9; }
+.desempeno-alto     { background: var(--exito-suave); color: var(--exito); }
+.desempeno-basico   { background: var(--alerta-suave); color: var(--alerta); }
+.desempeno-bajo     { background: var(--error-suave); color: var(--error); }
+
+/* --- Hijo card (vista padre) --- */
+.hijo-card {
+  background: var(--bg-card);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  transition: var(--trans);
+}
+.hijo-card:hover {
+  box-shadow: var(--sombra-md);
+  transform: translateY(-1px);
+}
+.hijo-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 800;
+  color: #fff; flex-shrink: 0;
+}
+.hijo-nombre {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--txt-primario);
+}
+.hijo-grado {
+  font-size: 12px;
+  color: var(--txt-muted);
+  margin-top: 2px;
+}
+.hijo-nota {
+  margin-left: auto;
+  text-align: right;
+}
+.hijo-nota-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--txt-primario);
+  line-height: 1;
+}
+.hijo-nota-label {
+  font-size: 10px;
+  color: var(--txt-muted);
+}
+
+/* --- Alerta banner --- */
+.alerta-banner {
+  background: var(--alerta-suave);
+  border: 1px solid #fde68a;
+  border-radius: var(--radio-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--alerta);
+  font-weight: 500;
+}
+.alerta-banner.error {
+  background: var(--error-suave);
+  border-color: #fecaca;
+  color: var(--error);
+}
+.alerta-banner.exito {
+  background: var(--exito-suave);
+  border-color: #bbf7d0;
+  color: var(--exito);
+}
+
+/* --- Responsive específico --- */
+@media (max-width: 960px) {
+  .nota-materia-name { width: 120px; }
+}
+@media (max-width: 600px) {
+  .materia-card-top { flex-wrap: wrap; }
+  .nota-materia-name { width: 100px; font-size: 11px; }
+  .hijo-card { flex-wrap: wrap; }
+}

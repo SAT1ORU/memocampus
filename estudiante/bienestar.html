@@ -134,37 +134,7 @@
 <div class="app-layout">
 
   <!-- SIDEBAR -->
-  <aside class="app-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">M</div>
-      <div class="sidebar-logo-text">
-        <div class="sidebar-logo-name">MemoCampus</div>
-        <div class="sidebar-logo-sub">IE La Armonía</div>
-      </div>
-    </div>
-    <div class="sidebar-section-title">Principal</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html"><span class="nav-ico">🏠</span> Mi inicio</a>
-      <a href="cursos.html"><span class="nav-ico">📚</span> Mis materias</a>
-      <a href="tareas.html"><span class="nav-ico">✅</span> Tareas <span class="sidebar-badge">3</span></a>
-      <a href="notas.html"><span class="nav-ico">📊</span> Mis notas</a>
-      <a href="bienestar.html" class="activo"><span class="nav-ico">🧠</span> Mi bienestar</a>
-    </nav>
-    <div class="sidebar-section-title">Más</div>
-    <nav class="sidebar-nav">
-      <a href="#"><span class="nav-ico">📅</span> Calendario</a>
-      <a href="#"><span class="nav-ico">💬</span> Mensajes</a>
-      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Valentina Gómez</div>
-        <div class="sidebar-user-rol" data-user-rol>Estudiante · 10°A</div>
-      </div>
-      <span class="sidebar-logout" data-logout>⏏</span>
-    </div>
-  </aside>
+  <aside class="app-sidebar" id="sidebar"></aside>
   <div class="sidebar-overlay"></div>
 
   <main class="app-main">
@@ -342,7 +312,7 @@
     </div>
   </main>
 </div>
-
+<script src="../assets/js/sidebar-estudiante.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('estudiante');

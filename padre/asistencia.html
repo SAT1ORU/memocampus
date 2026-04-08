@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asistencia — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    /* === Layout === */
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    /* === Banner === */
+    .asist-banner {
+      background: linear-gradient(135deg, #5a1a8a 0%, var(--color-padre) 100%);
+      border-radius: var(--radio-xl); padding: 1.5rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; margin-bottom: 1.75rem; position: relative; overflow: hidden;
+    }
+    .asist-banner::before { content:''; position:absolute; right:-20px; top:-20px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.06); }
+    .asist-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
+    .asist-banner p  { color:rgba(255,255,255,0.7); font-size:13px; font-weight:300; }
+    .banner-stats { display:flex; gap:24px; flex-wrap:wrap; }
+    .banner-stat  { text-align:center; }
+    .banner-stat-val  { color:#fff; font-size:1.8rem; font-weight:800; line-height:1; }
+    .banner-stat-lbl  { color:rgba(255,255,255,0.6); font-size:11px; margin-top:3px; }
+
+    /* === Selector hijo === */
+    .hijo-tabs { display:flex; gap:8px; margin-bottom:1.5rem; }
+    .hijo-tab {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 18px; border-radius:var(--radio-lg);
+      border:1.5px solid var(--borde); background:var(--bg-card);
+      cursor:pointer; transition:var(--trans); font-family:var(--font-ui);
+    }
+    .hijo-tab:hover { border-color:var(--color-padre); }
+    .hijo-tab.activo { border-color:var(--color-padre); background:var(--color-padre-suave); }
+    .hijo-tab-avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+    .hijo-tab-nombre { font-size:13.5px; font-weight:600; color:var(--txt-primario); }
+    .hijo-tab-grado  { font-size:11px; color:var(--txt-muted); }
+
+    /* === Calendario de asistencia === */
+    .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .cal-nav { display:flex; align-items:center; gap:12px; }
+    .cal-nav button { background:none; border:1.5px solid var(--borde); border-radius:var(--radio-md); padding:6px 12px; cursor:pointer; font-size:14px; transition:var(--trans); }
+    .cal-nav button:hover { border-color:var(--color-padre); color:var(--color-padre); }
+    .cal-mes { font-size:15px; font-weight:700; color:var(--txt-primario); min-width:160px; text-align:center; }
+
+    .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+    .cal-day-name { text-align:center; font-size:11px; font-weight:600; text-transform:uppercase; color:var(--txt-muted); padding:6px 0; }
+    .cal-day {
+      aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+      border-radius:var(--radio-md); font-size:13px; font-weight:500;
+      color:var(--txt-secundario); cursor:default; transition:var(--trans);
+      position:relative;
+    }
+    .cal-day.vacio   { background:transparent; }
+    .cal-day.presente { background:var(--verde-suave); color:var(--verde); font-weight:700; }
+    .cal-day.ausente  { background:var(--error-suave); color:var(--error); font-weight:700; }
+    .cal-day.tardanza { background:var(--alerta-suave); color:var(--alerta); font-weight:700; }
+    .cal-day.finde    { background:var(--bg-app); color:var(--txt-muted); opacity:0.5; }
+    .cal-day.festivo  { background:var(--info-suave); color:var(--info); }
+    .cal-day.hoy      { outline:2px solid var(--color-padre); outline-offset:1px; }
+
+    /* === Leyenda === */
+    .leyenda { display:flex; gap:16px; flex-wrap:wrap; margin-top:1rem; }
+    .ley-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--txt-secundario); }
+    .ley-dot  { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+
+    /* === Tabla detalle === */
+    .asist-row { display:grid; grid-template-columns:1.5fr 1fr 1fr 2fr; align-items:center; border-bottom:1px solid var(--borde); }
+    .asist-row:last-child { border-bottom:none; }
+    .asist-row:hover { background:var(--bg-app); }
+    .asist-cell { padding:11px 14px; font-size:13.5px; color:var(--txt-secundario); }
+    .asist-cell.hdr { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--txt-muted); background:var(--bg-app); border-bottom:2px solid var(--borde); }
+
+    /* === Barra progreso === */
+    .prog-wrap { background:var(--bg-app); border-radius:20px; height:8px; overflow:hidden; flex:1; }
+    .prog-bar  { height:100%; border-radius:20px; transition:width 0.8s ease; }
+
+    /* === Sidebar fixes === */
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.45) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    /* === Notif topbar === */
+    .notif-wrapper { position:relative; }
+    .notif-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:300px; background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); box-shadow:var(--sombra-lg); z-index:200; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--borde); }
+    .notif-footer { display:block; text-align:center; padding:10px; font-size:12px; font-weight:600; color:var(--color-padre); border-top:1px solid var(--borde); transition:var(--trans); }
+    .notif-footer:hover { background:var(--bg-app); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Asistencia</span>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-wrapper" id="notifWrapper">
+          <button class="topbar-btn" id="notifBtn" onclick="toggleNotif()">
+            🔔
+            <div class="topbar-notif-dot" id="notifDot"></div>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span class="fw-700">Notificaciones</span>
+              <span class="text-xs text-muted" id="notifCount">Al día</span>
+            </div>
+            <a href="comunicados.html" class="notif-footer">Ver comunicados →</a>
+          </div>
+        </div>
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;
+                    background:var(--color-padre);">CP</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Banner -->
+      <div class="asist-banner" id="banner-asistencia">
+        <div>
+          <h2 id="banner-titulo">Asistencia de Valentina Gómez 📅</h2>
+          <p>Grado 10°A · IE La Armonía · Marzo 2026</p>
+        </div>
+        <div class="banner-stats">
+          <div class="banner-stat"><div class="banner-stat-val" id="stat-pct">94%</div><div class="banner-stat-lbl">Asistencia</div></div>
+          <div class="banner-stat"><div class="banner-stat-val" id="stat-present">19</div><div class="banner-stat-lbl">Días presentes</div></div>
+          <div class="banner-stat"><div class="banner-stat-val" id="stat-ausent">1</div><div class="banner-stat-lbl">Ausencias</div></div>
+          <div class="banner-stat"><div class="banner-stat-val" id="stat-tard">1</div><div class="banner-stat-lbl">Tardanzas</div></div>
+        </div>
+      </div>
+
+      <!-- Selector de hijo -->
+      <div class="hijo-tabs mb-3">
+        <button class="hijo-tab activo" onclick="selHijo('valentina', this)">
+          <div class="hijo-tab-avatar" style="background:var(--color-estudiante);">VG</div>
+          <div><div class="hijo-tab-nombre">Valentina Gómez</div><div class="hijo-tab-grado">Grado 10°A</div></div>
+        </button>
+        <button class="hijo-tab" onclick="selHijo('andres', this)">
+          <div class="hijo-tab-avatar" style="background:var(--mat-ciencias);">AG</div>
+          <div><div class="hijo-tab-nombre">Andrés Gómez</div><div class="hijo-tab-grado">Grado 7°B</div></div>
+        </button>
+      </div>
+
+      <div class="grid-2 mb-3" style="grid-template-columns:1.1fr 0.9fr; align-items:start;">
+
+        <!-- Calendario -->
+        <div class="card">
+          <div class="cal-header">
+            <div class="cal-nav">
+              <button onclick="cambiarMes(-1)">←</button>
+              <span class="cal-mes" id="cal-mes-label">Marzo 2026</span>
+              <button onclick="cambiarMes(1)">→</button>
+            </div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="leyenda">
+            <div class="ley-item"><div class="ley-dot" style="background:var(--verde-suave);border:1.5px solid var(--verde);"></div> Presente</div>
+            <div class="ley-item"><div class="ley-dot" style="background:var(--error-suave);border:1.5px solid var(--error);"></div> Ausente</div>
+            <div class="ley-item"><div class="ley-dot" style="background:var(--alerta-suave);border:1.5px solid var(--alerta);"></div> Tardanza</div>
+            <div class="ley-item"><div class="ley-dot" style="background:var(--info-suave);border:1.5px solid var(--info);"></div> Festivo</div>
+          </div>
+        </div>
+
+        <!-- Resumen por materia -->
+        <div class="card">
+          <h3 style="margin-bottom:1.25rem;">Asistencia por materia</h3>
+          <div id="asist-materias" style="display:flex;flex-direction:column;gap:14px;"></div>
+
+          <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--borde);">
+            <a href="adjuntar.html" class="btn btn-primary" style="width:100%;justify-content:center;">
+              📎 Adjuntar excusa
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detalle de inasistencias -->
+      <div class="card">
+        <div class="flex-between mb-3">
+          <h3>Registro de inasistencias</h3>
+          <span class="badge badge-alerta" id="badge-inasist">2 registros</span>
+        </div>
+        <div style="overflow-x:auto; border-radius:var(--radio-md); border:1px solid var(--borde);">
+          <div class="asist-row">
+            <div class="asist-cell hdr">Fecha</div>
+            <div class="asist-cell hdr">Tipo</div>
+            <div class="asist-cell hdr">Estado excusa</div>
+            <div class="asist-cell hdr">Observación</div>
+          </div>
+          <div id="tabla-inasist"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/comunicados.js"></script>
+<script src="../assets/js/sidebar-padre.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+// ============ DATOS ============
+const HIJOS = {
+  valentina: {
+    nombre: 'Valentina Gómez', grado: '10°A',
+    pct: 94, presentes: 19, ausentes: 1, tardanzas: 1,
+    dias: {
+      // 1=presente, 0=ausente, 2=tardanza, 3=festivo
+      '2026-3-3':1,'2026-3-4':1,'2026-3-5':1,'2026-3-6':1,'2026-3-9':1,
+      '2026-3-10':1,'2026-3-11':2,'2026-3-12':1,'2026-3-13':1,'2026-3-16':1,
+      '2026-3-17':1,'2026-3-18':1,'2026-3-19':1,'2026-3-20':1,'2026-3-23':1,
+      '2026-3-24':1,'2026-3-25':0,'2026-3-26':1,'2026-3-27':1,'2026-3-19':3
+    },
+    materias: [
+      { nombre:'Matemáticas',   color:'var(--mat-matematicas)', pct:100 },
+      { nombre:'Ciencias Nat.', color:'var(--mat-ciencias)',    pct:100 },
+      { nombre:'Inglés',        color:'var(--mat-ingles)',      pct:95  },
+      { nombre:'Español',       color:'var(--mat-español)',     pct:90  },
+      { nombre:'Ed. Física',    color:'var(--mat-ed-fisica)',   pct:85  },
+    ],
+    inasistencias: [
+      { fecha:'25 mar 2026', tipo:'Ausencia', excusa:'Aprobada',  obs:'Excusa médica presentada' },
+      { fecha:'11 mar 2026', tipo:'Tardanza', excusa:'Sin excusa', obs:'Llegó 20 min tarde' },
+    ]
+  },
+  andres: {
+    nombre: 'Andrés Gómez', grado: '7°B',
+    pct: 88, presentes: 17, ausentes: 2, tardanzas: 2,
+    dias: {
+      '2026-3-3':1,'2026-3-4':1,'2026-3-5':0,'2026-3-6':1,'2026-3-9':1,
+      '2026-3-10':2,'2026-3-11':1,'2026-3-12':1,'2026-3-13':1,'2026-3-16':1,
+      '2026-3-17':1,'2026-3-18':1,'2026-3-19':1,'2026-3-20':0,'2026-3-23':1,
+      '2026-3-24':2,'2026-3-25':1,'2026-3-26':1,'2026-3-27':1
+    },
+    materias: [
+      { nombre:'Matemáticas',   color:'var(--mat-matematicas)', pct:88 },
+      { nombre:'Ciencias Nat.', color:'var(--mat-ciencias)',    pct:94 },
+      { nombre:'Inglés',        color:'var(--mat-ingles)',      pct:82 },
+      { nombre:'Español',       color:'var(--mat-español)',     pct:88 },
+      { nombre:'Ed. Física',    color:'var(--mat-ed-fisica)',   pct:76 },
+    ],
+    inasistencias: [
+      { fecha:'20 mar 2026', tipo:'Ausencia',  excusa:'Sin excusa', obs:'No justificada' },
+      { fecha:'5 mar 2026',  tipo:'Ausencia',  excusa:'Aprobada',   obs:'Calamidad familiar' },
+      { fecha:'24 mar 2026', tipo:'Tardanza',  excusa:'Sin excusa', obs:'Llegó 15 min tarde' },
+      { fecha:'10 mar 2026', tipo:'Tardanza',  excusa:'Sin excusa', obs:'Llegó 10 min tarde' },
+    ]
+  }
+};
+
+let hijoActual = 'valentina';
+let mesActual  = 2; // 0-indexed → Marzo
+let anioActual = 2026;
+
+// ============ SELECTOR HIJO ============
+function selHijo(id, btn) {
+  hijoActual = id;
+  document.querySelectorAll('.hijo-tab').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  actualizarPagina();
+}
+
+function actualizarPagina() {
+  const h = HIJOS[hijoActual];
+  document.getElementById('banner-titulo').textContent = `Asistencia de ${h.nombre} 📅`;
+  document.getElementById('stat-pct').textContent      = h.pct + '%';
+  document.getElementById('stat-present').textContent  = h.presentes;
+  document.getElementById('stat-ausent').textContent   = h.ausentes;
+  document.getElementById('stat-tard').textContent     = h.tardanzas;
+  renderCalendario();
+  renderMaterias();
+  renderInasistencias();
+}
+
+// ============ CALENDARIO ============
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+function cambiarMes(dir) {
+  mesActual += dir;
+  if (mesActual > 11) { mesActual = 0; anioActual++; }
+  if (mesActual < 0)  { mesActual = 11; anioActual--; }
+  renderCalendario();
+}
+
+function renderCalendario() {
+  const grid  = document.getElementById('cal-grid');
+  const label = document.getElementById('cal-mes-label');
+  label.textContent = `${MESES[mesActual]} ${anioActual}`;
+
+  const diasMes    = new Date(anioActual, mesActual + 1, 0).getDate();
+  const primerDia  = new Date(anioActual, mesActual, 1).getDay();
+  const h          = HIJOS[hijoActual];
+  const hoy        = new Date();
+
+  let html = DIAS.map(d => `<div class="cal-day-name">${d}</div>`).join('');
+
+  for (let i = 0; i < primerDia; i++) html += `<div class="cal-day vacio"></div>`;
+
+  for (let d = 1; d <= diasMes; d++) {
+    const dow   = new Date(anioActual, mesActual, d).getDay();
+    const key   = `${anioActual}-${mesActual+1}-${d}`;
+    const esHoy = hoy.getDate()===d && hoy.getMonth()===mesActual && hoy.getFullYear()===anioActual;
+    const estado = h.dias[key];
+    let cls = 'cal-day';
+    if (dow === 0 || dow === 6) cls += ' finde';
+    else if (estado === 1) cls += ' presente';
+    else if (estado === 0) cls += ' ausente';
+    else if (estado === 2) cls += ' tardanza';
+    else if (estado === 3) cls += ' festivo';
+    if (esHoy) cls += ' hoy';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+// ============ MATERIAS ============
+function renderMaterias() {
+  const cont = document.getElementById('asist-materias');
+  const h = HIJOS[hijoActual];
+  cont.innerHTML = h.materias.map(m => {
+    const color = m.pct >= 90 ? 'var(--verde)' : m.pct >= 80 ? 'var(--alerta)' : 'var(--error)';
+    return `
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <span style="font-size:13px;font-weight:600;color:var(--txt-primario);">${m.nombre}</span>
+          <span style="font-size:13px;font-weight:700;color:${color};">${m.pct}%</span>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-bar" style="width:${m.pct}%;background:${color};"></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ============ TABLA INASISTENCIAS ============
+function renderInasistencias() {
+  const tabla = document.getElementById('tabla-inasist');
+  const badge = document.getElementById('badge-inasist');
+  const h = HIJOS[hijoActual];
+  badge.textContent = `${h.inasistencias.length} registros`;
+
+  const excusaStyle = {
+    'Aprobada':    'badge-exito',
+    'Sin excusa':  'badge-alerta',
+    'Rechazada':   'badge-error',
+    'Pendiente':   'badge-morado'
+  };
+  const tipoStyle = {
+    'Ausencia': 'badge-error',
+    'Tardanza': 'badge-alerta'
+  };
+
+  tabla.innerHTML = h.inasistencias.map(r => `
+    <div class="asist-row">
+      <div class="asist-cell" style="font-weight:500;color:var(--txt-primario);">${r.fecha}</div>
+      <div class="asist-cell"><span class="badge ${tipoStyle[r.tipo]||''}">${r.tipo}</span></div>
+      <div class="asist-cell"><span class="badge ${excusaStyle[r.excusa]||''}">${r.excusa}</span></div>
+      <div class="asist-cell" style="color:var(--txt-muted);">${r.obs}</div>
+    </div>`).join('');
+}
+
+// ============ NOTIF ============
+function toggleNotif() {
+  const dd = document.getElementById('notifDropdown');
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) document.getElementById('notifDot').style.display = 'none';
+}
+document.addEventListener('click', e => {
+  const w = document.getElementById('notifWrapper');
+  if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
+});
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('padre');
+  if (usuario) AUTH.pintarUsuario(usuario);
+  actualizarPagina();
+});
+</script>
+</body>
+</html>

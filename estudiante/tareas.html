@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tareas — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    /* Banner */
+    .page-banner {
+      background:linear-gradient(135deg, #3b6de8 0%, #2454c7 100%);
+      border-radius:var(--radio-xl); padding:1.5rem 1.75rem;
+      display:flex; justify-content:space-between; align-items:center;
+      gap:1rem; margin-bottom:1.5rem; position:relative; overflow:hidden;
+    }
+    .page-banner::before { content:''; position:absolute; right:-25px; top:-25px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.06); }
+    .page-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
+    .page-banner p  { color:rgba(255,255,255,0.72); font-size:13px; }
+    .banner-kpis { display:flex; gap:20px; flex-wrap:wrap; position:relative; z-index:1; }
+    .bkpi { text-align:center; }
+    .bkpi-val { color:#fff; font-size:1.7rem; font-weight:800; line-height:1; }
+    .bkpi-lbl { color:rgba(255,255,255,0.55); font-size:11px; margin-top:3px; }
+
+    /* Filtros */
+    .filtros-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.25rem; }
+    .filtro-chip { border:1px solid var(--borde); background:#fff; color:var(--txt-secundario); border-radius:999px; padding:8px 14px; font-size:12.5px; font-weight:600; cursor:pointer; transition:var(--trans); }
+    .filtro-chip:hover { border-color:#3b6de8; color:#3b6de8; }
+    .filtro-chip.active { background:#eef2fd; border-color:#3b6de8; color:#3b6de8; }
+
+    /* Layout dos columnas */
+    .tareas-layout { display:grid; grid-template-columns:1.4fr 0.6fr; gap:1rem; align-items:start; }
+
+    /* Tarea card */
+    .tarea-card {
+      background:var(--bg-card); border:1.5px solid var(--borde);
+      border-radius:var(--radio-xl); padding:1.25rem;
+      display:flex; gap:14px; transition:var(--trans);
+      margin-bottom:.75rem;
+    }
+    .tarea-card:last-child { margin-bottom:0; }
+    .tarea-card:hover { box-shadow:var(--sombra-md); transform:translateY(-1px); }
+    .tarea-card.entregada { opacity:.65; }
+    .tarea-barra { width:5px; border-radius:3px; flex-shrink:0; align-self:stretch; min-height:50px; }
+    .tarea-nombre { font-size:14.5px; font-weight:700; color:var(--txt-primario); margin-bottom:5px; }
+    .tarea-desc   { font-size:12.5px; color:var(--txt-secundario); line-height:1.45; margin-bottom:8px; }
+    .tarea-chips  { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    .tarea-chip   { font-size:11px; font-weight:600; padding:4px 10px; border-radius:999px; }
+    .tarea-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+    .tarea-docente { font-size:12px; color:var(--txt-muted); }
+    .tarea-vence   { font-size:12px; font-weight:700; }
+
+    /* Botón entregar */
+    .btn-entregar {
+      padding:7px 16px; border-radius:var(--radio-md); border:none;
+      font-size:12px; font-weight:700; cursor:pointer; transition:var(--trans);
+      font-family:var(--font-ui);
+    }
+
+    /* Panel lateral */
+    .panel-card { background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-xl); padding:1.25rem; margin-bottom:1rem; }
+    .panel-card:last-child { margin-bottom:0; }
+    .progreso-materia { margin-bottom:12px; }
+    .progreso-materia:last-child { margin-bottom:0; }
+    .prog-label { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
+    .prog-wrap  { background:var(--bg-app); border-radius:20px; height:7px; overflow:hidden; }
+    .prog-bar   { height:100%; border-radius:20px; transition:width .7s ease; }
+
+    /* Modal entregar */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:500; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--bg-card); border-radius:var(--radio-xl); padding:2rem; width:100%; max-width:460px; box-shadow:var(--sombra-lg); }
+    .modal-title { font-size:1.1rem; font-weight:700; margin-bottom:1.25rem; color:var(--txt-primario); }
+    .form-label  { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--txt-secundario); margin-bottom:6px; }
+    .form-input  { width:100%; padding:10px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-size:13.5px; font-family:var(--font-ui); color:var(--txt-primario); background:var(--bg-card); transition:var(--trans); outline:none; box-sizing:border-box; }
+    .form-input:focus { border-color:#3b6de8; box-shadow:0 0 0 3px rgba(59,109,232,.1); }
+    .form-group  { margin-bottom:1rem; }
+    .file-zone   { border:2px dashed var(--borde); border-radius:var(--radio-lg); padding:2rem; text-align:center; cursor:pointer; transition:var(--trans); }
+    .file-zone:hover { border-color:#3b6de8; background:#eef2fd; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:1.5rem; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title">Tareas</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Banner -->
+      <div class="page-banner">
+        <div style="position:relative;z-index:1;">
+          <h2>Mis tareas 📝</h2>
+          <p>Grado 10°A · IE La Armonía · Período 1 — 2026</p>
+        </div>
+        <div class="banner-kpis">
+          <div class="bkpi"><div class="bkpi-val" id="kpi-pendientes">3</div><div class="bkpi-lbl">Pendientes</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="kpi-entregadas">5</div><div class="bkpi-lbl">Entregadas</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="kpi-vence-hoy">1</div><div class="bkpi-lbl">Vence hoy</div></div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-bar">
+        <button class="filtro-chip active" onclick="filtrar(this,'todas')">Todas</button>
+        <button class="filtro-chip" onclick="filtrar(this,'pendiente')">Pendientes</button>
+        <button class="filtro-chip" onclick="filtrar(this,'entregada')">Entregadas</button>
+        <button class="filtro-chip" onclick="filtrar(this,'matematicas')">Matemáticas</button>
+        <button class="filtro-chip" onclick="filtrar(this,'ciencias')">Ciencias</button>
+        <button class="filtro-chip" onclick="filtrar(this,'ingles')">Inglés</button>
+        <button class="filtro-chip" onclick="filtrar(this,'español')">Español</button>
+      </div>
+
+      <!-- Layout -->
+      <div class="tareas-layout">
+
+        <!-- Lista de tareas -->
+        <div id="lista-tareas"></div>
+
+        <!-- Panel lateral -->
+        <div>
+          <div class="panel-card">
+            <div class="flex-between mb-3">
+              <h3 style="margin:0;">Progreso período 1</h3>
+              <span class="badge badge-azul">P1</span>
+            </div>
+            <div class="progreso-materia">
+              <div class="prog-label"><span class="text-sm fw-600">Matemáticas</span><span class="text-sm" style="color:var(--mat-matematicas);font-weight:700;">2/3</span></div>
+              <div class="prog-wrap"><div class="prog-bar" style="width:66%;background:var(--mat-matematicas);"></div></div>
+            </div>
+            <div class="progreso-materia">
+              <div class="prog-label"><span class="text-sm fw-600">Ciencias</span><span class="text-sm" style="color:var(--mat-ciencias);font-weight:700;">1/2</span></div>
+              <div class="prog-wrap"><div class="prog-bar" style="width:50%;background:var(--mat-ciencias);"></div></div>
+            </div>
+            <div class="progreso-materia">
+              <div class="prog-label"><span class="text-sm fw-600">Inglés</span><span class="text-sm" style="color:var(--mat-ingles);font-weight:700;">1/2</span></div>
+              <div class="prog-wrap"><div class="prog-bar" style="width:50%;background:var(--mat-ingles);"></div></div>
+            </div>
+            <div class="progreso-materia">
+              <div class="prog-label"><span class="text-sm fw-600">Español</span><span class="text-sm" style="color:var(--mat-español);font-weight:700;">1/1</span></div>
+              <div class="prog-wrap"><div class="prog-bar" style="width:100%;background:var(--mat-español);"></div></div>
+            </div>
+            <div style="margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;">
+              <span class="text-sm text-muted">Total entregadas</span>
+              <span style="font-size:1.3rem;font-weight:800;color:#3b6de8;" id="total-prog">5 / 8</span>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="flex-between mb-2">
+              <h3 style="margin:0;">Próximas fechas</h3>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;" id="proximas-fechas"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal entregar tarea -->
+<div class="modal-overlay" id="modal-entregar">
+  <div class="modal-box">
+    <div class="modal-title">📤 Entregar tarea</div>
+    <div class="form-group">
+      <label class="form-label">Tarea</label>
+      <input type="text" class="form-input" id="modal-tarea-nombre" readonly style="background:var(--bg-app);">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Comentario (opcional)</label>
+      <textarea class="form-input" rows="3" placeholder="Agrega una nota para tu docente..." style="resize:none;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Adjuntar archivo</label>
+      <div class="file-zone" onclick="document.getElementById('file-input').click()">
+        <div style="font-size:2rem;margin-bottom:8px;">📎</div>
+        <div style="font-size:13px;font-weight:600;color:var(--txt-secundario);">Haz clic para seleccionar un archivo</div>
+        <div style="font-size:11px;color:var(--txt-muted);margin-top:4px;">PDF, DOC, DOCX, JPG, PNG — máx. 10 MB</div>
+        <input type="file" id="file-input" style="display:none;" accept=".pdf,.doc,.docx,.jpg,.png" onchange="mostrarArchivo(this)">
+      </div>
+      <div id="archivo-sel" style="display:none;margin-top:8px;padding:8px 12px;background:var(--bg-app);border-radius:var(--radio-md);font-size:12.5px;color:var(--txt-secundario);"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="border:1.5px solid var(--borde);background:none;padding:9px 20px;border-radius:var(--radio-md);cursor:pointer;" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarEntrega()">Entregar →</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/sidebar-estudiante.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+const TAREAS = [
+  {
+    id:1, materia:'matematicas', color:'var(--mat-matematicas)', icono:'➗',
+    nombre:'Ejercicios de trigonometría',
+    desc:'Resuelve los ejercicios 1 al 15 del capítulo 8 del libro de texto y presenta el procedimiento completo.',
+    docente:'Prof. Ramírez', vence:'Hoy', fecha:'25 mar', estado:'pendiente',
+    urgencia:'error', chips:['Obligatoria','Individual']
+  },
+  {
+    id:2, materia:'ciencias', color:'var(--mat-ciencias)', icono:'🔬',
+    nombre:'Informe práctica de laboratorio',
+    desc:'Redacta el informe de la práctica realizada el jueves incluyendo objetivo, materiales, procedimiento y conclusiones.',
+    docente:'Prof. Morales', vence:'2 días', fecha:'27 mar', estado:'pendiente',
+    urgencia:'alerta', chips:['Obligatoria','Grupal']
+  },
+  {
+    id:3, materia:'ingles', color:'var(--mat-ingles)', icono:'🌍',
+    nombre:'Reading comprehension — Unit 3',
+    desc:'Lee el texto "The Future of Technology" y responde las 10 preguntas de comprensión en inglés.',
+    docente:'Prof. Torres', vence:'5 días', fecha:'30 mar', estado:'pendiente',
+    urgencia:'verde', chips:['Obligatoria','Individual']
+  },
+  {
+    id:4, materia:'matematicas', color:'var(--mat-matematicas)', icono:'➗',
+    nombre:'Taller álgebra — Período 1',
+    desc:'Taller completo de álgebra del período 1. Todos los ejercicios con procedimiento.',
+    docente:'Prof. Ramírez', vence:'Entregada', fecha:'18 mar', estado:'entregada',
+    urgencia:'verde', chips:['Obligatoria','Individual'], nota:'4.2'
+  },
+  {
+    id:5, materia:'español', color:'var(--mat-español)', icono:'📖',
+    nombre:'Ensayo literario — El amor en los tiempos del cólera',
+    desc:'Ensayo de 3 páginas sobre los temas principales de la novela. Incluye introducción, desarrollo y conclusión.',
+    docente:'Prof. Vargas', vence:'Entregada', fecha:'15 mar', estado:'entregada',
+    urgencia:'verde', chips:['Obligatoria','Individual'], nota:'4.5'
+  },
+  {
+    id:6, materia:'ciencias', color:'var(--mat-ciencias)', icono:'🔬',
+    nombre:'Mapa conceptual — Ecosistemas',
+    desc:'Elabora un mapa conceptual digital o físico sobre los ecosistemas terrestres y acuáticos.',
+    docente:'Prof. Morales', vence:'Entregada', fecha:'10 mar', estado:'entregada',
+    urgencia:'verde', chips:['Optativa','Individual'], nota:'3.8'
+  },
+];
+
+let filtroActual = 'todas';
+
+function renderTareas() {
+  const lista = document.getElementById('lista-tareas');
+  const data = filtroActual === 'todas'
+    ? TAREAS
+    : TAREAS.filter(t => t.estado === filtroActual || t.materia === filtroActual);
+
+  if (!data.length) {
+    lista.innerHTML = `<div class="card" style="text-align:center;padding:2.5rem;color:var(--txt-muted);">
+      <div style="font-size:2.5rem;margin-bottom:10px;">📭</div>
+      <div style="font-size:14px;font-weight:600;">No hay tareas en esta categoría</div>
+    </div>`;
+    return;
+  }
+
+  lista.innerHTML = data.map(t => {
+    const urgBg    = t.urgencia==='error' ? '#fee2e2' : t.urgencia==='alerta' ? '#fef3c7' : '#dcfce7';
+    const urgColor = t.urgencia==='error' ? '#dc2626' : t.urgencia==='alerta' ? '#d97706' : '#16a34a';
+    const entregada = t.estado === 'entregada';
+    return `<div class="tarea-card${entregada?' entregada':''}">
+      <div class="tarea-barra" style="background:${t.color};"></div>
+      <div style="flex:1;">
+        <div class="tarea-nombre">${t.icono} ${t.nombre}</div>
+        <div class="tarea-desc">${t.desc}</div>
+        <div class="tarea-chips">
+          ${t.chips.map(c => `<span class="tarea-chip" style="background:${t.color}18;color:${t.color};">${c}</span>`).join('')}
+          ${entregada && t.nota ? `<span class="tarea-chip" style="background:#dcfce7;color:#16a34a;">✅ Nota: ${t.nota}</span>` : ''}
+        </div>
+        <div class="tarea-footer">
+          <span class="tarea-docente">📚 ${t.materia.charAt(0).toUpperCase()+t.materia.slice(1)} · ${t.docente}</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="tarea-vence" style="color:${urgColor};">⏰ ${t.vence}</span>
+            <span style="font-size:11px;color:var(--txt-muted);">${t.fecha}</span>
+            ${!entregada
+              ? `<button class="btn-entregar" style="background:#eef2fd;color:#3b6de8;" onclick="abrirModal(${t.id})">Entregar →</button>`
+              : `<span style="font-size:12px;font-weight:700;color:#16a34a;">✅ Entregada</span>`
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filtrar(btn, tipo) {
+  filtroActual = tipo;
+  document.querySelectorAll('.filtro-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTareas();
+}
+
+// Próximas fechas
+const proximas = TAREAS.filter(t => t.estado === 'pendiente');
+document.getElementById('proximas-fechas').innerHTML = proximas.map(t => {
+  const urgColor = t.urgencia==='error' ? '#dc2626' : t.urgencia==='alerta' ? '#d97706' : '#16a34a';
+  return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borde);">
+    <div style="width:8px;height:8px;border-radius:50%;background:${t.color};flex-shrink:0;"></div>
+    <div style="flex:1;">
+      <div style="font-size:12.5px;font-weight:600;color:var(--txt-primario);">${t.nombre}</div>
+      <div style="font-size:11px;color:var(--txt-muted);">${t.materia.charAt(0).toUpperCase()+t.materia.slice(1)}</div>
+    </div>
+    <span style="font-size:11.5px;font-weight:700;color:${urgColor};">${t.vence}</span>
+  </div>`;
+}).join('');
+
+// Modal
+let tareaActualId = null;
+function abrirModal(id) {
+  const t = TAREAS.find(x => x.id === id);
+  tareaActualId = id;
+  document.getElementById('modal-tarea-nombre').value = t.nombre;
+  document.getElementById('archivo-sel').style.display = 'none';
+  document.getElementById('file-input').value = '';
+  document.getElementById('modal-entregar').classList.add('open');
+}
+function cerrarModal() {
+  document.getElementById('modal-entregar').classList.remove('open');
+}
+function mostrarArchivo(input) {
+  const el = document.getElementById('archivo-sel');
+  if (input.files[0]) {
+    el.style.display = 'block';
+    el.textContent = '📎 ' + input.files[0].name;
+  }
+}
+function confirmarEntrega() {
+  const t = TAREAS.find(x => x.id === tareaActualId);
+  if (t) { t.estado = 'entregada'; t.vence = 'Entregada'; t.nota = '—'; }
+  cerrarModal();
+  renderTareas();
+  actualizarKPIs();
+}
+function actualizarKPIs() {
+  document.getElementById('kpi-pendientes').textContent = TAREAS.filter(t => t.estado==='pendiente').length;
+  document.getElementById('kpi-entregadas').textContent = TAREAS.filter(t => t.estado==='entregada').length;
+  document.getElementById('total-prog').textContent = `${TAREAS.filter(t=>t.estado==='entregada').length} / ${TAREAS.length}`;
+}
+document.getElementById('modal-entregar').addEventListener('click', function(e){
+  if (e.target === this) cerrarModal();
+});
+
+renderTareas();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+});
+</script>
+</body>
+</html>

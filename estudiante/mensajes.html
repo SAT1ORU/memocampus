@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mensajes — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:0; flex:1; display:flex; flex-direction:column; }
+
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    /* Mensajes layout tipo chat */
+    .msg-layout { display:grid; grid-template-columns:300px 1fr; flex:1; height:calc(100vh - 64px); }
+
+    /* Lista de conversaciones */
+    .conv-panel { border-right:1px solid var(--borde); background:var(--bg-card); display:flex; flex-direction:column; overflow:hidden; }
+    .conv-search { padding:1rem; border-bottom:1px solid var(--borde); }
+    .conv-search input { width:100%; padding:9px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-size:13px; font-family:var(--font-ui); background:var(--bg-app); color:var(--txt-primario); outline:none; transition:var(--trans); box-sizing:border-box; }
+    .conv-search input:focus { border-color:#3b6de8; background:#fff; }
+    .conv-lista { flex:1; overflow-y:auto; }
+    .conv-item { display:flex; gap:11px; padding:13px 14px; border-bottom:1px solid var(--borde); cursor:pointer; transition:var(--trans); align-items:flex-start; }
+    .conv-item:hover { background:var(--bg-app); }
+    .conv-item.activa { background:#eef2fd; border-left:3px solid #3b6de8; padding-left:11px; }
+    .conv-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; color:#fff; flex-shrink:0; }
+    .conv-nombre { font-size:13.5px; font-weight:700; color:var(--txt-primario); margin-bottom:2px; }
+    .conv-preview { font-size:12px; color:var(--txt-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:170px; }
+    .conv-meta { margin-left:auto; text-align:right; flex-shrink:0; }
+    .conv-hora { font-size:10.5px; color:var(--txt-muted); margin-bottom:4px; }
+    .conv-badge { background:#3b6de8; color:#fff; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; margin-left:auto; }
+    .conv-nuevo { font-weight:800; }
+    .conv-nuevo .conv-nombre { color:#3b6de8; }
+
+    /* Panel de chat */
+    .chat-panel { display:flex; flex-direction:column; background:var(--bg-app); }
+    .chat-header { padding:1rem 1.5rem; background:var(--bg-card); border-bottom:1px solid var(--borde); display:flex; align-items:center; gap:12px; }
+    .chat-header-nombre { font-size:15px; font-weight:700; color:var(--txt-primario); }
+    .chat-header-rol    { font-size:12px; color:var(--txt-muted); }
+    .chat-mensajes { flex:1; overflow-y:auto; padding:1.25rem 1.5rem; display:flex; flex-direction:column; gap:12px; }
+    .burbuja-wrap { display:flex; gap:9px; align-items:flex-end; }
+    .burbuja-wrap.mia { flex-direction:row-reverse; }
+    .burbuja-avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:#fff; flex-shrink:0; }
+    .burbuja { max-width:65%; padding:10px 14px; border-radius:16px; font-size:13.5px; line-height:1.5; position:relative; }
+    .burbuja.ellos { background:#fff; color:var(--txt-primario); border-bottom-left-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,.07); }
+    .burbuja.mia   { background:#3b6de8; color:#fff; border-bottom-right-radius:4px; }
+    .burbuja-hora  { font-size:10px; margin-top:4px; opacity:.6; text-align:right; }
+    .chat-input-bar { padding:1rem 1.5rem; background:var(--bg-card); border-top:1px solid var(--borde); display:flex; gap:10px; align-items:flex-end; }
+    .chat-input { flex:1; padding:10px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-size:13.5px; font-family:var(--font-ui); resize:none; outline:none; background:var(--bg-app); transition:var(--trans); max-height:120px; color:var(--txt-primario); }
+    .chat-input:focus { border-color:#3b6de8; background:#fff; }
+    .btn-send { width:42px; height:42px; border-radius:var(--radio-md); background:#3b6de8; border:none; color:#fff; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:var(--trans); flex-shrink:0; }
+    .btn-send:hover { background:#2454c7; }
+
+    /* Estado vacío */
+    .chat-vacio { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--txt-muted); gap:10px; }
+    .chat-vacio-ico { font-size:3.5rem; opacity:.4; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title">Mensajes</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="abrirNuevoMensaje()">+ Nuevo mensaje</button>
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <div class="msg-layout">
+
+        <!-- Lista conversaciones -->
+        <div class="conv-panel">
+          <div class="conv-search">
+            <input type="text" placeholder="🔍  Buscar conversación..." id="buscar-conv" oninput="buscarConv(this.value)">
+          </div>
+          <div class="conv-lista" id="conv-lista"></div>
+        </div>
+
+        <!-- Panel chat -->
+        <div class="chat-panel" id="chat-panel">
+          <div class="chat-vacio">
+            <div class="chat-vacio-ico">💬</div>
+            <div style="font-size:15px;font-weight:700;color:var(--txt-secundario);">Selecciona una conversación</div>
+            <div style="font-size:13px;">o inicia un nuevo mensaje con un docente</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal nuevo mensaje -->
+<div style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:500;align-items:center;justify-content:center;" id="modal-nuevo" onclick="if(event.target===this)cerrarNuevo()">
+  <div style="background:var(--bg-card);border-radius:var(--radio-xl);padding:2rem;width:100%;max-width:430px;box-shadow:var(--sombra-lg);">
+    <div style="font-size:1.1rem;font-weight:700;margin-bottom:1.25rem;color:var(--txt-primario);">✉️ Nuevo mensaje</div>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt-secundario);margin-bottom:6px;">Para</label>
+      <select id="dest-select" style="width:100%;padding:10px 14px;border:1.5px solid var(--borde);border-radius:var(--radio-md);font-size:13.5px;font-family:var(--font-ui);background:var(--bg-app);color:var(--txt-primario);outline:none;box-sizing:border-box;">
+        <option value="">Selecciona un destinatario...</option>
+        <option value="ramirez">Prof. Ramírez — Matemáticas</option>
+        <option value="morales">Prof. Morales — Ciencias Naturales</option>
+        <option value="torres">Prof. Torres — Inglés</option>
+        <option value="vargas">Prof. Vargas — Español</option>
+        <option value="coordinacion">Coordinación Académica</option>
+      </select>
+    </div>
+    <div style="margin-bottom:1rem;">
+      <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt-secundario);margin-bottom:6px;">Asunto</label>
+      <input type="text" id="nuevo-asunto" placeholder="Escribe el asunto..." style="width:100%;padding:10px 14px;border:1.5px solid var(--borde);border-radius:var(--radio-md);font-size:13.5px;font-family:var(--font-ui);background:var(--bg-app);color:var(--txt-primario);outline:none;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:1.25rem;">
+      <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--txt-secundario);margin-bottom:6px;">Mensaje</label>
+      <textarea id="nuevo-msg" rows="4" placeholder="Escribe tu mensaje..." style="width:100%;padding:10px 14px;border:1.5px solid var(--borde);border-radius:var(--radio-md);font-size:13.5px;font-family:var(--font-ui);resize:none;background:var(--bg-app);color:var(--txt-primario);outline:none;box-sizing:border-box;"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button style="padding:9px 20px;border-radius:var(--radio-md);border:1.5px solid var(--borde);background:none;cursor:pointer;font-family:var(--font-ui);" onclick="cerrarNuevo()">Cancelar</button>
+      <button class="btn btn-primary" onclick="enviarNuevo()">Enviar →</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/sidebar-estudiante.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+const CONTACTOS = {
+  ramirez:      { nombre:'Prof. Ramírez',        rol:'Matemáticas',        color:'var(--mat-matematicas)', ini:'PR' },
+  morales:      { nombre:'Prof. Morales',         rol:'Ciencias Naturales', color:'var(--mat-ciencias)',    ini:'PM' },
+  torres:       { nombre:'Prof. Torres',          rol:'Inglés',             color:'var(--mat-ingles)',      ini:'PT' },
+  vargas:       { nombre:'Prof. Vargas',          rol:'Español',            color:'var(--mat-español)',     ini:'PV' },
+  coordinacion: { nombre:'Coordinación Académica',rol:'IE La Armonía',      color:'#7c3aed',               ini:'CA' },
+};
+
+let CONVS = [
+  {
+    id:'ramirez', nuevo:true, hora:'10:32 am',
+    mensajes:[
+      { de:'ramirez', texto:'Buenos días Valentina. Recuerda que la tarea de trigonometría debe entregarse hoy antes de las 11:59 pm.', hora:'10:28 am' },
+      { de:'yo',      texto:'Buenas, Prof. Ramírez. Sí, la tengo casi lista. ¿La subo desde el módulo de tareas?', hora:'10:30 am' },
+      { de:'ramirez', texto:'Exacto, desde el módulo de tareas. Cualquier duda me avisas.', hora:'10:32 am' },
+    ]
+  },
+  {
+    id:'morales', nuevo:false, hora:'Ayer',
+    mensajes:[
+      { de:'morales', texto:'Hola Valentina, el informe del laboratorio es en grupos de 3. ¿Ya tienes equipo?', hora:'9:15 am' },
+      { de:'yo',      texto:'Hola Prof. Morales. Sí, voy con Camila y Sofía.', hora:'9:20 am' },
+      { de:'morales', texto:'Perfecto. Recuerden incluir la tabla de datos y las conclusiones.', hora:'9:22 am' },
+    ]
+  },
+  {
+    id:'coordinacion', nuevo:true, hora:'24 mar',
+    mensajes:[
+      { de:'coordinacion', texto:'Estimada Valentina, te informamos que la semana de recuperación del Período 1 inicia el 7 de abril. Comunica a tus padres. Atentamente, Coordinación.', hora:'24 mar' },
+    ]
+  },
+];
+
+let convActiva = null;
+
+function renderConvLista(filtro='') {
+  const lista = document.getElementById('conv-lista');
+  const data = filtro
+    ? CONVS.filter(c => CONTACTOS[c.id].nombre.toLowerCase().includes(filtro.toLowerCase()))
+    : CONVS;
+  lista.innerHTML = data.map(c => {
+    const ct = CONTACTOS[c.id];
+    const ultimo = c.mensajes[c.mensajes.length-1];
+    return `<div class="conv-item${c.id===convActiva?' activa':''}${c.nuevo?' conv-nuevo':''}" onclick="abrirConv('${c.id}')">
+      <div class="conv-avatar" style="background:${ct.color};">${ct.ini}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="conv-nombre">${ct.nombre}</div>
+        <div class="conv-preview">${ultimo.texto}</div>
+      </div>
+      <div class="conv-meta">
+        <div class="conv-hora">${c.hora}</div>
+        ${c.nuevo ? '<div class="conv-badge">1</div>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function abrirConv(id) {
+  convActiva = id;
+  const conv = CONVS.find(c => c.id===id);
+  conv.nuevo = false;
+  renderConvLista();
+  const ct = CONTACTOS[id];
+  const panel = document.getElementById('chat-panel');
+  panel.innerHTML = `
+    <div class="chat-header">
+      <div class="conv-avatar" style="background:${ct.color};width:40px;height:40px;font-size:14px;">${ct.ini}</div>
+      <div>
+        <div class="chat-header-nombre">${ct.nombre}</div>
+        <div class="chat-header-rol">${ct.rol}</div>
+      </div>
+    </div>
+    <div class="chat-mensajes" id="chat-mensajes">
+      ${conv.mensajes.map(m => burbujaHTML(m, ct)).join('')}
+    </div>
+    <div class="chat-input-bar">
+      <textarea class="chat-input" id="chat-input" rows="1" placeholder="Escribe un mensaje..." 
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensaje();}"></textarea>
+      <button class="btn-send" onclick="enviarMensaje()">&#10148;</button>
+    </div>`;
+  scrollChat();
+}
+
+function burbujaHTML(m, ct) {
+  const mia = m.de === 'yo';
+  const avatarColor = mia ? '#3b6de8' : ct.color;
+  const avatarIni   = mia ? 'VG' : ct.ini;
+  return `<div class="burbuja-wrap${mia?' mia':''}">
+    <div class="burbuja-avatar" style="background:${avatarColor};">${avatarIni}</div>
+    <div>
+      <div class="burbuja${mia?' mia':' ellos'}">${m.texto}
+        <div class="burbuja-hora">${m.hora}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function enviarMensaje() {
+  const input = document.getElementById('chat-input');
+  const texto = input.value.trim();
+  if (!texto) return;
+  const conv = CONVS.find(c => c.id===convActiva);
+  const ct   = CONTACTOS[convActiva];
+  const ahora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  conv.mensajes.push({ de:'yo', texto, hora: ahora });
+  input.value = '';
+  const contenedor = document.getElementById('chat-mensajes');
+  contenedor.insertAdjacentHTML('beforeend', burbujaHTML({de:'yo',texto,hora:ahora}, ct));
+  scrollChat();
+}
+
+function scrollChat() {
+  const el = document.getElementById('chat-mensajes');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function buscarConv(val) { renderConvLista(val); }
+
+function abrirNuevoMensaje() {
+  document.getElementById('modal-nuevo').style.display = 'flex';
+}
+function cerrarNuevo() {
+  document.getElementById('modal-nuevo').style.display = 'none';
+}
+function enviarNuevo() {
+  const dest   = document.getElementById('dest-select').value;
+  const asunto = document.getElementById('nuevo-asunto').value.trim();
+  const texto  = document.getElementById('nuevo-msg').value.trim();
+  if (!dest || !texto) return;
+  const existe = CONVS.find(c => c.id===dest);
+  const ahora  = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  if (existe) {
+    existe.mensajes.push({de:'yo', texto:`[${asunto}] ${texto}`, hora:ahora});
+  } else {
+    CONVS.unshift({id:dest, nuevo:false, hora:ahora, mensajes:[{de:'yo', texto:`[${asunto}] ${texto}`, hora:ahora}]});
+  }
+  cerrarNuevo();
+  renderConvLista();
+  abrirConv(dest);
+}
+
+renderConvLista();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+});
+</script>
+</body>
+</html>

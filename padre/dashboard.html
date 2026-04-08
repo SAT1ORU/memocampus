@@ -1,0 +1,497 @@
+'''<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Dashboard — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <style>
+    /* === Hijo card === */
+    .hijo-card {
+      background: var(--bg-card); border: 1px solid var(--borde);
+      border-radius: var(--radio-lg); overflow: hidden;
+      transition: var(--trans); cursor: pointer;
+    }
+    .hijo-card:hover { transform: translateY(-3px); box-shadow: var(--sombra-md); }
+    .hijo-header { height: 8px; }
+    .hijo-body { padding: 1.1rem 1.25rem; }
+    .hijo-avatar-wrap {
+      width: 44px; height: 44px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 8px;
+    }
+    .hijo-nombre { font-size: 14px; font-weight: 700; color: var(--txt-primario); margin-bottom: 2px; }
+    .hijo-grado  { font-size: 12px; color: var(--txt-muted); margin-bottom: 10px; }
+    .hijo-nota   { display: flex; justify-content: space-between; align-items: center; }
+    .nota-num    { font-size: 1.3rem; font-weight: 800; }
+    .nota-label  { font-size: 10px; color: var(--txt-muted); text-align: right; }
+
+    /* === Tarea item === */
+    .tarea-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 12px 0; border-bottom: 1px solid var(--borde);
+    }
+    .tarea-item:last-child { border-bottom: none; }
+    .tarea-color { width: 4px; border-radius: 2px; flex-shrink: 0; align-self: stretch; min-height: 40px; }
+    .tarea-nombre { font-size: 14px; font-weight: 600; color: var(--txt-primario); margin-bottom: 3px; }
+    .tarea-meta   { font-size: 12px; color: var(--txt-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+    .tarea-fecha  { margin-left: auto; text-align: right; flex-shrink: 0; }
+    .tarea-fecha .dias      { font-size: 11px; font-weight: 700; }
+    .tarea-fecha .fecha-str { font-size: 10px; color: var(--txt-muted); }
+
+    /* === Comunicado item === */
+    .comunicado-item {
+      display: flex; gap: 12px; padding: 12px 0;
+      border-bottom: 1px solid var(--borde);
+    }
+    .comunicado-item:last-child { border-bottom: none; }
+    .com-ico { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .com-titulo { font-size: 13.5px; font-weight: 600; color: var(--txt-primario); margin-bottom: 2px; }
+    .com-fecha  { font-size: 11px; color: var(--txt-muted); }
+
+    /* === Welcome banner === */
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--color-padre) 0%, #5b21b6 100%);
+      border-radius: var(--radio-xl); padding: 1.75rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; margin-bottom: 1.75rem; overflow: hidden; position: relative;
+    }
+    .welcome-banner::before {
+      content: ''; position: absolute; right: -20px; top: -20px;
+      width: 160px; height: 160px; border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .welcome-banner h2 { color: #000000; font-size: 1.3rem; margin-bottom: 4px; }
+    .welcome-banner p  { color: rgba(0, 0, 0, 0.75); font-size: 13px; font-weight: 300; }
+    .welcome-deco { font-size: 3.5rem; opacity: 0.25; flex-shrink: 0; }
+
+    /* === Layout forzado === */
+    .app-layout { display: flex !important; min-height: 100vh !important; background: #f4f6fa !important; }
+    .app-sidebar {
+      width: 240px !important; min-width: 240px !important;
+      background: #0f1923 !important; position: fixed !important;
+      top: 0 !important; left: 0 !important; height: 100vh !important;
+      overflow-y: auto !important; z-index: 100 !important;
+      display: flex !important; flex-direction: column !important;
+    }
+    .app-main { margin-left: 240px !important; flex: 1 !important; min-height: 100vh !important; display: flex !important; flex-direction: column !important; }
+    .app-topbar {
+      height: 64px !important; background: #ffffff !important;
+      border-bottom: 1px solid #e8ecf2 !important;
+      display: flex !important; align-items: center !important;
+      justify-content: space-between !important; padding: 0 1.75rem !important;
+      position: sticky !important; top: 0 !important; z-index: 50 !important;
+    }
+    .app-content { padding: 2rem 1.75rem !important; flex: 1 !important; }
+    .sidebar-logo { padding: 1.25rem !important; display: flex !important; align-items: center !important; gap: 10px !important; border-bottom: 1px solid rgba(255,255,255,0.07) !important; }
+    .sidebar-logo-mark { width: 36px !important; height: 36px !important; border-radius: 10px !important; background: var(--color-padre) !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 900 !important; font-size: 16px !important; color: #fff !important; flex-shrink: 0 !important; }
+    .sidebar-logo-name { font-size: 14px !important; font-weight: 700 !important; color: #fff !important; }
+    .sidebar-logo-sub  { font-size: 10px !important; color: rgba(255,255,255,0.4) !important; }
+    .sidebar-nav a { display: flex !important; align-items: center !important; gap: 11px !important; padding: 10px 1.25rem !important; color: rgba(255,255,255,0.75) !important; font-size: 13.5px !important; transition: all 0.2s !important; }
+    .sidebar-nav a:hover { background: rgba(255,255,255,0.07) !important; color: #fff !important; }
+    .sidebar-nav a.activo { background: rgba(255,255,255,0.13) !important; color: #fff !important; }
+    .sidebar-section-title { font-size: 10px !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 1.5px !important; color: rgba(255,255,255,0.3) !important; padding: 1rem 1.25rem 0.4rem !important; }
+    .sidebar-user { margin-top: auto !important; border-top: 1px solid rgba(255,255,255,0.07) !important; padding: 1rem 1.25rem !important; display: flex !important; align-items: center !important; gap: 10px !important; }
+    .sidebar-user-name { font-size: 13px !important; font-weight: 500 !important; color: #fff !important; }
+    .sidebar-user-rol  { font-size: 11px !important; color: rgba(255,255,255,0.4) !important; }
+
+    /* === Logout btn === */
+    .btn-logout-side {
+      margin-left: auto; background: none; border: none;
+      color: rgba(255,255,255,0.35); font-size: 18px;
+      cursor: pointer; transition: all 0.2s; padding: 4px;
+      border-radius: 6px; line-height: 1;
+    }
+    .btn-logout-side:hover { color: var(--error); background: rgba(220,38,38,0.12); }
+
+    /* === Btn alertas === */
+    .notif-wrapper {
+  position: relative;
+}
+.notif-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 300px;
+  background: var(--bg-card);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-lg);
+  box-shadow: var(--sombra-lg);
+  z-index: 200;
+  overflow: hidden;
+}
+.notif-dropdown.open { display: block; }
+
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borde);
+}
+.notif-list { max-height: 280px; overflow-y: auto; }
+.notif-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--borde);
+  transition: var(--trans);
+  cursor: pointer;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--bg-app); }
+.notif-unread { background: #f8f9ff; }
+.notif-ico {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.notif-titulo {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--txt-primario);
+  margin-bottom: 2px;
+}
+.notif-fecha {
+  font-size: 11px;
+  color: var(--txt-muted);
+}
+.notif-footer {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-padre);
+  border-top: 1px solid var(--borde);
+  transition: var(--trans);
+}
+.notif-footer:hover { background: var(--bg-app); }
+  </style>
+</head>
+    /* === Btn alertas === */
+    <script>
+  function toggleNotif() {
+    const dropdown = document.getElementById('notifDropdown');
+    const dot = document.getElementById('notifDot');
+    dropdown.classList.toggle('open');
+    // Quitar punto rojo al abrir
+    if (dropdown.classList.contains('open')) {
+      dot.style.display = 'none';
+    }
+  }
+
+  // Cerrar dropdown al hacer click fuera
+  document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('notifWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      document.getElementById('notifDropdown').classList.remove('open');
+    }
+  });
+</script>
+
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+<aside class="app-sidebar" id="sidebar"></aside>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <!-- TOPBAR -->
+<header class="app-topbar">
+  <div class="topbar-left">
+    <button class="hamburger-btn" onclick="toggleSidebar()">☰</button>
+    <span class="topbar-title">Mi inicio</span>
+  </div>
+  <div class="topbar-right">
+
+    <!-- Botón notificaciones con dropdown -->
+    <div class="notif-wrapper" id="notifWrapper">
+      <button class="topbar-btn" id="notifBtn" onclick="toggleNotif()">
+        🔔
+        <div class="topbar-notif-dot" id="notifDot"></div>
+      </button>
+
+      <!-- Dropdown -->
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="notif-header">
+          <span class="fw-700">Notificaciones</span>
+          <span class="text-xs text-muted" id="notifCount">2 nuevas</span>
+        </div>
+        <div class="notif-list">
+          <div class="notif-item notif-unread">
+            <div class="notif-ico" style="background:var(--error-suave);">⚠️</div>
+            <div>
+              <div class="notif-titulo">Tarea vencida — Andrés</div>
+              <div class="notif-fecha">Matemáticas · Hoy</div>
+            </div>
+          </div>
+          <div class="notif-item notif-unread">
+            <div class="notif-ico" style="background:var(--alerta-suave);">📅</div>
+            <div>
+              <div class="notif-titulo">Inasistencia registrada</div>
+              <div class="notif-fecha">Andrés · 22 mar</div>
+            </div>
+          </div>
+          <div class="notif-item">
+            <div class="notif-ico" style="background:var(--verde-suave);">📢</div>
+            <div>
+              <div class="notif-titulo">Semana de recuperación</div>
+              <div class="notif-fecha">Coordinación · 24 mar</div>
+            </div>
+          </div>
+        </div>
+        <a href="alertas.html" class="notif-footer">Ver todas las alertas →</a>
+      </div>
+    </div>
+
+    <!-- Avatar (sin botón Salir) -->
+    <div class="topbar-avatar av-padre" data-user-avatar>CP</div>
+
+  </div>
+</header>
+
+    <!-- CONTENIDO -->
+    <div class="app-content">
+
+      <!-- Banner bienvenida -->
+      <div class="welcome-banner">
+        <div>
+          <h2>¡Bienvenido, <span data-user-name>Carlos</span>! 👋</h2>
+          <p>Portal de familias · IE La Armonía · Período 1 — 2026</p>
+        </div>
+        <div class="welcome-deco">👨‍👧‍👦</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--color-estudiante-suave);">👧</div>
+          <div>
+            <div class="stat-label">Hijos registrados</div>
+            <div class="stat-value">2</div>
+            <div class="stat-sub">Activos este año</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7;">✅</div>
+          <div>
+            <div class="stat-label">Tareas pendientes</div>
+            <div class="stat-value" style="color:var(--alerta);">5</div>
+            <div class="stat-sub">Entre los 2 hijos</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
+          <div>
+            <div class="stat-label">Promedio Valentina</div>
+            <div class="stat-value" style="color:var(--verde);">4.1</div>
+            <div class="stat-sub">Período 1</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--error-suave);">🔔</div>
+          <div>
+            <div class="stat-label">Alertas nuevas</div>
+            <div class="stat-value" style="color:var(--error);">2</div>
+            <div class="stat-sub">Sin leer</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hijos + Tareas -->
+      <div class="grid-2 mb-3" style="grid-template-columns: 1.4fr 1fr;">
+
+        <!-- Mis hijos -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Mis hijos</h3>
+            <a href="notas.html" class="btn btn-ghost btn-sm">Ver notas →</a>
+          </div>
+          <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap:10px;">
+
+            <div class="hijo-card" onclick="window.location.href='notas.html'">
+              <div class="hijo-header" style="background:var(--color-estudiante);"></div>
+              <div class="hijo-body">
+                <div class="hijo-avatar-wrap" style="background:var(--color-estudiante);">VG</div>
+                <div class="hijo-nombre">Valentina Gómez</div>
+                <div class="hijo-grado">Grado 10°A</div>
+                <div class="hijo-nota">
+                  <span class="nota-num" style="color:var(--color-estudiante);">4.1</span>
+                  <div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hijo-card" onclick="window.location.href='notas.html'">
+              <div class="hijo-header" style="background:#0891b2;"></div>
+              <div class="hijo-body">
+                <div class="hijo-avatar-wrap" style="background:#0891b2;">AG</div>
+                <div class="hijo-nombre">Andrés Gómez</div>
+                <div class="hijo-grado">Grado 7°B</div>
+                <div class="hijo-nota">
+                  <span class="nota-num" style="color:#0891b2;">3.6</span>
+                  <div class="nota-label">Período 1<br><span class="badge badge-alerta" style="font-size:9px;">Básico</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Asistencia -->
+          <div style="margin-top:1rem; display:flex; flex-direction:column; gap:10px;">
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Asistencia Valentina</span><span class="text-sm" style="color:var(--verde); font-weight:700;">94%</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:94%; background:var(--verde);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Asistencia Andrés</span><span class="text-sm" style="color:var(--alerta); font-weight:700;">88%</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:88%; background:var(--alerta);"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tareas pendientes -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Tareas pendientes</h3>
+            <a href="alertas.html" class="btn btn-ghost btn-sm">Ver alertas →</a>
+          </div>
+          <div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:var(--color-estudiante);"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Ejercicios de trigonometría</div>
+                <div class="tarea-meta"><span>Valentina</span><span>Matemáticas</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--error);">Hoy</div>
+                <div class="fecha-str">25 mar</div>
+              </div>
+            </div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:var(--color-estudiante);"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Informe práctica laboratorio</div>
+                <div class="tarea-meta"><span>Valentina</span><span>Ciencias</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--alerta);">2 días</div>
+                <div class="fecha-str">27 mar</div>
+              </div>
+            </div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:#0891b2;"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Taller de fracciones</div>
+                <div class="tarea-meta"><span>Andrés</span><span>Matemáticas</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--error);">Vencida</div>
+                <div class="fecha-str">20 mar</div>
+              </div>
+            </div>
+            <div class="tarea-item">
+              <div class="tarea-color" style="background:#0891b2;"></div>
+              <div style="flex:1;">
+                <div class="tarea-nombre">Mapa conceptual historia</div>
+                <div class="tarea-meta"><span>Andrés</span><span>Sociales</span></div>
+              </div>
+              <div class="tarea-fecha">
+                <div class="dias" style="color:var(--verde);">4 días</div>
+                <div class="fecha-str">29 mar</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notas Valentina + Comunicados -->
+      <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
+
+        <!-- Notas -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Notas Valentina — P1</h3>
+            <a href="notas.html" class="btn btn-ghost btn-sm">Ver boletín →</a>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Matemáticas</span><span class="text-sm" style="color:var(--color-estudiante); font-weight:700;">4.2</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:84%; background:var(--color-estudiante);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Ciencias Naturales</span><span class="text-sm" style="color:#059669; font-weight:700;">4.5</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:90%; background:#059669;"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Inglés</span><span class="text-sm" style="color:var(--alerta); font-weight:700;">3.8</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:76%; background:var(--alerta);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Español</span><span class="text-sm" style="color:#7c3aed; font-weight:700;">4.0</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:80%; background:#7c3aed;"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Sociales</span><span class="text-sm" style="color:#0891b2; font-weight:700;">4.3</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:86%; background:#0891b2;"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
+            <span class="text-sm text-muted">Promedio general</span>
+            <span style="font-size:1.4rem; font-weight:800; color:var(--color-padre);">4.1</span>
+          </div>
+        </div>
+
+        <!-- Comunicados -->
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Comunicados</h3>
+            <span class="badge badge-morado">2 nuevos</span>
+          </div>
+          <div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--error-suave);">⚠️</div>
+              <div>
+                <div class="com-titulo">Andrés: tarea vencida en Matemáticas</div>
+                <div class="com-fecha">Sistema · 25 mar 2026</div>
+              </div>
+            </div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--alerta-suave);">📅</div>
+              <div>
+                <div class="com-titulo">Inasistencia registrada — Andrés</div>
+                <div class="com-fecha">Coordinación · 22 mar 2026</div>
+              </div>
+            </div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--verde-suave);">📢</div>
+              <div>
+                <div class="com-titulo">Semana de recuperación — Período 1</div>
+                <div class="com-fecha">Coordinación Académica · 24 mar 2026</div>
+              </div>
+            </div>
+            <div class="comunicado-item">
+              <div class="com-ico" style="background:var(--color-estudiante-suave);">🎉</div>
+              <div>
+                <div class="com-titulo">Feria de Ciencias — Inscripciones</div>
+                <div class="com-fecha">Rectoría · 20 mar 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /app-content -->
+  </main>
+</div>
+<script src="../assets/js/comunicados.js"></script>
+<script src="../assets/js/sidebar-padre.js"></script>
+<script src="../assets/js/auth.js"></script>
+</body>
+</html>'''
+

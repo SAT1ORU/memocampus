@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comunicados — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    /* === Layout === */
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    /* === Filtros === */
+    .filtros-bar {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .filtro-btn {
+      padding: 7px 16px; border-radius: var(--radio-full);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      border: 1.5px solid var(--borde); background: var(--bg-card);
+      color: var(--txt-secundario); transition: var(--trans);
+    }
+    .filtro-btn:hover { border-color: var(--color-padre); color: var(--color-padre); }
+    .filtro-btn.activo { background: var(--color-padre); color: #fff; border-color: var(--color-padre); }
+    .filtro-btn.urgente.activo   { background: var(--error);  border-color: var(--error); }
+    .filtro-btn.informativo.activo { background: var(--verde); border-color: var(--verde); }
+    .filtro-btn.academico.activo { background: var(--color-estudiante); border-color: var(--color-estudiante); }
+
+    /* === Cards de comunicados === */
+    .comunicado-card {
+      display: flex; gap: 14px;
+      background: var(--bg-card); border: 1px solid var(--borde);
+      border-radius: var(--radio-lg); padding: 1.1rem 1.25rem;
+      margin-bottom: 10px; cursor: pointer;
+      transition: var(--trans);
+    }
+    .comunicado-card:hover { box-shadow: var(--sombra-md); transform: translateY(-1px); }
+    .comunicado-card.no-leido { border-left: 4px solid var(--color-padre); }
+
+    .com-card-left  { flex-shrink: 0; }
+    .com-card-ico   { width: 42px; height: 42px; border-radius: 12px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+    .com-card-body  { flex: 1; min-width: 0; }
+    .com-card-top   { display:flex; align-items:center; gap:8px; margin-bottom:5px; flex-wrap:wrap; }
+    .com-card-fecha { margin-left:auto; font-size:11px; color:var(--txt-muted); }
+    .com-card-titulo { font-size:14.5px; font-weight:700; color:var(--txt-primario); margin-bottom:3px; }
+    .com-card-emisor { font-size:12px; color:var(--txt-muted); margin-bottom:4px; }
+    .com-card-preview { font-size:12.5px; color:var(--txt-secundario); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .com-nuevo-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--color-padre); flex-shrink: 0;
+    }
+
+    /* === Modal === */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(15,23,42,0.45); z-index: 500;
+      align-items: center; justify-content: center; padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg-card); border-radius: var(--radio-xl);
+      width: 100%; max-width: 540px;
+      box-shadow: var(--sombra-lg); overflow: hidden;
+      animation: modalIn 0.2s ease;
+    }
+    @keyframes modalIn { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+    .modal-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--borde);
+    }
+    .modal-ico { width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+    .modal-meta { flex:1; }
+    .modal-titulo { font-size:16px; font-weight:800; color:var(--txt-primario); margin-bottom:4px; }
+    .modal-sub { font-size:12px; color:var(--txt-muted); }
+    .modal-close { background:none; border:none; font-size:20px; cursor:pointer; color:var(--txt-muted); padding:4px; border-radius:6px; transition:var(--trans); }
+    .modal-close:hover { background:var(--bg-app); color:var(--txt-primario); }
+    .modal-body { padding:1.5rem; font-size:14px; color:var(--txt-secundario); line-height:1.7; }
+    .modal-footer { padding:1rem 1.5rem; border-top:1px solid var(--borde); display:flex; justify-content:flex-end; }
+
+    /* === Topbar notif === */
+    .notif-wrapper { position:relative; }
+    .notif-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:300px; background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); box-shadow:var(--sombra-lg); z-index:200; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--borde); }
+    .notif-list { max-height:280px; overflow-y:auto; }
+    .notif-item { display:flex; gap:10px; padding:12px 16px; border-bottom:1px solid var(--borde); transition:var(--trans); cursor:pointer; }
+    .notif-item:last-child { border-bottom:none; }
+    .notif-item:hover { background:var(--bg-app); }
+    .notif-unread { background:#f8f9ff; }
+    .notif-ico { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .notif-titulo { font-size:13px; font-weight:600; color:var(--txt-primario); margin-bottom:2px; }
+    .notif-fecha  { font-size:11px; color:var(--txt-muted); }
+    .notif-footer { display:block; text-align:center; padding:10px; font-size:12px; font-weight:600; color:var(--color-padre); border-top:1px solid var(--borde); transition:var(--trans); }
+    .notif-footer:hover { background:var(--bg-app); }
+
+    /* === Sidebar fixes === */
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; background:var(--color-padre); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; color:#fff; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.45) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <!-- TOPBAR -->
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Comunicados</span>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-wrapper" id="notifWrapper">
+          <button class="topbar-btn" id="notifBtn" onclick="toggleNotif()">
+            🔔
+            <div class="topbar-notif-dot" id="notifDot"></div>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span class="fw-700">Notificaciones</span>
+              <span class="text-xs text-muted" id="notifCount">Al día</span>
+            </div>
+            <div class="notif-list" id="notif-list-dropdown">
+              <div class="notif-item">
+                <div class="notif-ico" style="background:var(--verde-suave);">✅</div>
+                <div><div class="notif-titulo">Sin notificaciones nuevas</div><div class="notif-fecha">Todo al día</div></div>
+              </div>
+            </div>
+            <a href="comunicados.html" class="notif-footer">Ver todos los comunicados →</a>
+          </div>
+        </div>
+        <div class="topbar-avatar" data-user-avatar style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:var(--color-padre);" data-user-avatar>CP</div>
+      </div>
+    </header>
+
+    <!-- CONTENIDO -->
+    <div class="app-content">
+
+      <!-- Encabezado -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <div>
+          <h2 style="font-size:1.3rem; font-weight:800; color:var(--txt-primario); margin-bottom:4px;">Comunicados institucionales</h2>
+          <p style="font-size:13px; color:var(--txt-muted);">IE La Armonía · Período 1 — 2026</p>
+        </div>
+        <button onclick="marcarTodosLeidos(); renderComunicados(filtroActivo); actualizarBadges();"
+                class="btn btn-ghost btn-sm">✅ Marcar todos como leídos</button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filtros-bar">
+        <button class="filtro-btn activo" onclick="setFiltro('todos', this)">📋 Todos</button>
+        <button class="filtro-btn" onclick="setFiltro('no-leidos', this)">🔵 No leídos</button>
+        <button class="filtro-btn urgente" onclick="setFiltro('urgente', this)">⚠️ Urgentes</button>
+        <button class="filtro-btn informativo" onclick="setFiltro('informativo', this)">📢 Informativos</button>
+        <button class="filtro-btn academico" onclick="setFiltro('academico', this)">🎓 Académicos</button>
+      </div>
+
+      <!-- Lista de comunicados -->
+      <div id="lista-comunicados"></div>
+
+    </div><!-- /app-content -->
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="cerrarModalFuera(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-ico" id="modal-ico">📢</div>
+      <div class="modal-meta">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span class="badge" id="modal-badge">Informativo</span>
+        </div>
+        <div class="modal-titulo" id="modal-titulo"></div>
+        <div class="modal-sub"><span id="modal-emisor"></span> · <span id="modal-fecha"></span></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-cuerpo"></div>
+    <div class="modal-footer">
+      <button onclick="cerrarModal()" class="btn btn-primary">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/comunicados.js"></script>
+<script src="../assets/js/sidebar-padre.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  let filtroActivo = 'todos';
+
+  function setFiltro(tipo, btn) {
+    filtroActivo = tipo;
+    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('activo'));
+    btn.classList.add('activo');
+    renderComunicados(tipo);
+  }
+
+  function cerrarModalFuera(e) {
+    if (e.target === document.getElementById('modal-overlay')) cerrarModal();
+  }
+
+  function toggleNotif() {
+    const dropdown = document.getElementById('notifDropdown');
+    const dot = document.getElementById('notifDot');
+    dropdown.classList.toggle('open');
+    if (dropdown.classList.contains('open')) dot.style.display = 'none';
+  }
+
+  document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('notifWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      document.getElementById('notifDropdown').classList.remove('open');
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    renderComunicados('todos');
+    const usuario = AUTH.proteger('padre');
+    if (usuario) AUTH.pintarUsuario(usuario);
+  });
+</script>
+</body>
+</html>

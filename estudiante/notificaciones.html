@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notificaciones — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    .page-banner {
+      background:linear-gradient(135deg, #3b6de8 0%, #2454c7 100%);
+      border-radius:var(--radio-xl); padding:1.5rem 1.75rem;
+      display:flex; justify-content:space-between; align-items:center;
+      gap:1rem; margin-bottom:1.5rem; position:relative; overflow:hidden;
+    }
+    .page-banner::before { content:''; position:absolute; right:-25px; top:-25px; width:150px; height:150px; border-radius:50%; background:rgba(255,255,255,0.06); }
+    .page-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
+    .page-banner p  { color:rgba(255,255,255,0.72); font-size:13px; }
+    .banner-pill { background:rgba(255,255,255,0.15); color:#fff; border:1px solid rgba(255,255,255,0.18); padding:8px 12px; border-radius:999px; font-size:12px; font-weight:700; }
+
+    .filtros-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1rem; }
+    .filtro-chip {
+      border:1px solid var(--borde); background:#fff; color:var(--txt-secundario);
+      border-radius:999px; padding:8px 14px; font-size:12.5px; font-weight:600;
+      cursor:pointer; transition:var(--trans);
+    }
+    .filtro-chip:hover { border-color:#3b6de8; color:#3b6de8; }
+    .filtro-chip.active { background:#eef2fd; border-color:#3b6de8; color:#3b6de8; }
+
+    .notif-layout { display:grid; grid-template-columns:1.35fr 0.65fr; gap:1rem; align-items:start; }
+    .notif-card {
+      background:var(--bg-card); border:1px solid var(--borde);
+      border-radius:var(--radio-xl); padding:1.1rem 1.25rem;
+    }
+    .notif-item-page {
+      display:flex; gap:14px; align-items:flex-start;
+      padding:14px 4px; border-bottom:1px solid var(--borde);
+    }
+    .notif-item-page:last-child { border-bottom:none; }
+    .notif-ico-page {
+      width:42px; height:42px; border-radius:12px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; flex-shrink:0;
+    }
+    .notif-title-page { font-size:14px; font-weight:700; color:var(--txt-primario); margin-bottom:4px; }
+    .notif-desc-page  { font-size:12.5px; color:var(--txt-secundario); line-height:1.45; margin-bottom:6px; }
+    .notif-meta-page  { font-size:11px; color:var(--txt-muted); display:flex; gap:10px; flex-wrap:wrap; }
+    .notif-actions { margin-left:auto; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .notif-dot { width:8px; height:8px; border-radius:50%; background:#3b6de8; }
+    .notif-tag { font-size:10px; font-weight:700; padding:4px 8px; border-radius:999px; }
+
+    .mini-stat { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--borde); }
+    .mini-stat:last-child { border-bottom:none; }
+    .mini-stat-ico { width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .mini-stat-title { font-size:12.5px; font-weight:600; color:var(--txt-primario); }
+    .mini-stat-sub   { font-size:11px; color:var(--txt-muted); }
+
+    .preferencia-row { display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid var(--borde); }
+    .preferencia-row:last-child { border-bottom:none; }
+    .switch { position:relative; width:42px; height:24px; flex-shrink:0; }
+    .switch input { opacity:0; width:0; height:0; }
+    .slider { position:absolute; inset:0; background:#d1d5db; border-radius:999px; transition:.25s; cursor:pointer; }
+    .slider:before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.25s; box-shadow:0 2px 6px rgba(0,0,0,.15); }
+    .switch input:checked + .slider { background:#3b6de8; }
+    .switch input:checked + .slider:before { transform:translateX(18px); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title">Notificaciones</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-ghost btn-sm" onclick="marcarTodasLeidas()">Marcar todas como leídas</button>
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <div class="page-banner">
+        <div>
+          <h2>Centro de notificaciones 🔔</h2>
+          <p>Revisa tareas, notas nuevas, comunicados institucionales y recordatorios importantes.</p>
+        </div>
+        <div class="banner-pill" id="pill-no-leidas">3 sin leer</div>
+      </div>
+
+      <div class="filtros-bar">
+        <button class="filtro-chip active" onclick="filtrarNotif(this,'todas')">Todas</button>
+        <button class="filtro-chip" onclick="filtrarNotif(this,'tareas')">Tareas</button>
+        <button class="filtro-chip" onclick="filtrarNotif(this,'notas')">Notas</button>
+        <button class="filtro-chip" onclick="filtrarNotif(this,'comunicados')">Comunicados</button>
+        <button class="filtro-chip" onclick="filtrarNotif(this,'recordatorios')">Recordatorios</button>
+      </div>
+
+      <div class="notif-layout">
+        <div class="notif-card">
+          <div class="flex-between mb-2">
+            <h3 style="margin:0;">Actividad reciente</h3>
+            <span class="text-xs text-muted">Hoy y esta semana</span>
+          </div>
+          <div id="lista-notificaciones"></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="notif-card">
+            <div class="flex-between mb-2">
+              <h3 style="margin:0;">Resumen</h3>
+              <span class="badge badge-azul">Hoy</span>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-ico" style="background:#eef2fd;">🔔</div>
+              <div>
+                <div class="mini-stat-title" id="stat-total">7 notificaciones</div>
+                <div class="mini-stat-sub">En total esta semana</div>
+              </div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-ico" style="background:#fef3c7;">✅</div>
+              <div>
+                <div class="mini-stat-title">2 tareas próximas</div>
+                <div class="mini-stat-sub">Una vence hoy</div>
+              </div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-ico" style="background:var(--verde-suave);">📊</div>
+              <div>
+                <div class="mini-stat-title">1 nota nueva</div>
+                <div class="mini-stat-sub">Ciencias Naturales</div>
+              </div>
+            </div>
+            <div class="mini-stat">
+              <div class="mini-stat-ico" style="background:#f3e8ff;">📢</div>
+              <div>
+                <div class="mini-stat-title">2 comunicados</div>
+                <div class="mini-stat-sub">Pendientes por revisar</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="notif-card">
+            <div class="flex-between mb-2">
+              <h3 style="margin:0;">Preferencias</h3>
+              <span class="text-xs text-muted">Demo</span>
+            </div>
+            <div class="preferencia-row">
+              <div>
+                <div class="mini-stat-title">Tareas</div>
+                <div class="mini-stat-sub">Fechas de entrega y recordatorios</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="preferencia-row">
+              <div>
+                <div class="mini-stat-title">Notas</div>
+                <div class="mini-stat-sub">Cambios de calificaciones</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="preferencia-row">
+              <div>
+                <div class="mini-stat-title">Comunicados</div>
+                <div class="mini-stat-sub">Avisos de coordinación y rectoría</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+            <div class="preferencia-row">
+              <div>
+                <div class="mini-stat-title">Recordatorios</div>
+                <div class="mini-stat-sub">Eventos y actividades próximas</div>
+              </div>
+              <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/sidebar-estudiante.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+const NOTIFICACIONES = [
+  { tipo:'tareas', icono:'✅', bg:'#fef3c7', titulo:'Tarea vence hoy — Trigonometría', desc:'Recuerda entregar los ejercicios de trigonometría antes de las 11:59 pm.', meta:'Matemáticas · Prof. Ramírez · Hoy', nueva:true,  tag:'Urgente', tagBg:'#fee2e2', tagColor:'#dc2626' },
+  { tipo:'comunicados', icono:'📢', bg:'var(--verde-suave)', titulo:'Nuevo comunicado — Semana de recuperación', desc:'Coordinación académica publicó información sobre fechas, horarios y actividades de recuperación.', meta:'Coordinación · 24 mar 2026', nueva:true, tag:'Nuevo', tagBg:'#dcfce7', tagColor:'#16a34a' },
+  { tipo:'notas', icono:'📊', bg:'#eef2fd', titulo:'Nota registrada — Ciencias Naturales 4.5', desc:'Ya puedes revisar el resultado de la práctica de laboratorio del período 1.', meta:'Prof. Morales · Ayer', nueva:true, tag:'Nota', tagBg:'#dbeafe', tagColor:'#2563eb' },
+  { tipo:'recordatorios', icono:'📅', bg:'#fff7ed', titulo:'Cambio de horario — Educación Física', desc:'La clase del jueves fue movida a la segunda hora por ajuste institucional.', meta:'Coordinación · 22 mar 2026', nueva:false, tag:'Horario', tagBg:'#ffedd5', tagColor:'#ea580c' },
+  { tipo:'tareas', icono:'📝', bg:'#f3e8ff', titulo:'Entrega próxima — Reading comprehension', desc:'Tu actividad de inglés vence en 5 días. Puedes subir el archivo desde el módulo de tareas.', meta:'Inglés · Prof. Torres · 30 mar', nueva:false, tag:'Pendiente', tagBg:'#f3e8ff', tagColor:'#7c3aed' },
+  { tipo:'comunicados', icono:'🎉', bg:'#ecfeff', titulo:'Feria de Ciencias — Inscripciones abiertas', desc:'Ya están abiertas las inscripciones para participar en la feria institucional de ciencias.', meta:'Rectoría · 20 mar 2026', nueva:false, tag:'Evento', tagBg:'#cffafe', tagColor:'#0891b2' },
+  { tipo:'recordatorios', icono:'⚠️', bg:'#fef2f2', titulo:'Recordatorio entrega de formularios', desc:'No olvides entregar los formularios firmados antes del viernes en coordinación.', meta:'Secretaría · 18 mar 2026', nueva:false, tag:'Aviso', tagBg:'#fee2e2', tagColor:'#dc2626' },
+];
+
+let filtroActual = 'todas';
+
+function renderNotif() {
+  const lista = document.getElementById('lista-notificaciones');
+  const data = filtroActual === 'todas' ? NOTIFICACIONES : NOTIFICACIONES.filter(n => n.tipo === filtroActual);
+  lista.innerHTML = data.map(n => `
+    <div class="notif-item-page">
+      <div class="notif-ico-page" style="background:${n.bg};">${n.icono}</div>
+      <div style="flex:1;">
+        <div class="notif-title-page">${n.titulo}</div>
+        <div class="notif-desc-page">${n.desc}</div>
+        <div class="notif-meta-page">${n.meta}</div>
+      </div>
+      <div class="notif-actions">
+        ${n.nueva ? '<div class="notif-dot"></div>' : ''}
+        <span class="notif-tag" style="background:${n.tagBg};color:${n.tagColor};">${n.tag}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filtrarNotif(btn, tipo) {
+  filtroActual = tipo;
+  document.querySelectorAll('.filtro-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderNotif();
+}
+
+function marcarTodasLeidas() {
+  NOTIFICACIONES.forEach(n => n.nueva = false);
+  document.getElementById('pill-no-leidas').textContent = '0 sin leer';
+  renderNotif();
+}
+
+renderNotif();
+document.getElementById('pill-no-leidas').textContent = `${NOTIFICACIONES.filter(n => n.nueva).length} sin leer`;
+document.getElementById('stat-total').textContent = `${NOTIFICACIONES.length} notificaciones`;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+});
+</script>
+</body>
+</html>

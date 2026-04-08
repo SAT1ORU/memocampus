@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    /* Layout principal */
+    .cal-layout { display:grid; grid-template-columns:1fr 320px; gap:1.25rem; align-items:start; }
+
+    /* Cabecera del calendario */
+    .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem; }
+    .cal-mes { font-size:1.2rem; font-weight:800; color:var(--txt-primario); }
+    .cal-nav  { display:flex; gap:6px; }
+    .cal-nav-btn { width:34px; height:34px; border-radius:10px; border:1.5px solid var(--borde); background:#fff; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; transition:var(--trans); }
+    .cal-nav-btn:hover { border-color:#3b6de8; color:#3b6de8; }
+
+    /* Grid del calendario */
+    .cal-grid { background:var(--bg-card); border-radius:var(--radio-xl); border:1px solid var(--borde); overflow:hidden; }
+    .cal-dias-semana { display:grid; grid-template-columns:repeat(7,1fr); background:var(--bg-app); border-bottom:1px solid var(--borde); }
+    .cal-dia-label { text-align:center; padding:10px 4px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--txt-muted); }
+    .cal-dias { display:grid; grid-template-columns:repeat(7,1fr); }
+    .cal-dia {
+      min-height:80px; border-right:1px solid var(--borde); border-bottom:1px solid var(--borde);
+      padding:6px 8px; cursor:pointer; transition:var(--trans); position:relative;
+    }
+    .cal-dia:nth-child(7n) { border-right:none; }
+    .cal-dia:hover { background:#eef2fd; }
+    .cal-dia.otro-mes { background:var(--bg-app); }
+    .cal-dia.otro-mes .dia-num { color:var(--txt-muted); opacity:.4; }
+    .cal-dia.hoy { background:#eef2fd; }
+    .cal-dia.hoy .dia-num { background:#3b6de8; color:#fff; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-weight:800; }
+    .cal-dia.seleccionado { background:#eef2fd; outline:2px solid #3b6de8; outline-offset:-2px; border-radius:0; }
+    .dia-num { font-size:13px; font-weight:600; color:var(--txt-primario); margin-bottom:4px; width:26px; height:26px; display:flex; align-items:center; justify-content:center; }
+    .dia-evento { font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; }
+
+    /* Panel lateral */
+    .panel-card { background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-xl); padding:1.25rem; margin-bottom:1rem; }
+    .panel-card:last-child { margin-bottom:0; }
+
+    .evento-item { display:flex; gap:12px; padding:11px 0; border-bottom:1px solid var(--borde); align-items:flex-start; }
+    .evento-item:last-child { border-bottom:none; }
+    .evento-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+    .evento-titulo { font-size:13px; font-weight:600; color:var(--txt-primario); margin-bottom:2px; }
+    .evento-meta   { font-size:11px; color:var(--txt-muted); }
+
+    /* Leyenda */
+    .leyenda { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:1rem; }
+    .leyenda-item { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--txt-secundario); }
+    .leyenda-dot  { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title">Calendario</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#3b6de8;">VG</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+      <div class="cal-layout">
+
+        <!-- Columna principal: calendario -->
+        <div>
+          <div class="cal-header">
+            <div class="cal-mes" id="cal-titulo">Abril 2026</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="leyenda">
+                <div class="leyenda-item"><div class="leyenda-dot" style="background:var(--mat-matematicas);"></div>Tarea</div>
+                <div class="leyenda-item"><div class="leyenda-dot" style="background:#7c3aed;"></div>Evaluación</div>
+                <div class="leyenda-item"><div class="leyenda-dot" style="background:#059669;"></div>Evento</div>
+                <div class="leyenda-item"><div class="leyenda-dot" style="background:#ea580c;"></div>Institucional</div>
+              </div>
+              <div class="cal-nav">
+                <button class="cal-nav-btn" onclick="cambiarMes(-1)">&#8592;</button>
+                <button class="cal-nav-btn" onclick="cambiarMes(1)">&#8594;</button>
+              </div>
+            </div>
+          </div>
+          <div class="cal-grid">
+            <div class="cal-dias-semana">
+              <div class="cal-dia-label">Lun</div>
+              <div class="cal-dia-label">Mar</div>
+              <div class="cal-dia-label">Mié</div>
+              <div class="cal-dia-label">Jue</div>
+              <div class="cal-dia-label">Vie</div>
+              <div class="cal-dia-label" style="color:#dc2626;">Sáb</div>
+              <div class="cal-dia-label" style="color:#dc2626;">Dom</div>
+            </div>
+            <div class="cal-dias" id="cal-dias"></div>
+          </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div>
+          <div class="panel-card">
+            <div class="flex-between mb-2">
+              <h3 style="margin:0;" id="panel-titulo">Eventos del día</h3>
+              <span class="badge badge-azul" id="panel-fecha">Hoy</span>
+            </div>
+            <div id="panel-eventos">
+              <div style="text-align:center;padding:1.5rem;color:var(--txt-muted);">
+                <div style="font-size:2rem;margin-bottom:8px;">📅</div>
+                <div style="font-size:13px;">Selecciona un día para ver sus eventos</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="flex-between mb-2">
+              <h3 style="margin:0;">Próximos eventos</h3>
+            </div>
+            <div id="proximos-eventos"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/sidebar-estudiante.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// Eventos del año (mes base 0)
+const EVENTOS = [
+  // Abril 2026
+  { fecha:'2026-04-08', titulo:'Tarea — Trigonometría', tipo:'tarea', color:'var(--mat-matematicas)', desc:'Entrega: Matemáticas · Prof. Ramírez' },
+  { fecha:'2026-04-10', titulo:'Evaluación Inglés', tipo:'evaluacion', color:'#7c3aed', desc:'Unit 3 — Reading comprehension · Prof. Torres' },
+  { fecha:'2026-04-14', titulo:'Feria de Ciencias', tipo:'evento', color:'#059669', desc:'Inscripciones abiertas · Patio central' },
+  { fecha:'2026-04-15', titulo:'Entrega informe Lab.', tipo:'tarea', color:'var(--mat-ciencias)', desc:'Ciencias Naturales · Prof. Morales' },
+  { fecha:'2026-04-16', titulo:'Semana de receso', tipo:'institucional', color:'#ea580c', desc:'IE La Armonía · Sin clases' },
+  { fecha:'2026-04-17', titulo:'Semana de receso', tipo:'institucional', color:'#ea580c', desc:'IE La Armonía · Sin clases' },
+  { fecha:'2026-04-18', titulo:'Semana de receso', tipo:'institucional', color:'#ea580c', desc:'IE La Armonía · Sin clases' },
+  { fecha:'2026-04-22', titulo:'Evaluación Ciencias P1', tipo:'evaluacion', color:'#7c3aed', desc:'Ecosistemas y biodiversidad · Prof. Morales' },
+  { fecha:'2026-04-25', titulo:'Entrega boletines P1', tipo:'institucional', color:'#ea580c', desc:'Coordinación · Para padres de familia' },
+  { fecha:'2026-04-28', titulo:'Reunión de padres', tipo:'institucional', color:'#ea580c', desc:'Rectoría · 3:00 pm · Salón múltiple' },
+  // Mayo 2026
+  { fecha:'2026-05-05', titulo:'Inicio Período 2', tipo:'institucional', color:'#ea580c', desc:'IE La Armonía · Año lectivo 2026' },
+  { fecha:'2026-05-12', titulo:'Evaluación Matemáticas', tipo:'evaluacion', color:'#7c3aed', desc:'Funciones y gráficas · Prof. Ramírez' },
+];
+
+let mesActual = 3; // Abril (0-indexado)
+let anioActual = 2026;
+let diaSeleccionado = null;
+
+function cambiarMes(dir) {
+  mesActual += dir;
+  if (mesActual > 11) { mesActual = 0; anioActual++; }
+  if (mesActual < 0)  { mesActual = 11; anioActual--; }
+  renderCalendario();
+}
+
+function eventosDelDia(fecha) {
+  return EVENTOS.filter(e => e.fecha === fecha);
+}
+
+function renderCalendario() {
+  const titulo = document.getElementById('cal-titulo');
+  titulo.textContent = `${MESES[mesActual]} ${anioActual}`;
+
+  const hoy = new Date();
+  const primerDia = new Date(anioActual, mesActual, 1);
+  const ultimoDia = new Date(anioActual, mesActual + 1, 0);
+
+  // Lunes=0 base
+  let inicioGrid = primerDia.getDay(); // 0=Dom en JS
+  inicioGrid = inicioGrid === 0 ? 6 : inicioGrid - 1; // convertir a Lun=0
+
+  const container = document.getElementById('cal-dias');
+  container.innerHTML = '';
+
+  // Días del mes anterior
+  for (let i = 0; i < inicioGrid; i++) {
+    const d = new Date(anioActual, mesActual, -inicioGrid + i + 1);
+    const cell = crearCelda(d, true);
+    container.appendChild(cell);
+  }
+  // Días del mes actual
+  for (let d = 1; d <= ultimoDia.getDate(); d++) {
+    const fecha = new Date(anioActual, mesActual, d);
+    const cell = crearCelda(fecha, false);
+    if (fecha.toDateString() === hoy.toDateString()) cell.classList.add('hoy');
+    container.appendChild(cell);
+  }
+  // Rellenar hasta completar grid
+  const total = container.children.length;
+  const restantes = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= restantes; i++) {
+    const d = new Date(anioActual, mesActual + 1, i);
+    container.appendChild(crearCelda(d, true));
+  }
+
+  renderProximos();
+}
+
+function crearCelda(fecha, otroMes) {
+  const cell = document.createElement('div');
+  cell.className = 'cal-dia' + (otroMes ? ' otro-mes' : '');
+  const yyyy = fecha.getFullYear();
+  const mm   = String(fecha.getMonth()+1).padStart(2,'0');
+  const dd   = String(fecha.getDate()).padStart(2,'0');
+  const key  = `${yyyy}-${mm}-${dd}`;
+  const evs  = eventosDelDia(key);
+
+  cell.innerHTML = `<div class="dia-num">${fecha.getDate()}</div>
+    ${evs.slice(0,2).map(e =>
+      `<div class="dia-evento" style="background:${e.color}20;color:${e.color};" title="${e.titulo}">${e.titulo}</div>`
+    ).join('')}
+    ${evs.length > 2 ? `<div style="font-size:10px;color:var(--txt-muted);padding-left:2px;">+${evs.length-2} más</div>` : ''}`;
+
+  cell.addEventListener('click', () => seleccionarDia(key, fecha));
+  return cell;
+}
+
+function seleccionarDia(key, fecha) {
+  document.querySelectorAll('.cal-dia.seleccionado').forEach(c => c.classList.remove('seleccionado'));
+  const celdas = document.querySelectorAll('.cal-dia');
+  celdas.forEach(c => {
+    const numEl = c.querySelector('.dia-num');
+    if (numEl && parseInt(numEl.textContent) === fecha.getDate() && !c.classList.contains('otro-mes')) {
+      c.classList.add('seleccionado');
+    }
+  });
+
+  diaSeleccionado = key;
+  const evs = eventosDelDia(key);
+  const panelTitulo = document.getElementById('panel-titulo');
+  const panelFecha  = document.getElementById('panel-fecha');
+  const panelEvs    = document.getElementById('panel-eventos');
+
+  const opciones = { weekday:'long', day:'numeric', month:'long' };
+  panelTitulo.textContent = 'Eventos del día';
+  panelFecha.textContent  = fecha.toLocaleDateString('es-CO', opciones);
+
+  if (!evs.length) {
+    panelEvs.innerHTML = `<div style="text-align:center;padding:1.25rem;color:var(--txt-muted);">
+      <div style="font-size:1.8rem;margin-bottom:6px;">😊</div>
+      <div style="font-size:13px;">Sin eventos para este día</div>
+    </div>`;
+    return;
+  }
+  panelEvs.innerHTML = evs.map(e => `
+    <div class="evento-item">
+      <div class="evento-dot" style="background:${e.color};"></div>
+      <div>
+        <div class="evento-titulo">${e.titulo}</div>
+        <div class="evento-meta">${e.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderProximos() {
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+  const proximos = EVENTOS
+    .filter(e => new Date(e.fecha) >= hoy)
+    .sort((a,b) => new Date(a.fecha)-new Date(b.fecha))
+    .slice(0, 5);
+
+  document.getElementById('proximos-eventos').innerHTML = proximos.map(e => {
+    const d = new Date(e.fecha);
+    const label = d.toLocaleDateString('es-CO',{day:'numeric',month:'short'});
+    return `<div class="evento-item">
+      <div class="evento-dot" style="background:${e.color};margin-top:4px;"></div>
+      <div style="flex:1;">
+        <div class="evento-titulo">${e.titulo}</div>
+        <div class="evento-meta">${e.desc}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:var(--txt-muted);flex-shrink:0;">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+renderCalendario();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('estudiante');
+  if (usuario) AUTH.pintarUsuario(usuario);
+});
+</script>
+</body>
+</html>

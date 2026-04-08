@@ -39,34 +39,7 @@
 </head>
 <body>
 <div class="app-layout">
-  <aside class="app-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">M</div>
-      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía · Admin</div></div>
-    </div>
-    <div class="sidebar-section-title">Administración</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html"><span class="nav-ico">🏠</span> Dashboard</a>
-      <a href="usuarios.html"><span class="nav-ico">👥</span> Usuarios</a>
-      <a href="cursos.html"><span class="nav-ico">📚</span> Cursos y grupos</a>
-      <a href="reportes.html"><span class="nav-ico">📊</span> Reportes</a>
-      <a href="comunicados.html"><span class="nav-ico">📢</span> Comunicados</a>
-      <a href="asistencia.html" class="activo"><span class="nav-ico">📅</span> Mapa de asistencia</a>
-    </nav>
-    <div class="sidebar-section-title">Sistema</div>
-    <nav class="sidebar-nav">
-      <a href="#"><span class="nav-ico">⚙️</span> Configuración</a>
-      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" data-user-avatar style="background:var(--verde);">RA</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Rectoría</div>
-        <div class="sidebar-user-rol">Administrador</div>
-      </div>
-      <span class="sidebar-logout" data-logout>⏏</span>
-    </div>
-  </aside>
+  <aside class="app-sidebar" id="sidebar"></aside>
   <div class="sidebar-overlay"></div>
 
   <main class="app-main">
@@ -205,5 +178,7 @@
     tbody.appendChild(tr);
   });
 </script>
+<script src="../assets/js/sidebar-admin.js"></script>
+<script src="../assets/js/auth.js"></script>
 </body>
 </html>

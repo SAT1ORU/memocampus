@@ -34,33 +34,7 @@
 </head>
 <body>
 <div class="app-layout">
-  <aside class="app-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">M</div>
-      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
-    </div>
-    <div class="sidebar-section-title">Mi hijo/a</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
-      <a href="notas.html"><span class="nav-ico">📊</span> Notas</a>
-      <a href="dashboard.html#asistencia"><span class="nav-ico">📅</span> Asistencia</a>
-      <a href="#"><span class="nav-ico">📎</span> Adjuntar excusa</a>
-    </nav>
-    <div class="sidebar-section-title">Comunicación</div>
-    <nav class="sidebar-nav">
-      <a href="mensajes.html" class="activo"><span class="nav-ico">💬</span> Mensajes al docente</a>
-      <a href="dashboard.html#comunicados"><span class="nav-ico">📢</span> Comunicados <span class="sidebar-badge">2</span></a>
-      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-padre);">CG</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Carlos Gómez</div>
-        <div class="sidebar-user-rol">Padre de familia</div>
-      </div>
-      <span class="sidebar-logout" data-logout>⏏</span>
-    </div>
-  </aside>
+  <aside class="app-sidebar" id="sidebar"></aside>
   <div class="sidebar-overlay"></div>
 
   <main class="app-main" style="overflow:hidden;">
@@ -146,7 +120,8 @@
     </div>
   </main>
 </div>
-
+<script src="../assets/js/sidebar-padre.js"></script>
+<script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('padre');

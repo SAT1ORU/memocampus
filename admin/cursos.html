@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cursos — MemoCampus Admin</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    /* Banner */
+    .admin-banner { background:linear-gradient(135deg,#064e2e 0%,#1a6b3c 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; position:relative; overflow:hidden; }
+    .admin-banner::before { content:''; position:absolute; right:-20px; top:-20px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.05); }
+    .admin-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
+    .admin-banner p  { color:rgba(255,255,255,0.65); font-size:13px; }
+    .banner-kpis { display:flex; gap:24px; flex-wrap:wrap; }
+    .bkpi { text-align:center; }
+    .bkpi-val { color:#fff; font-size:1.8rem; font-weight:800; line-height:1; }
+    .bkpi-lbl { color:rgba(255,255,255,0.55); font-size:11px; margin-top:3px; }
+
+    /* Tabs */
+    .mod-tab-bar { display:flex; gap:4px; border-bottom:2px solid var(--borde); margin-bottom:1.5rem; }
+    .mtab { padding:9px 22px; font-size:13.5px; font-weight:500; color:var(--txt-muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--trans); background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-ui); }
+    .mtab.active { color:#1a6b3c; border-bottom-color:#1a6b3c; font-weight:600; }
+    .mtab-content { display:none; }
+    .mtab-content.active { display:block; }
+
+    /* Cursos grid */
+    .curso-card { background:var(--bg-card); border-radius:var(--radio-xl); border:1.5px solid var(--borde); padding:1.25rem; transition:var(--trans); }
+    .curso-card:hover { border-color:var(--cc-color); box-shadow:0 6px 20px rgba(0,0,0,0.07); transform:translateY(-1px); }
+    .curso-header { display:flex; align-items:center; gap:12px; margin-bottom:1rem; }
+    .curso-ico { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+    .curso-nombre { font-size:15px; font-weight:700; color:var(--txt-primario); }
+    .curso-jornada { font-size:11.5px; color:var(--txt-muted); }
+    .curso-stat-row { display:flex; gap:8px; margin-bottom:10px; }
+    .curso-stat { flex:1; background:var(--bg-app); border-radius:var(--radio-md); padding:8px; text-align:center; }
+    .curso-stat-val { font-size:1.1rem; font-weight:800; }
+    .curso-stat-lbl { font-size:10px; color:var(--txt-muted); margin-top:1px; }
+    .curso-docente { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--bg-app); border-radius:var(--radio-md); font-size:12.5px; color:var(--txt-secundario); }
+    .doc-av { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
+    .prog-wrap { background:var(--bg-app); border-radius:20px; height:7px; overflow:hidden; flex:1; }
+    .prog-bar  { height:100%; border-radius:20px; }
+
+    /* Tabla asignación */
+    .asig-row { display:grid; grid-template-columns:1.2fr 1fr 1fr 1fr 0.8fr; align-items:center; border-bottom:1px solid var(--borde); }
+    .asig-row:last-child { border-bottom:none; }
+    .asig-row:hover { background:var(--bg-app); }
+    .asig-cell { padding:11px 14px; font-size:13px; color:var(--txt-secundario); }
+    .asig-cell.hdr { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--txt-muted); background:var(--bg-app); border-bottom:2px solid var(--borde); }
+    select.asig-select { border:1.5px solid var(--borde); border-radius:var(--radio-md); padding:5px 10px; font-size:12.5px; font-family:var(--font-ui); color:var(--txt-primario); background:var(--bg-card); cursor:pointer; transition:var(--trans); outline:none; }
+    select.asig-select:focus { border-color:#1a6b3c; }
+
+    /* Estadísticas */
+    .stat-curso-row { display:flex; align-items:center; gap:14px; padding:12px 0; border-bottom:1px solid var(--borde); }
+    .stat-curso-row:last-child { border-bottom:none; }
+    .stat-curso-nombre { font-size:13px; font-weight:600; color:var(--txt-primario); min-width:60px; }
+    .mini-bar-wrap { flex:1; background:var(--bg-app); border-radius:20px; height:8px; overflow:hidden; }
+    .mini-bar { height:100%; border-radius:20px; transition:width 0.8s ease; }
+    .mini-val { font-size:12.5px; font-weight:700; min-width:36px; text-align:right; }
+
+    /* Modal */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:500; align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--bg-card); border-radius:var(--radio-xl); padding:2rem; width:100%; max-width:480px; box-shadow:var(--sombra-lg); }
+    .modal-title { font-size:1.1rem; font-weight:700; color:var(--txt-primario); margin-bottom:1.5rem; }
+    .form-label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--txt-secundario); margin-bottom:6px; }
+    .form-input { width:100%; padding:10px 14px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-size:13.5px; font-family:var(--font-ui); color:var(--txt-primario); background:var(--bg-card); transition:var(--trans); outline:none; box-sizing:border-box; appearance:none; -webkit-appearance:none; }
+    .form-input:focus { border-color:#1a6b3c; box-shadow:0 0 0 3px rgba(26,107,60,0.1); }
+    select.form-input { background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; cursor:pointer; }
+    .form-group { margin-bottom:1rem; }
+    .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:1.5rem; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title">Cursos</span>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="abrirModal()">➕ Nuevo curso</button>
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;
+                    background:#1a6b3c;margin-left:10px;">RA</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Banner -->
+      <div class="admin-banner">
+        <div style="position:relative;z-index:1;">
+          <h2>Gestión de Cursos 📚</h2>
+          <p>IE La Armonía · Año lectivo 2026 · Jornada mañana y tarde</p>
+        </div>
+        <div class="banner-kpis" style="position:relative;z-index:1;">
+          <div class="bkpi"><div class="bkpi-val">12</div><div class="bkpi-lbl">Cursos activos</div></div>
+          <div class="bkpi"><div class="bkpi-val">342</div><div class="bkpi-lbl">Estudiantes</div></div>
+          <div class="bkpi"><div class="bkpi-val">18</div><div class="bkpi-lbl">Docentes</div></div>
+          <div class="bkpi"><div class="bkpi-val">3.9</div><div class="bkpi-lbl">Promedio inst.</div></div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="mod-tab-bar">
+        <button class="mtab active" onclick="swTab(this,'lista')">📋 Lista de cursos</button>
+        <button class="mtab" onclick="swTab(this,'asignacion')">✏️ Asignación docentes</button>
+        <button class="mtab" onclick="swTab(this,'estadisticas')">📊 Estadísticas</button>
+      </div>
+
+      <!-- TAB 1: Lista de cursos -->
+      <div class="mtab-content active" id="tab-lista">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;" id="grid-cursos"></div>
+      </div>
+
+      <!-- TAB 2: Asignación docentes -->
+      <div class="mtab-content" id="tab-asignacion">
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Asignación de docentes por curso</h3>
+            <span class="badge badge-exito">2026</span>
+          </div>
+          <p class="text-sm text-muted mb-3">Selecciona el docente titular para cada curso. Los cambios se guardan automáticamente.</p>
+          <div style="border:1px solid var(--borde);border-radius:var(--radio-md);overflow:hidden;">
+            <div class="asig-row">
+              <div class="asig-cell hdr">Curso</div>
+              <div class="asig-cell hdr">Grado</div>
+              <div class="asig-cell hdr">Jornada</div>
+              <div class="asig-cell hdr">Docente titular</div>
+              <div class="asig-cell hdr">Estado</div>
+            </div>
+            <div id="tabla-asignacion"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Estadísticas -->
+      <div class="mtab-content" id="tab-estadisticas">
+        <div class="grid-2" style="grid-template-columns:1fr 1fr;align-items:start;">
+          <div class="card">
+            <div class="flex-between mb-3">
+              <h3>Promedio académico por curso</h3>
+              <span class="badge badge-morado">Período 1</span>
+            </div>
+            <div id="stat-promedios"></div>
+          </div>
+          <div class="card">
+            <div class="flex-between mb-3">
+              <h3>Asistencia por curso</h3>
+              <span class="badge badge-azul">Abril 2026</span>
+            </div>
+            <div id="stat-asistencia"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+          <div class="flex-between mb-3">
+            <h3>Resumen por grado</h3>
+            <span class="badge badge-exito">Todos los cursos</span>
+          </div>
+          <div style="overflow-x:auto;border-radius:var(--radio-md);border:1px solid var(--borde);">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;border-bottom:2px solid var(--borde);">
+              <div class="asig-cell hdr">Curso</div>
+              <div class="asig-cell hdr">Estudiantes</div>
+              <div class="asig-cell hdr">Promedio</div>
+              <div class="asig-cell hdr">Asistencia</div>
+              <div class="asig-cell hdr">Superior</div>
+              <div class="asig-cell hdr">Bajo</div>
+            </div>
+            <div id="tabla-resumen"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal nuevo curso -->
+<div class="modal-overlay" id="modal-curso">
+  <div class="modal-box">
+    <div class="modal-title">➕ Crear nuevo curso</div>
+    <div class="form-group">
+      <label class="form-label">Nombre del curso</label>
+      <input type="text" class="form-input" placeholder="Ej: 6°A" id="input-nombre">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Grado</label>
+      <select class="form-input" id="input-grado">
+        <option value="">Selecciona el grado</option>
+        <option>6°</option><option>7°</option><option>8°</option>
+        <option>9°</option><option>10°</option><option>11°</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jornada</label>
+      <select class="form-input" id="input-jornada">
+        <option value="">Selecciona la jornada</option>
+        <option>Mañana</option>
+        <option>Tarde</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Docente titular</label>
+      <select class="form-input" id="input-docente">
+        <option value="">Asignar docente</option>
+        <option>Prof. Andrés Morales</option>
+        <option>Prof. Laura Reyes</option>
+        <option>Prof. Carmen López</option>
+        <option>Prof. Ricardo Díaz</option>
+        <option>Prof. Sandra Ruiz</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" style="border:1.5px solid var(--borde);background:none;padding:9px 20px;border-radius:var(--radio-md);cursor:pointer;" onclick="cerrarModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarCurso()">Guardar curso</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/sidebar-admin.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+const CURSOS = [
+  { id:'6a', nombre:'6°A', grado:'6°', jornada:'Mañana', estudiantes:32, docente:'Prof. Carmen López',  doc_av:'CL', doc_color:'#db2777', promedio:3.8, asistencia:93, superior:3,  bajo:1, color:'#2563eb' },
+  { id:'6b', nombre:'6°B', grado:'6°', jornada:'Tarde',  estudiantes:30, docente:'Prof. Ricardo Díaz',  doc_av:'RD', doc_color:'#ea580c', promedio:3.6, asistencia:90, superior:2,  bajo:2, color:'#0891b2' },
+  { id:'7a', nombre:'7°A', grado:'7°', jornada:'Mañana', estudiantes:31, docente:'Prof. Sandra Ruiz',   doc_av:'SR', doc_color:'#059669', promedio:3.9, asistencia:88, superior:4,  bajo:1, color:'#7c3aed' },
+  { id:'7b', nombre:'7°B', grado:'7°', jornada:'Tarde',  estudiantes:29, docente:'Prof. Andrés Morales',doc_av:'AM', doc_color:'#e87d1e', promedio:3.7, asistencia:87, superior:2,  bajo:2, color:'#ea580c' },
+  { id:'8a', nombre:'8°A', grado:'8°', jornada:'Mañana', estudiantes:33, docente:'Prof. Laura Reyes',   doc_av:'LR', doc_color:'#2563eb', promedio:4.0, asistencia:92, superior:5,  bajo:0, color:'#059669' },
+  { id:'8b', nombre:'8°B', grado:'8°', jornada:'Tarde',  estudiantes:30, docente:'Prof. Carmen López',  doc_av:'CL', doc_color:'#db2777', promedio:3.8, asistencia:91, superior:3,  bajo:1, color:'#db2777' },
+  { id:'9a', nombre:'9°A', grado:'9°', jornada:'Mañana', estudiantes:28, docente:'Prof. Ricardo Díaz',  doc_av:'RD', doc_color:'#ea580c', promedio:4.1, asistencia:94, superior:6,  bajo:0, color:'#4f46e5' },
+  { id:'9b', nombre:'9°B', grado:'9°', jornada:'Tarde',  estudiantes:27, docente:'Prof. Sandra Ruiz',   doc_av:'SR', doc_color:'#059669', promedio:3.9, asistencia:89, superior:4,  bajo:1, color:'#0891b2' },
+  { id:'10a',nombre:'10°A',grado:'10°',jornada:'Mañana', estudiantes:26, docente:'Prof. Andrés Morales',doc_av:'AM', doc_color:'#e87d1e', promedio:4.2, asistencia:95, superior:7,  bajo:0, color:'#1a6b3c' },
+  { id:'10b',nombre:'10°B',grado:'10°',jornada:'Tarde',  estudiantes:25, docente:'Prof. Laura Reyes',   doc_av:'LR', doc_color:'#2563eb', promedio:4.0, asistencia:93, superior:5,  bajo:0, color:'#16a34a' },
+  { id:'11a',nombre:'11°A',grado:'11°',jornada:'Mañana', estudiantes:24, docente:'Prof. Carmen López',  doc_av:'CL', doc_color:'#db2777', promedio:4.3, asistencia:96, superior:8,  bajo:0, color:'#7c3aed' },
+  { id:'11b',nombre:'11°B',grado:'11°',jornada:'Tarde',  estudiantes:27, docente:'Prof. Ricardo Díaz',  doc_av:'RD', doc_color:'#ea580c', promedio:4.1, asistencia:94, superior:6,  bajo:0, color:'#ea580c' },
+];
+
+const DOCENTES = ['Prof. Andrés Morales','Prof. Laura Reyes','Prof. Carmen López','Prof. Ricardo Díaz','Prof. Sandra Ruiz'];
+
+// TAB 1 — Lista de cursos
+document.getElementById('grid-cursos').innerHTML = CURSOS.map(c => {
+  const pct = (c.promedio/5*100).toFixed(0);
+  const color_asist = c.asistencia >= 92 ? 'var(--verde)' : c.asistencia >= 85 ? 'var(--alerta)' : 'var(--error)';
+  return `<div class="curso-card" style="--cc-color:${c.color};">
+    <div class="curso-header">
+      <div class="curso-ico" style="background:${c.color}20;">${getEmoji(c.grado)}</div>
+      <div>
+        <div class="curso-nombre">Grado ${c.nombre}</div>
+        <div class="curso-jornada">Jornada ${c.jornada}</div>
+      </div>
+      <span class="badge" style="margin-left:auto;background:${c.color}18;color:${c.color};">${c.estudiantes} est.</span>
+    </div>
+    <div class="curso-stat-row">
+      <div class="curso-stat">
+        <div class="curso-stat-val" style="color:${c.color};">${c.promedio.toFixed(1)}</div>
+        <div class="curso-stat-lbl">Promedio</div>
+      </div>
+      <div class="curso-stat">
+        <div class="curso-stat-val" style="color:${color_asist};">${c.asistencia}%</div>
+        <div class="curso-stat-lbl">Asistencia</div>
+      </div>
+      <div class="curso-stat">
+        <div class="curso-stat-val" style="color:var(--verde);">${c.superior}</div>
+        <div class="curso-stat-lbl">Superior</div>
+      </div>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt-muted);margin-bottom:4px;">
+        <span>Rendimiento P1</span><span style="color:${c.color};font-weight:700;">${pct}%</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%;background:${c.color};"></div></div>
+    </div>
+    <div class="curso-docente">
+      <div class="doc-av" style="background:${c.doc_color};">${c.doc_av}</div>
+      <span>${c.docente}</span>
+    </div>
+  </div>`;
+}).join('');
+
+// TAB 2 — Asignación
+document.getElementById('tabla-asignacion').innerHTML = CURSOS.map(c => `
+  <div class="asig-row">
+    <div class="asig-cell">
+      <span style="display:inline-flex;align-items:center;gap:8px;">
+        <span style="width:10px;height:10px;border-radius:50%;background:${c.color};display:inline-block;"></span>
+        <span style="font-weight:600;color:var(--txt-primario);">Grado ${c.nombre}</span>
+      </span>
+    </div>
+    <div class="asig-cell">${c.grado}</div>
+    <div class="asig-cell">${c.jornada}</div>
+    <div class="asig-cell">
+      <select class="asig-select" onchange="guardarAsignacion('${c.id}',this.value)">
+        ${DOCENTES.map(d => `<option ${d===c.docente?'selected':''}>${d}</option>`).join('')}
+      </select>
+    </div>
+    <div class="asig-cell"><span class="badge badge-exito">Asignado</span></div>
+  </div>`).join('');
+
+// TAB 3 — Estadísticas
+document.getElementById('stat-promedios').innerHTML = CURSOS.map(c => {
+  const pct = (c.promedio/5*100).toFixed(0);
+  return `<div class="stat-curso-row">
+    <div class="stat-curso-nombre">${c.nombre}</div>
+    <div class="mini-bar-wrap"><div class="mini-bar" style="width:${pct}%;background:${c.color};"></div></div>
+    <div class="mini-val" style="color:${c.color};">${c.promedio.toFixed(1)}</div>
+  </div>`;
+}).join('');
+
+document.getElementById('stat-asistencia').innerHTML = CURSOS.map(c => {
+  const color = c.asistencia >= 92 ? 'var(--verde)' : c.asistencia >= 85 ? 'var(--alerta)' : 'var(--error)';
+  return `<div class="stat-curso-row">
+    <div class="stat-curso-nombre">${c.nombre}</div>
+    <div class="mini-bar-wrap"><div class="mini-bar" style="width:${c.asistencia}%;background:${color};"></div></div>
+    <div class="mini-val" style="color:${color};">${c.asistencia}%</div>
+  </div>`;
+}).join('');
+
+document.getElementById('tabla-resumen').innerHTML = CURSOS.map(c => {
+  const dp = c.promedio >= 4.6 ? {txt:'Superior',cls:'badge-morado'} : c.promedio >= 4.0 ? {txt:'Alto',cls:'badge-exito'} : c.promedio >= 3.0 ? {txt:'Básico',cls:'badge-alerta'} : {txt:'Bajo',cls:'badge-error'};
+  return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;border-bottom:1px solid var(--borde);" onmouseover="this.style.background='var(--bg-app)'" onmouseout="this.style.background=''">
+    <div class="asig-cell" style="font-weight:600;color:var(--txt-primario);">
+      <span style="display:inline-flex;align-items:center;gap:6px;">
+        <span style="width:9px;height:9px;border-radius:50%;background:${c.color};display:inline-block;"></span>${c.nombre}
+      </span>
+    </div>
+    <div class="asig-cell">${c.estudiantes}</div>
+    <div class="asig-cell"><span class="badge ${dp.cls}">${c.promedio.toFixed(1)} — ${dp.txt}</span></div>
+    <div class="asig-cell">${c.asistencia}%</div>
+    <div class="asig-cell" style="color:var(--verde);font-weight:700;">${c.superior}</div>
+    <div class="asig-cell" style="color:${c.bajo>0?'var(--error)':'var(--txt-muted)'};font-weight:700;">${c.bajo}</div>
+  </div>`;
+}).join('');
+
+// Helpers
+function getEmoji(g) {
+  const map = {'6°':'🌱','7°':'📖','8°':'🔬','9°':'🧮','10°':'🎯','11°':'🎓'};
+  return map[g] || '📚';
+}
+function swTab(btn, id) {
+  document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mtab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+function abrirModal()  { document.getElementById('modal-curso').classList.add('open'); }
+function cerrarModal() { document.getElementById('modal-curso').classList.remove('open'); }
+function guardarCurso() {
+  const nombre  = document.getElementById('input-nombre').value.trim();
+  const grado   = document.getElementById('input-grado').value;
+  const jornada = document.getElementById('input-jornada').value;
+  if (!nombre || !grado || !jornada) { alert('Completa todos los campos requeridos.'); return; }
+  alert('Curso "' + nombre + '" creado correctamente. En producción se guardaría en la base de datos.');
+  cerrarModal();
+}
+function guardarAsignacion(id, docente) {
+  console.log('Asignación actualizada:', id, docente);
+  // En producción: llamada al API
+}
+document.getElementById('modal-curso').addEventListener('click', function(e) {
+  if (e.target === this) cerrarModal();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('admin');
+  if (usuario) AUTH.pintarUsuario(usuario);
+});
+</script>
+</body>
+</html>

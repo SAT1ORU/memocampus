@@ -10,14 +10,14 @@
     .welcome-banner { background:linear-gradient(135deg,#5a1a8a 0%,var(--color-padre) 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; position:relative; overflow:hidden; }
     .welcome-banner::before { content:''; position:absolute; right:-20px; top:-20px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.06); }
     .welcome-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
-    .welcome-banner p { color:rgba(255,255,255,0.7); font-size:13px; font-weight:300; }
+    .welcome-banner p  { color:rgba(255,255,255,0.7); font-size:13px; font-weight:300; }
     .nota-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr; border-bottom:1px solid var(--borde); align-items:center; }
     .nota-row:last-child { border-bottom:none; }
     .nota-row:hover { background:var(--bg-app); }
     .nota-cell { padding:11px 14px; font-size:13.5px; color:var(--txt-secundario); }
     .nota-cell.hdr { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.8px; color:var(--txt-muted); background:var(--bg-app); border-bottom:2px solid var(--borde); }
-    .nota-num { font-size:1.1rem; font-weight:800; }
-    .nota-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-right:8px; display:inline-block; }
+    .nota-num  { font-size:1.1rem; font-weight:800; }
+    .nota-dot  { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-right:8px; display:inline-block; }
     .periodo-tab-bar { display:flex; gap:4px; border-bottom:2px solid var(--borde); margin-bottom:1.5rem; }
     .ptab { padding:8px 20px; font-size:13.5px; font-weight:500; color:var(--txt-muted); cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; transition:var(--trans); background:none; border-top:none; border-left:none; border-right:none; font-family:var(--font-ui); }
     .ptab.active { color:var(--color-padre); border-bottom-color:var(--color-padre); font-weight:600; }
@@ -28,184 +28,307 @@
     .chart-bar-wrap { flex:1; background:var(--bg-app); border-radius:20px; height:9px; overflow:hidden; }
     .chart-bar { height:100%; border-radius:20px; transition:width 0.8s ease; }
     .chart-val { font-size:13px; font-weight:700; min-width:30px; text-align:right; }
+    .hijo-tab { display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:var(--radio-lg); border:1.5px solid var(--borde); background:var(--bg-card); cursor:pointer; transition:var(--trans); font-family:var(--font-ui); }
+    .hijo-tab:hover { border-color:var(--color-padre); }
+    .hijo-tab.activo { border-color:var(--color-padre); background:var(--color-padre-suave); }
+    .hijo-tab-avatar { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; }
+    .hijo-tab-nombre { font-size:13.5px; font-weight:600; color:var(--txt-primario); }
+    .hijo-tab-grado  { font-size:11px; color:var(--txt-muted); }
+    /* Sidebar */
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.45) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+    /* Notif */
+    .notif-wrapper { position:relative; }
+    .notif-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:300px; background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); box-shadow:var(--sombra-lg); z-index:200; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--borde); }
+    .notif-footer { display:block; text-align:center; padding:10px; font-size:12px; font-weight:600; color:var(--color-padre); border-top:1px solid var(--borde); transition:var(--trans); }
+    .notif-footer:hover { background:var(--bg-app); }
   </style>
 </head>
 <body>
 <div class="app-layout">
-  <aside class="app-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">M</div>
-      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
-    </div>
-    <div class="sidebar-section-title">Mi hijo/a</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
-      <a href="notas.html" class="activo"><span class="nav-ico">📊</span> Notas</a>
-      <a href="dashboard.html#asistencia"><span class="nav-ico">📅</span> Asistencia</a>
-      <a href="#" onclick="document.getElementById('modal-excusa').classList.add('open')"><span class="nav-ico">📎</span> Adjuntar excusa</a>
-    </nav>
-    <div class="sidebar-section-title">Comunicación</div>
-    <nav class="sidebar-nav">
-      <a href="mensajes.html"><span class="nav-ico">💬</span> Mensajes al docente</a>
-      <a href="dashboard.html#comunicados"><span class="nav-ico">📢</span> Comunicados <span class="sidebar-badge">2</span></a>
-      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-padre);">CG</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Carlos Gómez</div>
-        <div class="sidebar-user-rol">Padre de familia</div>
-      </div>
-      <span class="sidebar-logout" data-logout>⏏</span>
-    </div>
-  </aside>
+  <aside class="app-sidebar" id="sidebar"></aside>
   <div class="sidebar-overlay"></div>
 
   <main class="app-main">
     <header class="app-topbar">
       <div class="topbar-left">
-        <button class="hamburger-btn">☰</button>
-        <span class="topbar-title">Notas de Valentina</span>
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title" id="topbar-titulo">Notas de Valentina</span>
       </div>
       <div class="topbar-right">
-        <button class="btn btn-primary btn-sm" onclick="window.print()">📥 Descargar boletín</button>
-        <div class="topbar-avatar" style="background:var(--color-padre); margin-left:8px;">CG</div>
+        <div class="notif-wrapper" id="notifWrapper">
+          <button class="topbar-btn" onclick="toggleNotif()">
+            &#128276;
+            <div class="topbar-notif-dot" id="notifDot"></div>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span class="fw-700">Notificaciones</span>
+              <span class="text-xs text-muted" id="notifCount">Al dia</span>
+            </div>
+            <a href="comunicados.html" class="notif-footer">Ver comunicados</a>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="window.print()">Descargar boletin</button>
+        <div class="topbar-avatar" data-user-avatar style="background:var(--color-padre);margin-left:8px;">CG</div>
       </div>
     </header>
 
     <div class="app-content">
 
+      <!-- Banner -->
       <div class="welcome-banner">
         <div>
-          <h2>Notas de Valentina Gómez 📊</h2>
-          <p>Grado 10°A · IE La Armonía · Año 2026</p>
+          <h2 id="banner-titulo">Notas de Valentina Gomez</h2>
+          <p id="banner-sub">Grado 10A - IE La Armonia - Ano 2026</p>
         </div>
-        <div style="display:flex; gap:16px; flex-wrap:wrap;">
-          <div style="text-align:center;"><div style="color:rgba(255,255,255,0.65); font-size:11px; margin-bottom:4px;">Promedio</div><div style="color:#fff; font-size:2rem; font-weight:800;">4.1</div><div style="color:rgba(255,255,255,0.55); font-size:11px;">Período 1</div></div>
-          <div style="text-align:center;"><div style="color:rgba(255,255,255,0.65); font-size:11px; margin-bottom:4px;">Desempeño</div><div style="color:var(--amarillo); font-size:1.2rem; font-weight:700;">Alto</div><div style="color:rgba(255,255,255,0.55); font-size:11px;">Escala inst.</div></div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="color:rgba(255,255,255,0.65);font-size:11px;margin-bottom:4px;">Promedio</div>
+            <div id="banner-promedio" style="color:#fff;font-size:2rem;font-weight:800;">4.1</div>
+            <div style="color:rgba(255,255,255,0.55);font-size:11px;">Periodo 1</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="color:rgba(255,255,255,0.65);font-size:11px;margin-bottom:4px;">Desempeno</div>
+            <div id="banner-desempeno" style="color:var(--amarillo);font-size:1.2rem;font-weight:700;">Alto</div>
+            <div style="color:rgba(255,255,255,0.55);font-size:11px;">Escala inst.</div>
+          </div>
         </div>
       </div>
 
+      <!-- Selector hijo -->
+      <div style="display:flex;gap:8px;margin-bottom:1.5rem;">
+        <button class="hijo-tab activo" onclick="selHijo('valentina',this)">
+          <div class="hijo-tab-avatar" style="background:var(--color-estudiante);">VG</div>
+          <div><div class="hijo-tab-nombre">Valentina Gomez</div><div class="hijo-tab-grado">Grado 10A</div></div>
+        </button>
+        <button class="hijo-tab" onclick="selHijo('andres',this)">
+          <div class="hijo-tab-avatar" style="background:var(--mat-ciencias);">AG</div>
+          <div><div class="hijo-tab-nombre">Andres Gomez</div><div class="hijo-tab-grado">Grado 7B</div></div>
+        </button>
+      </div>
+
+      <!-- Chart + Resumen -->
       <div class="grid-2 mb-3">
         <div class="card">
-          <div class="flex-between mb-3"><h3>Rendimiento por materia</h3><span class="badge badge-morado">Período 1</span></div>
+          <div class="flex-between mb-3"><h3>Rendimiento por materia</h3><span class="badge badge-morado">Periodo 1</span></div>
           <div id="chart-padre"></div>
         </div>
         <div class="card">
-          <div class="flex-between mb-3"><h3>Resumen del período</h3></div>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--borde);">
-              <span class="text-sm text-muted">Materias en desempeño Superior</span>
-              <span style="font-size:1.1rem; font-weight:700; color:#9b3de8;">1</span>
+          <div class="flex-between mb-3"><h3>Resumen del periodo</h3></div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde);">
+              <span class="text-sm text-muted">Materias en desempeno Superior</span>
+              <span id="res-superior" style="font-size:1.1rem;font-weight:700;color:#9b3de8;">1</span>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--borde);">
-              <span class="text-sm text-muted">Materias en desempeño Alto</span>
-              <span style="font-size:1.1rem; font-weight:700; color:var(--verde);">6</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde);">
+              <span class="text-sm text-muted">Materias en desempeno Alto</span>
+              <span id="res-alto" style="font-size:1.1rem;font-weight:700;color:var(--verde);">6</span>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--borde);">
-              <span class="text-sm text-muted">Materias en desempeño Básico</span>
-              <span style="font-size:1.1rem; font-weight:700; color:var(--alerta);">2</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--borde);">
+              <span class="text-sm text-muted">Materias en desempeno Basico</span>
+              <span id="res-basico" style="font-size:1.1rem;font-weight:700;color:var(--alerta);">2</span>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0;">
-              <span class="text-sm text-muted">Materias en desempeño Bajo</span>
-              <span style="font-size:1.1rem; font-weight:700; color:var(--error);">0</span>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+              <span class="text-sm text-muted">Materias en desempeno Bajo</span>
+              <span id="res-bajo" style="font-size:1.1rem;font-weight:700;color:var(--error);">0</span>
             </div>
           </div>
-          <div style="margin-top:1rem; padding:12px; background:var(--verde-suave); border-radius:var(--radio-md);">
-            <p style="font-size:13px; color:var(--verde); font-weight:500;">💡 Valentina tiene buen desempeño general. Se recomienda reforzar Inglés y Física para el próximo período.</p>
+          <div style="margin-top:1rem;padding:12px;background:var(--verde-suave);border-radius:var(--radio-md);">
+            <p id="res-nota" style="font-size:13px;color:var(--verde);font-weight:500;"></p>
           </div>
         </div>
       </div>
 
+      <!-- Boletin -->
       <div class="card">
-        <div class="flex-between mb-3"><h3>Boletín detallado</h3><div style="display:flex; gap:8px;"><span class="badge badge-morado">10°A</span><span class="badge badge-verde">2026</span></div></div>
-
-        <div class="periodo-tab-bar">
-          <button class="ptab active" onclick="swPeriodo(this,'p1')">Período 1</button>
-          <button class="ptab" onclick="swPeriodo(this,'p2')">Período 2</button>
-          <button class="ptab" onclick="swPeriodo(this,'p3')">Período 3</button>
-          <button class="ptab" onclick="swPeriodo(this,'p4')">Período 4</button>
+        <div class="flex-between mb-3">
+          <h3>Boletin detallado</h3>
+          <div style="display:flex;gap:8px;">
+            <span class="badge badge-morado" id="badge-grado">10A</span>
+            <span class="badge badge-verde">2026</span>
+          </div>
         </div>
-
+        <div class="periodo-tab-bar">
+          <button class="ptab active" onclick="swPeriodo(this,'p1')">Periodo 1</button>
+          <button class="ptab" onclick="swPeriodo(this,'p2')">Periodo 2</button>
+          <button class="ptab" onclick="swPeriodo(this,'p3')">Periodo 3</button>
+          <button class="ptab" onclick="swPeriodo(this,'p4')">Periodo 4</button>
+        </div>
         <div class="ptab-content active" id="ptab-p1">
-          <div style="overflow-x:auto; border-radius:var(--radio-md); border:1px solid var(--borde);">
+          <div style="overflow-x:auto;border-radius:var(--radio-md);border:1px solid var(--borde);">
             <div class="nota-row">
               <div class="nota-cell hdr">Materia</div>
               <div class="nota-cell hdr" style="text-align:center;">Ser</div>
               <div class="nota-cell hdr" style="text-align:center;">Saber</div>
               <div class="nota-cell hdr" style="text-align:center;">Hacer</div>
               <div class="nota-cell hdr" style="text-align:center;">Nota P1</div>
-              <div class="nota-cell hdr" style="text-align:center;">Desempeño</div>
+              <div class="nota-cell hdr" style="text-align:center;">Desempeno</div>
             </div>
             <div id="tabla-padre-p1"></div>
             <div class="nota-row" style="background:var(--color-padre-suave);">
-              <div class="nota-cell" style="font-weight:700; color:var(--color-padre);">Promedio General</div>
+              <div class="nota-cell" style="font-weight:700;color:var(--color-padre);">Promedio General</div>
               <div class="nota-cell"></div><div class="nota-cell"></div><div class="nota-cell"></div>
-              <div class="nota-cell" style="text-align:center;"><span class="nota-num" style="color:var(--color-padre);">4.1</span></div>
-              <div class="nota-cell" style="text-align:center;"><span class="badge badge-exito">Alto</span></div>
+              <div class="nota-cell" style="text-align:center;">
+                <span id="fila-promedio-val" class="nota-num" style="color:var(--color-padre);">4.1</span>
+              </div>
+              <div class="nota-cell" style="text-align:center;">
+                <span id="fila-desempeno-badge" class="badge badge-exito">Alto</span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="ptab-content" id="ptab-p2"><div style="text-align:center; padding:3rem; color:var(--txt-muted);"><div style="font-size:2.5rem; opacity:0.3; margin-bottom:12px;">📊</div><p>El período 2 aún no ha finalizado.</p></div></div>
-        <div class="ptab-content" id="ptab-p3"><div style="text-align:center; padding:3rem; color:var(--txt-muted);"><div style="font-size:2.5rem; opacity:0.3; margin-bottom:12px;">📊</div><p>El período 3 aún no ha iniciado.</p></div></div>
-        <div class="ptab-content" id="ptab-p4"><div style="text-align:center; padding:3rem; color:var(--txt-muted);"><div style="font-size:2.5rem; opacity:0.3; margin-bottom:12px;">📊</div><p>El período 4 aún no ha iniciado.</p></div></div>
+        <div class="ptab-content" id="ptab-p2"><div style="text-align:center;padding:3rem;color:var(--txt-muted);"><div style="font-size:2.5rem;opacity:0.3;margin-bottom:12px;">&#128202;</div><p>El periodo 2 aun no ha finalizado.</p></div></div>
+        <div class="ptab-content" id="ptab-p3"><div style="text-align:center;padding:3rem;color:var(--txt-muted);"><div style="font-size:2.5rem;opacity:0.3;margin-bottom:12px;">&#128202;</div><p>El periodo 3 aun no ha iniciado.</p></div></div>
+        <div class="ptab-content" id="ptab-p4"><div style="text-align:center;padding:3rem;color:var(--txt-muted);"><div style="font-size:2.5rem;opacity:0.3;margin-bottom:12px;">&#128202;</div><p>El periodo 4 aun no ha iniciado.</p></div></div>
       </div>
+
     </div>
   </main>
 </div>
 
+<script src="../assets/js/comunicados.js"></script>
+<script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
+const HIJOS_NOTAS = {
+  valentina: {
+    nombre:'Valentina Gomez', grado:'10A',
+    promedio:'4.1', desempeno:'Alto',
+    resumen:{ superior:1, alto:6, basico:2, bajo:0 },
+    nota:'Valentina tiene buen desempeno general. Se recomienda reforzar Ingles y Fisica.',
+    materias:[
+      { nombre:'Matematicas',      color:'#2563eb', ser:4.3, saber:4.0, hacer:4.3 },
+      { nombre:'Ciencias Nat.',    color:'#059669', ser:4.5, saber:4.6, hacer:4.4 },
+      { nombre:'Ingles',           color:'#7c3aed', ser:4.0, saber:3.6, hacer:3.8 },
+      { nombre:'Espanol',          color:'#db2777', ser:4.2, saber:3.8, hacer:4.0 },
+      { nombre:'Ciencias Sociales',color:'#0891b2', ser:4.4, saber:4.2, hacer:4.2 },
+      { nombre:'Ed. Artistica',    color:'#ea580c', ser:5.0, saber:4.7, hacer:4.8 },
+      { nombre:'Fisica',           color:'#4f46e5', ser:4.0, saber:3.8, hacer:4.0 },
+      { nombre:'Etica y Valores',  color:'#16a34a', ser:4.8, saber:4.5, hacer:4.5 },
+      { nombre:'Ed. Fisica',       color:'#888',    ser:4.5, saber:4.2, hacer:4.4 },
+    ]
+  },
+  andres: {
+    nombre:'Andres Gomez', grado:'7B',
+    promedio:'3.7', desempeno:'Basico',
+    resumen:{ superior:0, alto:3, basico:5, bajo:1 },
+    nota:'Andres necesita reforzar Matematicas y Ciencias Sociales. Se recomienda apoyo en casa.',
+    materias:[
+      { nombre:'Matematicas',      color:'#2563eb', ser:3.5, saber:3.2, hacer:3.4 },
+      { nombre:'Ciencias Nat.',    color:'#059669', ser:4.2, saber:4.0, hacer:4.1 },
+      { nombre:'Ingles',           color:'#7c3aed', ser:3.8, saber:3.5, hacer:3.7 },
+      { nombre:'Espanol',          color:'#db2777', ser:4.0, saber:3.8, hacer:3.9 },
+      { nombre:'Ciencias Sociales',color:'#0891b2', ser:3.2, saber:2.9, hacer:3.0 },
+      { nombre:'Ed. Artistica',    color:'#ea580c', ser:4.5, saber:4.2, hacer:4.3 },
+      { nombre:'Fisica',           color:'#4f46e5', ser:3.6, saber:3.4, hacer:3.5 },
+      { nombre:'Etica y Valores',  color:'#16a34a', ser:4.0, saber:3.8, hacer:3.9 },
+      { nombre:'Ed. Fisica',       color:'#888',    ser:4.2, saber:4.0, hacer:4.1 },
+    ]
+  }
+};
+
+let hijoActual = 'valentina';
+
+function calc(m) { return Math.round((m.ser*0.3 + m.saber*0.4 + m.hacer*0.3)*10)/10; }
+
+function desemp(n) {
+  if (n >= 4.6) return { txt:'Superior', cls:'badge-morado',  style:'background:#fdf4ff;color:#9b3de8;' };
+  if (n >= 4.0) return { txt:'Alto',     cls:'badge-exito',   style:'background:var(--exito-suave);color:#16a34a;' };
+  if (n >= 3.0) return { txt:'Basico',   cls:'badge-alerta',  style:'background:var(--alerta-suave);color:#d97706;' };
+  return               { txt:'Bajo',     cls:'badge-error',   style:'background:var(--error-suave);color:#dc2626;' };
+}
+
+function selHijo(id, btn) {
+  hijoActual = id;
+  document.querySelectorAll('.hijo-tab').forEach(b => b.classList.remove('activo'));
+  btn.classList.add('activo');
+  renderNotas();
+}
+
+function renderNotas() {
+  const h = HIJOS_NOTAS[hijoActual];
+
+  // Banner y topbar
+  document.getElementById('banner-titulo').textContent   = 'Notas de ' + h.nombre;
+  document.getElementById('banner-sub').textContent      = 'Grado ' + h.grado + ' - IE La Armonia - Ano 2026';
+  document.getElementById('topbar-titulo').textContent   = 'Notas de ' + h.nombre.split(' ')[0];
+  document.getElementById('banner-promedio').textContent = h.promedio;
+  document.getElementById('banner-desempeno').textContent= h.desempeno;
+  document.getElementById('badge-grado').textContent     = h.grado;
+
+  // Resumen
+  document.getElementById('res-superior').textContent = h.resumen.superior;
+  document.getElementById('res-alto').textContent     = h.resumen.alto;
+  document.getElementById('res-basico').textContent   = h.resumen.basico;
+  document.getElementById('res-bajo').textContent     = h.resumen.bajo;
+  document.getElementById('res-nota').textContent     = h.nota;
+
+  // Fila promedio
+  document.getElementById('fila-promedio-val').textContent = h.promedio;
+  const dp = desemp(parseFloat(h.promedio));
+  const fb = document.getElementById('fila-desempeno-badge');
+  fb.textContent = dp.txt; fb.className = 'badge ' + dp.cls;
+
+  // Chart
+  document.getElementById('chart-padre').innerHTML = h.materias.map(m => {
+    const nota = calc(m), pct = (nota/5*100).toFixed(0);
+    return '<div class="chart-row">' +
+      '<div class="chart-label">' + m.nombre + '</div>' +
+      '<div class="chart-bar-wrap"><div class="chart-bar" style="width:' + pct + '%;background:' + m.color + ';"></div></div>' +
+      '<div class="chart-val" style="color:' + m.color + ';">' + nota.toFixed(1) + '</div>' +
+    '</div>';
+  }).join('');
+
+  // Tabla
+  document.getElementById('tabla-padre-p1').innerHTML = h.materias.map(m => {
+    const nota = calc(m), d = desemp(nota);
+    return '<div class="nota-row">' +
+      '<div class="nota-cell"><span class="nota-dot" style="background:' + m.color + ';"></span><span style="font-weight:500;color:var(--txt-primario);">' + m.nombre + '</span></div>' +
+      '<div class="nota-cell" style="text-align:center;">' + m.ser.toFixed(1) + '</div>' +
+      '<div class="nota-cell" style="text-align:center;">' + m.saber.toFixed(1) + '</div>' +
+      '<div class="nota-cell" style="text-align:center;">' + m.hacer.toFixed(1) + '</div>' +
+      '<div class="nota-cell" style="text-align:center;"><span class="nota-num" style="color:' + m.color + ';">' + nota.toFixed(1) + '</span></div>' +
+      '<div class="nota-cell" style="text-align:center;"><span class="badge" style="' + d.style + '">' + d.txt + '</span></div>' +
+    '</div>';
+  }).join('');
+}
+
+function swPeriodo(btn, id) {
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.ptab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ptab-' + id).classList.add('active');
+}
+
+function toggleNotif() {
+  const dd = document.getElementById('notifDropdown');
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) document.getElementById('notifDot').style.display = 'none';
+}
+document.addEventListener('click', e => {
+  const w = document.getElementById('notifWrapper');
+  if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('padre');
   if (usuario) AUTH.pintarUsuario(usuario);
-
-  const materias = [
-    { nombre:"Matemáticas",       color:"#3b6de8", ser:4.3, saber:4.0, hacer:4.3 },
-    { nombre:"Ciencias Nat.",     color:"#1a9b6e", ser:4.5, saber:4.6, hacer:4.4 },
-    { nombre:"Inglés",            color:"#9b3de8", ser:4.0, saber:3.6, hacer:3.8 },
-    { nombre:"Español",           color:"#e84c3d", ser:4.2, saber:3.8, hacer:4.0 },
-    { nombre:"Ciencias Sociales", color:"#e87d1e", ser:4.4, saber:4.2, hacer:4.2 },
-    { nombre:"Ed. Artística",     color:"#e83d8a", ser:5.0, saber:4.7, hacer:4.8 },
-    { nombre:"Física",            color:"#1e9ee8", ser:4.0, saber:3.8, hacer:4.0 },
-    { nombre:"Ética y Valores",   color:"#6db83b", ser:4.8, saber:4.5, hacer:4.5 },
-    { nombre:"Ed. Física",        color:"#888",    ser:4.5, saber:4.2, hacer:4.4 },
-  ];
-
-  function calc(m){ return Math.round((m.ser*0.3+m.saber*0.4+m.hacer*0.3)*10)/10; }
-  function desemp(n){
-    if(n>=4.6) return {txt:"Superior",style:"background:#fdf4ff;color:#9b3de8;"};
-    if(n>=4.0) return {txt:"Alto",    style:"background:var(--exito-suave);color:#16a34a;"};
-    if(n>=3.0) return {txt:"Básico",  style:"background:var(--alerta-suave);color:#d97706;"};
-    return           {txt:"Bajo",     style:"background:var(--error-suave);color:#dc2626;"};
-  }
-
-  const tbody = document.getElementById('tabla-padre-p1');
-  materias.forEach(m => {
-    const nota = calc(m); const d = desemp(nota);
-    const row = document.createElement('div');
-    row.className = 'nota-row';
-    row.innerHTML = `
-      <div class="nota-cell"><span class="nota-dot" style="background:${m.color};"></span><span style="font-weight:500;color:var(--txt-primario);">${m.nombre}</span></div>
-      <div class="nota-cell" style="text-align:center;">${m.ser.toFixed(1)}</div>
-      <div class="nota-cell" style="text-align:center;">${m.saber.toFixed(1)}</div>
-      <div class="nota-cell" style="text-align:center;">${m.hacer.toFixed(1)}</div>
-      <div class="nota-cell" style="text-align:center;"><span class="nota-num" style="color:${m.color};">${nota.toFixed(1)}</span></div>
-      <div class="nota-cell" style="text-align:center;"><span class="badge" style="${d.style}">${d.txt}</span></div>`;
-    tbody.appendChild(row);
-  });
-
-  const chart = document.getElementById('chart-padre');
-  materias.forEach(m => {
-    const nota = calc(m); const pct = (nota/5*100).toFixed(0);
-    chart.innerHTML += `<div class="chart-row"><div class="chart-label">${m.nombre}</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:${pct}%;background:${m.color};"></div></div><div class="chart-val" style="color:${m.color};">${nota.toFixed(1)}</div></div>`;
-  });
-
-  function swPeriodo(btn, id) {
-    document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
-    document.querySelectorAll('.ptab-content').forEach(c=>c.classList.remove('active'));
-    btn.classList.add('active');
-    document.getElementById('ptab-'+id).classList.add('active');
-  }
+  renderNotas();
+});
 </script>
 </body>
 </html>

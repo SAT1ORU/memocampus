@@ -42,34 +42,7 @@
 </head>
 <body>
 <div class="app-layout">
-  <aside class="app-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">M</div>
-      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
-    </div>
-    <div class="sidebar-section-title">Mis cursos</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
-      <a href="cursos.html" class="activo"><span class="nav-ico">📚</span> Mis materias</a>
-      <a href="tareas.html"><span class="nav-ico">📤</span> Tareas recibidas <span class="sidebar-badge">8</span></a>
-      <a href="notas.html"><span class="nav-ico">📊</span> Registrar notas</a>
-      <a href="material.html"><span class="nav-ico">📎</span> Subir material</a>
-    </nav>
-    <div class="sidebar-section-title">Comunidad</div>
-    <nav class="sidebar-nav">
-      <a href="mensajes.html"><span class="nav-ico">💬</span> Mensajes <span class="sidebar-badge">3</span></a>
-      <a href="#"><span class="nav-ico">📢</span> Comunicados</a>
-      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-docente);">AM</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Prof. Andrés Morales</div>
-        <div class="sidebar-user-rol">Docente · Ciencias Nat.</div>
-      </div>
-      <span class="sidebar-logout" data-logout title="Cerrar sesión">⏏</span>
-    </div>
-  </aside>
+  <aside class="app-sidebar" id="sidebar"></aside>
   <div class="sidebar-overlay"></div>
 
   <main class="app-main">
@@ -255,7 +228,9 @@
   </div>
 </div>
 
+<script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
+
 <script>
   const usuario = AUTH.proteger('docente');
   if (usuario) AUTH.pintarUsuario(usuario);

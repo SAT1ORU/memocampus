@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adjuntar excusa — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; max-width:860px; }
+
+    .upload-zone {
+      border: 2px dashed var(--borde); border-radius: var(--radio-xl);
+      padding: 2.5rem; text-align: center;
+      background: var(--bg-card); cursor: pointer;
+      transition: var(--trans); position: relative;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--color-padre);
+      background: var(--color-padre-suave);
+    }
+    .upload-zone input[type=file] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width:100%; height:100%;
+    }
+    .upload-ico   { font-size: 2.8rem; margin-bottom: 12px; }
+    .upload-title { font-size: 15px; font-weight: 700; color: var(--txt-primario); margin-bottom: 6px; }
+    .upload-sub   { font-size: 12.5px; color: var(--txt-muted); }
+
+    .file-preview {
+      display: none; align-items: center; gap: 12px;
+      background: var(--color-padre-suave);
+      border: 1px solid var(--color-padre);
+      border-radius: var(--radio-md); padding: 12px 16px;
+      margin-top: 12px;
+    }
+    .file-preview.visible { display: flex; }
+    .file-preview-ico  { font-size: 1.6rem; flex-shrink: 0; }
+    .file-preview-name { font-size: 13.5px; font-weight: 600; color: var(--txt-primario); }
+    .file-preview-size { font-size: 11px; color: var(--txt-muted); }
+    .file-remove {
+      margin-left: auto; background: none; border: none;
+      font-size: 16px; cursor: pointer; color: var(--txt-muted);
+      transition: var(--trans); padding: 4px;
+    }
+    .file-remove:hover { color: var(--error); }
+
+    .historial-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 0; border-bottom: 1px solid var(--borde);
+    }
+    .historial-item:last-child { border-bottom: none; }
+    .hist-ico    { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+    .hist-nombre { font-size:13.5px; font-weight:600; color:var(--txt-primario); margin-bottom:2px; }
+    .hist-meta   { font-size:11.5px; color:var(--txt-muted); }
+    .hist-estado { margin-left:auto; flex-shrink:0; }
+
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.45) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    .notif-wrapper { position:relative; }
+    .notif-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:300px; background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); box-shadow:var(--sombra-lg); z-index:200; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--borde); }
+    .notif-footer { display:block; text-align:center; padding:10px; font-size:12px; font-weight:600; color:var(--color-padre); border-top:1px solid var(--borde); }
+
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      background: var(--txt-primario); color: #fff;
+      padding: 12px 20px; border-radius: var(--radio-lg);
+      font-size: 13.5px; font-weight: 600;
+      box-shadow: var(--sombra-lg); z-index: 999;
+      display: none; align-items: center; gap: 10px;
+    }
+    .toast.visible { display: flex; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    .form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--txt-secundario);
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-md);
+  font-size: 13.5px;
+  font-family: var(--font-ui);
+  color: var(--txt-primario);
+  background: var(--bg-card);
+  transition: var(--trans);
+  outline: none;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.form-input:focus {
+  border-color: var(--color-padre);
+  box-shadow: 0 0 0 3px var(--color-padre-suave);
+}
+select.form-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+textarea.form-input { resize: vertical; min-height: 80px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Adjuntar excusa</span>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-wrapper" id="notifWrapper">
+          <button class="topbar-btn" id="notifBtn" onclick="toggleNotif()">
+            🔔
+            <div class="topbar-notif-dot" id="notifDot"></div>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span class="fw-700">Notificaciones</span>
+              <span class="text-xs text-muted" id="notifCount">Al día</span>
+            </div>
+            <a href="comunicados.html" class="notif-footer">Ver comunicados →</a>
+          </div>
+        </div>
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;
+                    background:var(--color-padre);">CP</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div style="margin-bottom:1.75rem;">
+        <h2 style="font-size:1.3rem;font-weight:800;color:var(--txt-primario);margin-bottom:4px;">Adjuntar excusa médica</h2>
+        <p style="font-size:13px;color:var(--txt-muted);">Justifica inasistencias de tu hijo/a adjuntando el soporte correspondiente.</p>
+      </div>
+
+      <div class="grid-2" style="grid-template-columns:1.1fr 0.9fr; gap:1.5rem; align-items:start;">
+
+        <!-- Formulario -->
+        <div class="card">
+          <h3 style="margin-bottom:1.25rem;">Nueva excusa</h3>
+          <form id="form-excusa" onsubmit="enviarExcusa(event)">
+
+            <div style="margin-bottom:1rem;">
+              <label class="form-label">Estudiante</label>
+              <select class="form-input" id="sel-estudiante" required>
+                <option value="">Selecciona un estudiante</option>
+                <option value="valentina">Valentina Gómez — 10°A</option>
+                <option value="andres">Andrés Gómez — 7°B</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <label class="form-label">Tipo de excusa</label>
+              <select class="form-input" id="sel-tipo" required>
+                <option value="">Selecciona el tipo</option>
+                <option value="medica">🏥 Excusa médica</option>
+                <option value="familiar">👨‍👩‍👧 Calamidad familiar</option>
+                <option value="otro">📄 Otro motivo</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <label class="form-label">Fecha de inasistencia</label>
+              <input type="date" class="form-input" id="inp-fecha" required>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+              <label class="form-label">Descripción <span style="color:var(--txt-muted);font-weight:400;">(opcional)</span></label>
+              <textarea class="form-input" id="inp-desc" rows="3"
+                        placeholder="Ej: Cita médica de control, fiebre alta..."
+                        style="resize:vertical; font-family:var(--font-ui);"></textarea>
+            </div>
+
+            <div style="margin-bottom:1.25rem;">
+              <label class="form-label">Documento soporte</label>
+              <div class="upload-zone" id="uploadZone">
+                <input type="file" id="inp-archivo" accept=".pdf,.jpg,.jpeg,.png"
+                       onchange="previewArchivo(this)">
+                <div class="upload-ico">📎</div>
+                <div class="upload-title">Arrastra tu archivo aquí</div>
+                <div class="upload-sub">PDF, JPG o PNG · Máx. 5 MB</div>
+              </div>
+              <div class="file-preview" id="filePreview">
+                <div class="file-preview-ico" id="previewIco">📄</div>
+                <div>
+                  <div class="file-preview-name" id="previewName">archivo.pdf</div>
+                  <div class="file-preview-size" id="previewSize">0 KB</div>
+                </div>
+                <button type="button" class="file-remove" onclick="quitarArchivo()">✕</button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">
+              📤 Enviar excusa
+            </button>
+          </form>
+        </div>
+
+        <!-- Historial -->
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Historial de excusas</h3>
+            <span class="badge badge-azul" id="total-excusas">3 enviadas</span>
+          </div>
+          <div id="lista-historial">
+            <div class="historial-item">
+              <div class="hist-ico" style="background:var(--verde-suave);">🏥</div>
+              <div>
+                <div class="hist-nombre">Valentina Gómez</div>
+                <div class="hist-meta">Excusa médica · 10 mar 2026</div>
+              </div>
+              <div class="hist-estado"><span class="badge badge-exito">Aprobada</span></div>
+            </div>
+            <div class="historial-item">
+              <div class="hist-ico" style="background:var(--alerta-suave);">👨‍👩‍👧</div>
+              <div>
+                <div class="hist-nombre">Andrés Gómez</div>
+                <div class="hist-meta">Calamidad familiar · 5 mar 2026</div>
+              </div>
+              <div class="hist-estado"><span class="badge badge-exito">Aprobada</span></div>
+            </div>
+            <div class="historial-item">
+              <div class="hist-ico" style="background:var(--error-suave);">📄</div>
+              <div>
+                <div class="hist-nombre">Andrés Gómez</div>
+                <div class="hist-meta">Otro motivo · 20 feb 2026</div>
+              </div>
+              <div class="hist-estado"><span class="badge badge-alerta">Pendiente</span></div>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--borde);">
+            <p style="font-size:12px;color:var(--txt-muted);line-height:1.6;">
+              ℹ️ Las excusas son revisadas por coordinación en un plazo de <strong>1 a 2 días hábiles</strong>.
+              Recibirás una notificación cuando sea aprobada o rechazada.
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast">✅ Excusa enviada correctamente</div>
+
+<script src="../assets/js/comunicados.js"></script>
+<script src="../assets/js/sidebar-padre.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  function previewArchivo(input) {
+    if (!input.files || !input.files[0]) return;
+    const f = input.files[0];
+    const ext = f.name.split('.').pop().toLowerCase();
+    const iconos = { pdf:'📄', jpg:'🖼️', jpeg:'🖼️', png:'🖼️' };
+    document.getElementById('previewIco').textContent  = iconos[ext] || '📄';
+    document.getElementById('previewName').textContent = f.name;
+    document.getElementById('previewSize').textContent = (f.size / 1024).toFixed(1) + ' KB';
+    document.getElementById('filePreview').classList.add('visible');
+    document.getElementById('uploadZone').style.borderColor = 'var(--color-padre)';
+  }
+
+  function quitarArchivo() {
+    document.getElementById('inp-archivo').value = '';
+    document.getElementById('filePreview').classList.remove('visible');
+    document.getElementById('uploadZone').style.borderColor = '';
+  }
+
+  const zone = document.getElementById('uploadZone');
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) {
+      document.getElementById('inp-archivo').files = e.dataTransfer.files;
+      previewArchivo(document.getElementById('inp-archivo'));
+    }
+  });
+
+  function enviarExcusa(e) {
+    e.preventDefault();
+    const estudiante  = document.getElementById('sel-estudiante');
+    const tipo        = document.getElementById('sel-tipo');
+    const fecha       = document.getElementById('inp-fecha').value;
+    const iconosTipo  = { medica:'🏥', familiar:'👨‍👩‍👧', otro:'📄' };
+    const nombresTipo = { medica:'Excusa médica', familiar:'Calamidad familiar', otro:'Otro motivo' };
+    const nombreEst   = estudiante.options[estudiante.selectedIndex].text.split(' —')[0];
+
+    const item = document.createElement('div');
+    item.className = 'historial-item';
+    item.innerHTML = `
+      <div class="hist-ico" style="background:var(--color-padre-suave);">${iconosTipo[tipo.value]}</div>
+      <div>
+        <div class="hist-nombre">${nombreEst}</div>
+        <div class="hist-meta">${nombresTipo[tipo.value]} · ${fecha}</div>
+      </div>
+      <div class="hist-estado"><span class="badge badge-alerta">Pendiente</span></div>
+    `;
+    document.getElementById('lista-historial').prepend(item);
+
+    const total = document.querySelectorAll('.historial-item').length;
+    document.getElementById('total-excusas').textContent = `${total} enviadas`;
+
+    document.getElementById('form-excusa').reset();
+    quitarArchivo();
+
+    const toast = document.getElementById('toast');
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 3000);
+  }
+
+  function toggleNotif() {
+    const dd = document.getElementById('notifDropdown');
+    dd.classList.toggle('open');
+    if (dd.classList.contains('open')) document.getElementById('notifDot').style.display = 'none';
+  }
+  document.addEventListener('click', e => {
+    const w = document.getElementById('notifWrapper');
+    if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const usuario = AUTH.proteger('padre');
+    if (usuario) AUTH.pintarUsuario(usuario);
+  });
+</script>
+</body>
+</html>

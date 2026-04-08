@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Docente — MemoCampus</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <style>
+    /* === Estudiante row === */
+    .estudiante-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--borde); }
+    .estudiante-row:last-child { border-bottom:none; }
+    .est-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; background:var(--color-docente); }
+    .est-nombre { font-size:13.5px; font-weight:600; color:var(--txt-primario); }
+    .est-grado  { font-size:11px; color:var(--txt-muted); }
+    .est-nota   { margin-left:auto; font-size:1rem; font-weight:800; }
+
+    /* === Tarea item === */
+    .tarea-item { display:flex; gap:14px; align-items:flex-start; padding:11px 0; border-bottom:1px solid var(--borde); }
+    .tarea-item:last-child { border-bottom:none; }
+    .tarea-color { width:4px; border-radius:2px; flex-shrink:0; align-self:stretch; min-height:36px; }
+    .tarea-nombre { font-size:13.5px; font-weight:600; color:var(--txt-primario); margin-bottom:3px; }
+    .tarea-meta   { font-size:12px; color:var(--txt-muted); display:flex; gap:10px; flex-wrap:wrap; }
+    .tarea-fecha  { margin-left:auto; text-align:right; flex-shrink:0; }
+    .tarea-fecha .dias      { font-size:11px; font-weight:700; }
+    .tarea-fecha .fecha-str { font-size:10px; color:var(--txt-muted); }
+
+    /* === Comunicado === */
+    .comunicado-item { display:flex; gap:12px; padding:11px 0; border-bottom:1px solid var(--borde); }
+    .comunicado-item:last-child { border-bottom:none; }
+    .com-ico   { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .com-titulo { font-size:13.5px; font-weight:600; color:var(--txt-primario); margin-bottom:2px; }
+    .com-fecha  { font-size:11px; color:var(--txt-muted); }
+
+    /* === Banner === */
+    .welcome-banner {
+      background:linear-gradient(135deg, var(--color-docente) 0%, #c2410c 100%);
+      border-radius:var(--radio-xl); padding:1.75rem 2rem;
+      display:flex; justify-content:space-between; align-items:center;
+      gap:1rem; margin-bottom:1.75rem; overflow:hidden; position:relative;
+    }
+    .welcome-banner::before { content:''; position:absolute; right:-20px; top:-20px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.06); }
+    .welcome-banner h2 { color:#fff; font-size:1.3rem; margin-bottom:4px; }
+    .welcome-banner p  { color:rgba(255,255,255,0.75); font-size:13px; font-weight:300; }
+    .welcome-deco { font-size:3.5rem; opacity:0.25; flex-shrink:0; }
+
+    /* === Layout === */
+    .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
+    .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
+    .app-main    { margin-left:240px; flex:1; min-height:100vh; display:flex; flex-direction:column; }
+    .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
+    .app-content { padding:2rem 1.75rem; flex:1; }
+
+    /* === Sidebar styles === */
+    .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; background:var(--color-docente); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; color:#fff; flex-shrink:0; }
+    .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
+    .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
+    .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
+    .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
+    .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+
+    /* === Notif dropdown === */
+    .notif-wrapper { position:relative; }
+    .notif-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:310px; background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); box-shadow:var(--sombra-lg); z-index:200; overflow:hidden; }
+    .notif-dropdown.open { display:block; }
+    .notif-header  { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--borde); }
+    .notif-item    { display:flex; gap:12px; padding:11px 16px; border-bottom:1px solid var(--borde); transition:var(--trans); cursor:pointer; }
+    .notif-item:hover { background:var(--bg-app); }
+    .notif-item:last-of-type { border-bottom:none; }
+    .notif-item-ico  { width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+    .notif-item-txt  { font-size:13px; font-weight:500; color:var(--txt-primario); margin-bottom:2px; }
+    .notif-item-meta { font-size:11px; color:var(--txt-muted); }
+    .notif-footer  { display:block; text-align:center; padding:10px; font-size:12px; font-weight:600; color:var(--color-docente); border-top:1px solid var(--borde); transition:var(--trans); text-decoration:none; }
+    .notif-footer:hover { background:var(--bg-app); }
+    .notif-dot-item { width:8px; height:8px; border-radius:50%; background:var(--color-docente); flex-shrink:0; margin-top:5px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <!-- MAIN -->
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">&#9776;</button>
+        <span class="topbar-title">Mi inicio</span>
+      </div>
+      <div class="topbar-right">
+        <!-- Notificaciones -->
+        <div class="notif-wrapper" id="notifWrapper">
+          <button class="topbar-btn" id="notifBtn" onclick="toggleNotif()">
+            &#128276;
+            <div class="topbar-notif-dot" id="notifDot"></div>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <span style="font-size:14px;font-weight:700;color:var(--txt-primario);">Notificaciones</span>
+              <span id="notifCount" class="text-xs text-muted">4 nuevas</span>
+            </div>
+            <div class="notif-item">
+              <div class="notif-item-ico" style="background:var(--color-docente-suave);">👩‍👦</div>
+              <div style="flex:1;">
+                <div class="notif-item-txt">Mamá de Valentina — consulta tarea</div>
+                <div class="notif-item-meta">Hoy · 9:15 am</div>
+              </div>
+              <div class="notif-dot-item"></div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-item-ico" style="background:var(--alerta-suave);">⚠️</div>
+              <div style="flex:1;">
+                <div class="notif-item-txt">Coordinación — reunión período 1</div>
+                <div class="notif-item-meta">Ayer · 3:00 pm</div>
+              </div>
+              <div class="notif-dot-item"></div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-item-ico" style="background:var(--verde-suave);">📢</div>
+              <div style="flex:1;">
+                <div class="notif-item-txt">Feria de Ciencias — inscripciones</div>
+                <div class="notif-item-meta">Rectoría · 20 mar 2026</div>
+              </div>
+              <div class="notif-dot-item"></div>
+            </div>
+            <div class="notif-item">
+              <div class="notif-item-ico" style="background:var(--color-estudiante-suave);">📎</div>
+              <div style="flex:1;">
+                <div class="notif-item-txt">Excusa adjuntada — Julián Torres</div>
+                <div class="notif-item-meta">Hoy · 8:40 am</div>
+              </div>
+              <div class="notif-dot-item"></div>
+            </div>
+            <a href="mensajes.html" class="notif-footer">Ver todos los mensajes →</a>
+          </div>
+        </div>
+        <!-- Avatar -->
+        <div class="topbar-avatar" data-user-avatar
+             style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
+                    justify-content:center;font-size:13px;font-weight:700;color:#fff;
+                    background:var(--color-docente);">AM</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <!-- Banner -->
+      <div class="welcome-banner">
+        <div>
+          <h2>¡Hola, <span data-user-name>Prof. Morales</span>! 👋</h2>
+          <p>Docente · Matemáticas · IE La Armonía · Período 1 — 2026</p>
+        </div>
+        <div class="welcome-deco">🎓</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid-4 mb-3">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--color-docente-suave);">👨‍🏫</div>
+          <div>
+            <div class="stat-label">Estudiantes</div>
+            <div class="stat-value">38</div>
+            <div class="stat-sub">Grado 10°A</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:#fef3c7;">✅</div>
+          <div>
+            <div class="stat-label">Tareas activas</div>
+            <div class="stat-value" style="color:var(--alerta);">4</div>
+            <div class="stat-sub">Sin calificar</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
+          <div>
+            <div class="stat-label">Promedio del curso</div>
+            <div class="stat-value" style="color:var(--verde);">4.0</div>
+            <div class="stat-sub">Período 1</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--error-suave);">⚠️</div>
+          <div>
+            <div class="stat-label">En riesgo</div>
+            <div class="stat-value" style="color:var(--error);">3</div>
+            <div class="stat-sub">Bajo rendimiento</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estudiantes + Tareas -->
+      <div class="grid-2 mb-3" style="grid-template-columns:1.4fr 1fr;">
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Estudiantes — 10°A</h3>
+            <a href="notas.html" class="btn btn-ghost btn-sm">Ver notas →</a>
+          </div>
+          <div class="estudiante-row">
+            <div class="est-avatar">VG</div>
+            <div><div class="est-nombre">Valentina Gómez</div><div class="est-grado">10°A · Puesto 1</div></div>
+            <div class="est-nota" style="color:var(--verde);">4.8</div>
+            <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
+          </div>
+          <div class="estudiante-row">
+            <div class="est-avatar">CM</div>
+            <div><div class="est-nombre">Carlos Moreno</div><div class="est-grado">10°A · Puesto 2</div></div>
+            <div class="est-nota" style="color:var(--verde);">4.5</div>
+            <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
+          </div>
+          <div class="estudiante-row">
+            <div class="est-avatar" style="background:#0891b2;">LP</div>
+            <div><div class="est-nombre">Laura Pineda</div><div class="est-grado">10°A · Puesto 3</div></div>
+            <div class="est-nota" style="color:var(--alerta);">3.5</div>
+            <span class="badge badge-alerta" style="margin-left:8px;">Básico</span>
+          </div>
+          <div class="estudiante-row">
+            <div class="est-avatar" style="background:#dc2626;">JT</div>
+            <div><div class="est-nombre">Julián Torres</div><div class="est-grado">10°A · En riesgo</div></div>
+            <div class="est-nota" style="color:var(--error);">2.9</div>
+            <span class="badge badge-error" style="margin-left:8px;">Bajo</span>
+          </div>
+          <div class="estudiante-row">
+            <div class="est-avatar" style="background:#7c3aed;">SR</div>
+            <div><div class="est-nombre">Sofía Ramos</div><div class="est-grado">10°A</div></div>
+            <div class="est-nota" style="color:var(--verde);">4.1</div>
+            <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
+          </div>
+          <a href="notas.html" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:1rem;">Ver todos los estudiantes →</a>
+        </div>
+
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Tareas por calificar</h3>
+            <a href="tareas.html" class="btn btn-ghost btn-sm">Ver todas →</a>
+          </div>
+          <div class="tarea-item">
+            <div class="tarea-color" style="background:var(--color-docente);"></div>
+            <div style="flex:1;"><div class="tarea-nombre">Ejercicios de trigonometría</div><div class="tarea-meta"><span>10°A</span><span>32 entregas</span></div></div>
+            <div class="tarea-fecha"><div class="dias" style="color:var(--error);">Vence hoy</div><div class="fecha-str">25 mar</div></div>
+          </div>
+          <div class="tarea-item">
+            <div class="tarea-color" style="background:#0891b2;"></div>
+            <div style="flex:1;"><div class="tarea-nombre">Taller álgebra — Período 1</div><div class="tarea-meta"><span>10°A</span><span>28 entregas</span></div></div>
+            <div class="tarea-fecha"><div class="dias" style="color:var(--alerta);">2 días</div><div class="fecha-str">27 mar</div></div>
+          </div>
+          <div class="tarea-item">
+            <div class="tarea-color" style="background:#7c3aed;"></div>
+            <div style="flex:1;"><div class="tarea-nombre">Evaluación funciones — P1</div><div class="tarea-meta"><span>10°A</span><span>38 entregas</span></div></div>
+            <div class="tarea-fecha"><div class="dias" style="color:var(--verde);">5 días</div><div class="fecha-str">30 mar</div></div>
+          </div>
+          <div class="tarea-item">
+            <div class="tarea-color" style="background:var(--txt-muted);"></div>
+            <div style="flex:1;"><div class="tarea-nombre">Guía trigonometría — U3</div><div class="tarea-meta"><span>10°A</span><span>15 entregas</span></div></div>
+            <div class="tarea-fecha"><div class="dias" style="color:var(--verde);">7 días</div><div class="fecha-str">1 abr</div></div>
+          </div>
+          <a href="tareas.html" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1rem;">Ir a calificar →</a>
+        </div>
+      </div>
+
+      <!-- Rendimiento + Mensajes -->
+      <div class="grid-2" style="grid-template-columns:1fr 1fr;">
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Rendimiento 10°A — P1</h3>
+            <a href="notas.html" class="btn btn-ghost btn-sm">Ver boletín →</a>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Desempeño Superior</span><span class="text-sm" style="color:#6d28d9;font-weight:700;">5 est.</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:13%;background:#7c3aed;"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Desempeño Alto</span><span class="text-sm" style="color:var(--verde);font-weight:700;">20 est.</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:53%;background:var(--verde);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Desempeño Básico</span><span class="text-sm" style="color:var(--alerta);font-weight:700;">10 est.</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:26%;background:var(--alerta);"></div></div>
+            </div>
+            <div>
+              <div class="flex-between mb-1"><span class="text-sm fw-600">Desempeño Bajo</span><span class="text-sm" style="color:var(--error);font-weight:700;">3 est.</span></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:8%;background:var(--error);"></div></div>
+            </div>
+          </div>
+          <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;">
+            <span class="text-sm text-muted">Promedio general del curso</span>
+            <span style="font-size:1.4rem;font-weight:800;color:var(--color-docente);">4.0</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="flex-between mb-2">
+            <h3>Mensajes recientes</h3>
+            <a href="mensajes.html" class="btn btn-ghost btn-sm">Ver todos →</a>
+          </div>
+          <div class="comunicado-item">
+            <div class="com-ico" style="background:var(--color-docente-suave);">👩‍👦</div>
+            <div><div class="com-titulo">Mamá de Valentina — consulta tarea</div><div class="com-fecha">Hoy · 9:15 am</div></div>
+          </div>
+          <div class="comunicado-item">
+            <div class="com-ico" style="background:var(--alerta-suave);">⚠️</div>
+            <div><div class="com-titulo">Coordinación — reunión período 1</div><div class="com-fecha">Ayer · 3:00 pm</div></div>
+          </div>
+          <div class="comunicado-item">
+            <div class="com-ico" style="background:var(--verde-suave);">📢</div>
+            <div><div class="com-titulo">Feria de Ciencias — inscripciones</div><div class="com-fecha">Rectoría · 20 mar 2026</div></div>
+          </div>
+          <div class="comunicado-item">
+            <div class="com-ico" style="background:var(--color-estudiante-suave);">👨‍👦</div>
+            <div><div class="com-titulo">Papá de Julián — solicitud reunión</div><div class="com-fecha">18 mar 2026</div></div>
+          </div>
+          <a href="mensajes.html" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:1rem;">Ir a mensajes →</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/sidebar-docente.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+function toggleNotif() {
+  const dd = document.getElementById('notifDropdown');
+  const dot = document.getElementById('notifDot');
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    dot.style.display = 'none';
+    document.getElementById('notifCount').textContent = 'Al dia';
+  }
+}
+document.addEventListener('click', e => {
+  const w = document.getElementById('notifWrapper');
+  if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const usuario = AUTH.proteger('docente');
+  if (usuario) AUTH.pintarUsuario(usuario);
+});
+</script>
+</body>
+</html>
