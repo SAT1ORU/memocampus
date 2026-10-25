@@ -1,3 +1,4 @@
+/* global AUTH */
 /* ============================================
    sidebar-docente.js — Sidebar compartido docente
    MemoCampus · Prototipo
@@ -11,7 +12,7 @@ function cargarSidebarDocente() {
   try {
     const data = localStorage.getItem('memocampus_mensajes');
     if (data) msgNoLeidos = JSON.parse(data).filter(m => !m.leido).length;
-  } catch(e) {}
+  } catch { /* Ignorar datos locales inválidos. */ }
 
   const badgeMsg = msgNoLeidos > 0
     ? `<span class="sidebar-badge">${msgNoLeidos}</span>`
@@ -62,7 +63,10 @@ function cargarSidebarDocente() {
   if (link) link.classList.add('activo');
 
   // Logout
-  sidebar.querySelector('[data-logout]')?.addEventListener('click', () => AUTH.logout());
+  sidebar.querySelector('[data-logout]')?.addEventListener('click', () => {
+    if (typeof AUTH !== 'undefined') AUTH.logout();
+    else window.location.href = '../login.html';
+  });
 }
 
 document.addEventListener('DOMContentLoaded', cargarSidebarDocente);

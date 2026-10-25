@@ -3,6 +3,8 @@
    MemoCampus · Prototipo
    ============================================ */
 
+/* exported marcarTodosLeidos, renderComunicados, abrirComunicado, cerrarModal */
+
 const COMUNICADOS_KEY = 'memocampus_comunicados';
 
 const COMUNICADOS_DATA = [

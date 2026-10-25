@@ -7,11 +7,13 @@
 .page-header {
   margin-bottom: 1.75rem;
 }
+
 .page-header h1,
 .page-header h2 {
   color: var(--txt-primario);
   margin-bottom: 4px;
 }
+
 .page-header p {
   font-size: 14px;
   color: var(--txt-muted);
@@ -36,6 +38,7 @@
   gap: 8px;
 }
 .card-header h3 { margin: 0; }
+
 .card-header a {
   font-size: 12px;
   font-weight: 600;
@@ -52,43 +55,51 @@
   padding: 1.25rem 1.4rem;
   transition: var(--trans);
 }
+
 .materia-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--sombra-md);
 }
+
 .materia-card-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 10px;
 }
+
 .materia-ico {
   width: 40px; height: 40px;
   border-radius: var(--radio-md);
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; flex-shrink: 0;
 }
+
 .materia-nota {
   font-size: 1.5rem;
   font-weight: 800;
   color: var(--txt-primario);
   line-height: 1;
 }
+
 .materia-nota-sub {
   font-size: 10px;
   color: var(--txt-muted);
   text-align: right;
 }
+
 .materia-nombre {
   font-size: 14px;
   font-weight: 700;
   color: var(--txt-primario);
   margin-bottom: 2px;
 }
+
 .materia-prof {
   font-size: 12px;
   color: var(--txt-muted);
 }
+
 .materia-footer {
   display: flex;
   align-items: center;
@@ -97,6 +108,7 @@
   padding-top: 10px;
   border-top: 1px solid var(--borde);
 }
+
 .materia-materiales {
   font-size: 12px;
   color: var(--txt-muted);
@@ -111,6 +123,7 @@
   border-bottom: 1px solid var(--borde);
 }
 .tarea-item:last-child { border-bottom: none; }
+
 .tarea-check {
   width: 18px; height: 18px;
   border-radius: 50%;
@@ -120,20 +133,24 @@
   transition: var(--trans);
 }
 .tarea-check:hover { border-color: var(--verde); }
+
 .tarea-check.done {
   background: var(--verde);
   border-color: var(--verde);
 }
+
 .tarea-nombre {
   font-size: 13.5px;
   font-weight: 500;
   color: var(--txt-primario);
   margin-bottom: 3px;
 }
+
 .tarea-meta {
   font-size: 11px;
   color: var(--txt-muted);
 }
+
 .tarea-fecha {
   margin-left: auto;
   font-size: 11px;
@@ -153,6 +170,7 @@
   border-bottom: 1px solid var(--borde);
 }
 .nota-row:last-child { border-bottom: none; }
+
 .nota-materia-name {
   font-size: 13px;
   font-weight: 500;
@@ -160,6 +178,7 @@
   width: 160px;
   flex-shrink: 0;
 }
+
 .nota-bar-wrap {
   flex: 1;
   background: var(--bg-app);
@@ -167,12 +186,14 @@
   height: 7px;
   overflow: hidden;
 }
+
 .nota-bar {
   height: 100%;
   border-radius: var(--radio-full);
   background: var(--verde-claro);
   transition: width 0.7s ease;
 }
+
 .nota-val {
   font-size: 13px;
   font-weight: 700;
@@ -190,6 +211,7 @@
   border-bottom: 1px solid var(--borde);
 }
 .comunicado-item:last-child { border-bottom: none; }
+
 .comunicado-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
@@ -197,12 +219,14 @@
   flex-shrink: 0;
   margin-top: 6px;
 }
+
 .comunicado-titulo {
   font-size: 13.5px;
   font-weight: 500;
   color: var(--txt-primario);
   margin-bottom: 2px;
 }
+
 .comunicado-meta {
   font-size: 11px;
   color: var(--txt-muted);
@@ -238,10 +262,12 @@
   align-items: center;
   transition: var(--trans);
 }
+
 .hijo-card:hover {
   box-shadow: var(--sombra-md);
   transform: translateY(-1px);
 }
+
 .hijo-avatar {
   width: 52px; height: 52px;
   border-radius: 50%;
@@ -249,26 +275,31 @@
   font-size: 18px; font-weight: 800;
   color: #fff; flex-shrink: 0;
 }
+
 .hijo-nombre {
   font-size: 14px;
   font-weight: 700;
   color: var(--txt-primario);
 }
+
 .hijo-grado {
   font-size: 12px;
   color: var(--txt-muted);
   margin-top: 2px;
 }
+
 .hijo-nota {
   margin-left: auto;
   text-align: right;
 }
+
 .hijo-nota-val {
   font-size: 1.4rem;
   font-weight: 800;
   color: var(--txt-primario);
   line-height: 1;
 }
+
 .hijo-nota-label {
   font-size: 10px;
   color: var(--txt-muted);
@@ -287,11 +318,13 @@
   color: var(--alerta);
   font-weight: 500;
 }
+
 .alerta-banner.error {
   background: var(--error-suave);
   border-color: #fecaca;
   color: var(--error);
 }
+
 .alerta-banner.exito {
   background: var(--exito-suave);
   border-color: #bbf7d0;
@@ -299,10 +332,11 @@
 }
 
 /* --- Responsive específico --- */
-@media (max-width: 960px) {
+@media (width <= 960px) {
   .nota-materia-name { width: 120px; }
 }
-@media (max-width: 600px) {
+
+@media (width <= 600px) {
   .materia-card-top { flex-wrap: wrap; }
   .nota-materia-name { width: 100px; font-size: 11px; }
   .hijo-card { flex-wrap: wrap; }

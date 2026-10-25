@@ -1,3 +1,4 @@
+/* global AUTH */
 /* ============================================
    sidebar-padre.js — Sidebar compartido del padre
    MemoCampus · Prototipo
@@ -11,7 +12,7 @@ function cargarSidebarPadre() {
   try {
     const data = localStorage.getItem('memocampus_comunicados');
     if (data) noLeidos = JSON.parse(data).filter(c => !c.leido).length;
-  } catch(e) {}
+  } catch { /* Ignorar datos locales inválidos. */ }
 
   const badgeCom = noLeidos > 0
     ? `<span class="sidebar-badge" id="badge-comunicados">${noLeidos}</span>`
@@ -62,7 +63,10 @@ function cargarSidebarPadre() {
   if (link) link.classList.add('activo');
 
   // Logout — registrar después de que el botón existe en el DOM
-  sidebar.querySelector('[data-logout]')?.addEventListener('click', () => AUTH.logout());
+  sidebar.querySelector('[data-logout]')?.addEventListener('click', () => {
+    if (typeof AUTH !== 'undefined') AUTH.logout();
+    else window.location.href = '../login.html';
+  });
 }
 
 document.addEventListener('DOMContentLoaded', cargarSidebarPadre)

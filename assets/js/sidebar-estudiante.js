@@ -1,3 +1,4 @@
+/* global AUTH */
 
 function cargarSidebarEstudiante() {
   const sidebar = document.getElementById('sidebar');
@@ -7,7 +8,7 @@ function cargarSidebarEstudiante() {
   try {
     const data = localStorage.getItem('memocampus_tareas');
     if (data) tareasNoLeidas = JSON.parse(data).filter(t => !t.entregada).length;
-  } catch(e) {}
+  } catch { /* Ignorar datos locales inválidos. */ }
 
   const badgeTareas = tareasNoLeidas > 0
     ? `<span class="sidebar-badge">${tareasNoLeidas}</span>`

@@ -1,3 +1,4 @@
+/* global AUTH */
 /* ============================================
    sidebar-admin.js — Sidebar compartido admin
    MemoCampus · Prototipo
@@ -56,7 +57,10 @@ function cargarSidebarAdmin() {
   if (link) link.classList.add('activo');
 
   // Logout
-  sidebar.querySelector('[data-logout]')?.addEventListener('click', () => AUTH.logout());
+  sidebar.querySelector('[data-logout]')?.addEventListener('click', () => {
+    if (typeof AUTH !== 'undefined') AUTH.logout();
+    else window.location.href = '../login.html';
+  });
 }
 
 document.addEventListener('DOMContentLoaded', cargarSidebarAdmin);

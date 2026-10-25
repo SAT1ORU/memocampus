@@ -5,17 +5,15 @@
    ============================================ */
 
 :root {
-
   /* === Fuentes === */
   --font-ui:      'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-display: 'Fraunces', Georgia, serif;
+  --font-display: 'Fraunces', georgia, serif;
 
   /* === Colores base === */
   --verde:          #1a6b3c;
   --verde-medio:    #156032;
   --verde-claro:    #2d9e5a;
   --verde-suave:    #dcfce7;
-
   --amarillo:       #f5c400;
   --amarillo-suave: #fef9c3;
   --dorado:         #b45309;
@@ -34,13 +32,10 @@
   /* === Colores por rol === */
   --color-estudiante:       #2563eb;
   --color-estudiante-suave: #dbeafe;
-
   --color-padre:            #7c3aed;
   --color-padre-suave:      #ede9fe;
-
   --color-docente:          #ea580c;
   --color-docente-suave:    #ffedd5;
-
   --color-admin:            #0f766e;
   --color-admin-suave:      #ccfbf1;
 
@@ -56,21 +51,21 @@
 
   /* === Fondos === */
   --bg-app:     #f4f6fb;
-  --bg-card:    #ffffff;
+  --bg-card:    #fff;
   --bg-sidebar: #0f1923;
 
   /* === Textos === */
   --txt-primario:   #0f172a;
   --txt-secundario: #475569;
   --txt-muted:      #94a3b8;
-  --txt-sidebar:    rgba(255, 255, 255, 0.70);
+  --txt-sidebar:    rgb(255 255 255 / 70%);
 
   /* === Bordes === */
   --borde: #e2e8f0;
 
   /* === Sidebar === */
-  --sidebar-hover:  rgba(255, 255, 255, 0.07);
-  --sidebar-active: rgba(255, 255, 255, 0.13);
+  --sidebar-hover:  rgb(255 255 255 / 7%);
+  --sidebar-active: rgb(255 255 255 / 13%);
   --sidebar-w:      240px;
 
   /* === Topbar === */
@@ -84,9 +79,9 @@
   --radio-full: 9999px;
 
   /* === Sombras === */
-  --sombra-sm: 0 1px 4px rgba(15, 23, 42, 0.06);
-  --sombra-md: 0 4px 16px rgba(15, 23, 42, 0.10);
-  --sombra-lg: 0 8px 32px rgba(15, 23, 42, 0.14);
+  --sombra-sm: 0 1px 4px rgb(15 23 42 / 6%);
+  --sombra-md: 0 4px 16px rgb(15 23 42 / 10%);
+  --sombra-lg: 0 8px 32px rgb(15 23 42 / 14%);
 
   /* === Transiciones === */
   --trans:      all 0.18s ease;
