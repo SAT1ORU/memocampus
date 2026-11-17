@@ -38,7 +38,7 @@ function cargarSidebarDocente() {
     <nav class="sidebar-nav">
       <a href="mensajes.html"  data-page="mensajes">  <span class="nav-ico">✉️</span> Mensajes ${badgeMsg}</a>
       <a href="bienestar.html" data-page="bienestar"> <span class="nav-ico">💙</span> Bienestar</a>
-      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank">
+      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank" rel="noopener">
         <span class="nav-ico">🌐</span> Portal del colegio
       </a>
     </nav>
