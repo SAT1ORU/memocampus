@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Docente — MemoCampus</title>
@@ -10,7 +13,7 @@
     /* === Estudiante row === */
     .estudiante-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--borde); }
     .estudiante-row:last-child { border-bottom:none; }
-    .est-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; background:var(--color-docente); }
+    .est-avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:#fff; flex-shrink:0; background:#b45309; }
     .est-nombre { font-size:13.5px; font-weight:600; color:var(--txt-primario); }
     .est-grado  { font-size:11px; color:var(--txt-muted); }
     .est-nota   { margin-left:auto; font-size:1rem; font-weight:800; }
@@ -55,14 +58,14 @@
     .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
     .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; background:var(--color-docente); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; color:#fff; flex-shrink:0; }
     .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
-    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.6); }
     .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
     .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
     .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
-    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.6); padding:1rem 1.25rem 0.4rem; }
     .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
     .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
-    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.6) !important; }
     .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
     .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
 
@@ -218,7 +221,7 @@
             <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
           </div>
           <div class="estudiante-row">
-            <div class="est-avatar" style="background:#0891b2;">LP</div>
+            <div class="est-avatar" style="background:#0e7490;">LP</div>
             <div><div class="est-nombre">Laura Pineda</div><div class="est-grado">10°A · Puesto 3</div></div>
             <div class="est-nota" style="color:var(--alerta);">3.5</div>
             <span class="badge badge-alerta" style="margin-left:8px;">Básico</span>
@@ -249,7 +252,7 @@
             <div class="tarea-fecha"><div class="dias" style="color:var(--error);">Vence hoy</div><div class="fecha-str">25 mar</div></div>
           </div>
           <div class="tarea-item">
-            <div class="tarea-color" style="background:#0891b2;"></div>
+            <div class="tarea-color" style="background:#0e7490;"></div>
             <div style="flex:1;"><div class="tarea-nombre">Taller álgebra — Período 1</div><div class="tarea-meta"><span>10°A</span><span>28 entregas</span></div></div>
             <div class="tarea-fecha"><div class="dias" style="color:var(--alerta);">2 días</div><div class="fecha-str">27 mar</div></div>
           </div>

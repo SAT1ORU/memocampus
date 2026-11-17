@@ -47,7 +47,7 @@
   /* === Estado / semánticos === */
   --exito:        #16a34a;
   --exito-suave:  #dcfce7;
-  --alerta:       #d97706;
+  --alerta:       #b45309;
   --alerta-suave: #fef3c7;
   --error:        #dc2626;
   --error-suave:  #fee2e2;
@@ -62,7 +62,7 @@
   /* === Textos === */
   --txt-primario:   #0f172a;
   --txt-secundario: #475569;
-  --txt-muted:      #94a3b8;
+  --txt-muted:      #64748b;
   --txt-sidebar:    rgba(255, 255, 255, 0.70);
 
   /* === Bordes === */
