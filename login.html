@@ -195,6 +195,8 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="assets/js/supabase-config.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>
   let rolSeleccionado = 'estudiante';
@@ -227,16 +229,17 @@
     document.getElementById('dominio-texto').innerHTML = textos[rol] || textos.estudiante;
   }
 
-  function loginConGoogle() {
-    /* En producción: aquí iría Google OAuth 2.0
-       Por ahora simula el flujo con los datos demo */
+  async function loginConGoogle() {
     const btn = document.querySelector('.btn-google');
     btn.textContent = 'Conectando con Google...';
     btn.disabled = true;
-    setTimeout(() => {
-      AUTH.login(rolSeleccionado);
-      AUTH.redirigirSegunRol(rolSeleccionado);
-    }, 1200);
+    try {
+      await AUTH.loginConGoogle();
+    } catch (error) {
+      btn.textContent = 'Continuar con Google';
+      btn.disabled = false;
+      alert(error.message);
+    }
   }
 
   function loginDemo() {
@@ -249,10 +252,20 @@
     }, 800);
   }
 
-  /* Si ya está autenticado, redirigir directamente */
-  if (AUTH.isAutenticado()) {
-    AUTH.redirigirSegunRol(AUTH.getUsuario().rol);
-  }
+  /* Procesar retorno de Google y conservar demo separado */
+  (async () => {
+    if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
+      try {
+        const usuario = await AUTH.procesarCallbackOAuth();
+        if (usuario) AUTH.redirigirSegunRol(usuario.rol);
+      } catch (error) {
+        alert(error.message);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } else if (AUTH.isAutenticado()) {
+      AUTH.redirigirSegunRol(AUTH.getUsuario().rol);
+    }
+  })();
 </script>
 </body>
 </html>

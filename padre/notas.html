@@ -6,6 +6,7 @@
   <title>Notas — MemoCampus Padre</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .welcome-banner { background:linear-gradient(135deg,#5a1a8a 0%,var(--color-padre) 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; position:relative; overflow:hidden; }
     .welcome-banner::before { content:''; position:absolute; right:-20px; top:-20px; width:140px; height:140px; border-radius:50%; background:rgba(255,255,255,0.06); }
@@ -200,6 +201,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -307,6 +310,27 @@ function renderNotas() {
   }).join('');
 }
 
+async function cargarNotasPadre(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const { data, error } = await client.from('padres_estudiantes').select('estudiantes(id,nombre,grupo_id,grupos(grado,seccion),notas(materia_id,periodo,ser,saber,hacer,final,materias(nombre)))').eq('padre_id', usuario.id);
+    if (error) throw error;
+    const hijos = (data || []).map(v => v.estudiantes).filter(Boolean);
+    if (!hijos.length) return;
+    const colores = ['#2563eb','#059669','#7c3aed','#ea580c','#0891b2'];
+    hijos.forEach((hijo, i) => {
+      const actuales = (hijo.notas || []).filter(n => Number(n.periodo) === 1);
+      const materias = actuales.map(n => ({ nombre: n.materias?.nombre || 'Materia', color: colores[i % colores.length], ser: Number(n.ser), saber: Number(n.saber), hacer: Number(n.hacer) }));
+      const valores = actuales.map(n => Number(n.final)).filter(Number.isFinite);
+      const promedio = valores.length ? (valores.reduce((a,b) => a+b, 0) / valores.length).toFixed(1) : '—';
+      const id = i === 0 ? 'valentina' : i === 1 ? 'andres' : `hijo-${i}`;
+      if (HIJOS_NOTAS[id]) HIJOS_NOTAS[id] = { ...HIJOS_NOTAS[id], nombre: hijo.nombre, grado: hijo.grupos ? `${hijo.grupos.grado}°${hijo.grupos.seccion}` : HIJOS_NOTAS[id].grado, promedio, desempeno: promedio === '—' ? 'Sin nota' : desemp(Number(promedio)).txt, materias };
+    });
+    renderNotas();
+  } catch (error) { console.warn('No se pudieron cargar notas reales del padre.', error); }
+}
+
 function swPeriodo(btn, id) {
   document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.ptab-content').forEach(c => c.classList.remove('active'));
@@ -326,7 +350,7 @@ document.addEventListener('click', e => {
 
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('padre');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) { AUTH.pintarUsuario(usuario); cargarNotasPadre(usuario); }
   renderNotas();
 });
 </script>

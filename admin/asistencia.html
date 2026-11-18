@@ -6,6 +6,7 @@
   <title>Asistencia — MemoCampus Admin</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .hm-tabla { width:100%; border-collapse:collapse; }
     .hm-tabla th { font-size:11px; font-weight:600; color:var(--txt-muted); padding:6px 8px; text-align:center; border-bottom:2px solid var(--borde); text-transform:uppercase; letter-spacing:0.5px; }
@@ -61,7 +62,7 @@
 
       <!-- Stats -->
       <div class="grid-4 mb-3">
-        <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">✅</div><div><div class="stat-label">Asistencia promedio</div><div class="stat-value" style="color:var(--exito);">91%</div><div class="stat-sub">Marzo 2026</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">✅</div><div><div class="stat-label">Asistencia promedio</div><div class="stat-value" id="admin-asistencia-promedio" style="color:var(--exito);">—</div><div class="stat-sub">Marzo 2026</div></div></div>
         <div class="stat-card"><div class="stat-icon" style="background:var(--error-suave);">📉</div><div><div class="stat-label">Día con más ausencias</div><div class="stat-value" style="color:var(--error); font-size:1rem;">Lunes</div><div class="stat-sub">Promedio 12% ausencia</div></div></div>
         <div class="stat-card"><div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div><div><div class="stat-label">Grado crítico</div><div class="stat-value" style="color:var(--alerta); font-size:1rem;">Grado 8°</div><div class="stat-sub">Promedio 83%</div></div></div>
         <div class="stat-card"><div class="stat-icon" style="background:var(--verde-suave);">🏆</div><div><div class="stat-label">Grado con mejor asist.</div><div class="stat-value" style="color:var(--verde); font-size:1rem;">Grado 11°</div><div class="stat-sub">Promedio 97%</div></div></div>
@@ -144,6 +145,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('admin');
@@ -169,14 +172,41 @@
   }
 
   const tbody = document.getElementById('hm-tbody');
-  grados.forEach(g => {
-    const prom = Math.round(g.s.reduce((a,b)=>a+b,0)/g.s.length);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="grado-lbl">${g.g}</td>` +
-      g.s.map(v=>`<td><div class="celda-asist ${clase(v)}" title="${v}%">${v}%</div></td>`).join('') +
-      `<td><strong style="font-size:13px; color:${prom>=90?'var(--verde)':prom>=85?'var(--alerta)':'var(--error)'};">${prom}%</strong></td>`;
-    tbody.appendChild(tr);
-  });
+  function renderMapa(gradosActuales) {
+    tbody.innerHTML = '';
+    gradosActuales.forEach(g => {
+      const prom = Math.round(g.s.reduce((a,b)=>a+b,0)/g.s.length);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td class="grado-lbl">${g.g}</td>` + g.s.map(v=>`<td><div class="celda-asist ${clase(v)}" title="${v}%">${v}%</div></td>`).join('') + `<td><strong style="font-size:13px;color:${prom>=90?'var(--verde)':prom>=85?'var(--alerta)':'var(--error)'};">${prom}%</strong></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  renderMapa(grados);
+
+  async function cargarAsistenciaAdmin() {
+    if (!usuario || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const { data, error } = await client.from('asistencia').select('estudiante_id,fecha,estado,estudiantes(grupo_id,grupos(grado))');
+      if (error) throw error;
+      const filas = data || [];
+      const presentes = filas.filter(r => ['presente','tardanza'].includes(r.estado)).length;
+      if (filas.length) document.getElementById('admin-asistencia-promedio').textContent = `${Math.round(presentes / filas.length * 100)}%`;
+      const grupos = new Map();
+      filas.forEach(r => {
+        const grado = r.estudiantes?.grupos?.grado;
+        if (!grado) return;
+        if (!grupos.has(grado)) grupos.set(grado, []);
+        grupos.get(grado).push(r);
+      });
+      const reales = [...grupos.entries()].map(([grado, registros]) => {
+        const porcentaje = registros.length ? Math.round(registros.filter(r => ['presente','tardanza'].includes(r.estado)).length / registros.length * 100) : 0;
+        return { g: `Grado ${grado}°`, s: [porcentaje, porcentaje, porcentaje, porcentaje] };
+      });
+      if (reales.length) renderMapa(reales);
+    } catch (error) { console.warn('No se pudo cargar asistencia institucional real.', error); }
+  }
+  cargarAsistenciaAdmin();
 </script>
 <script src="../assets/js/sidebar-admin.js"></script>
 <script src="../assets/js/auth.js"></script>

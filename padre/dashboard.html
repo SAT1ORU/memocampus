@@ -1,4 +1,4 @@
-'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -105,6 +105,11 @@
       border-radius: 6px; line-height: 1;
     }
     .btn-logout-side:hover { color: var(--error); background: rgba(220,38,38,0.12); }
+    @media (max-width:960px) {
+      .app-sidebar { transform:translateX(-100%); }
+      .app-sidebar.open { transform:translateX(0); }
+      .app-main { margin-left:0 !important; }
+    }
 
     /* === Btn alertas === */
     .notif-wrapper {
@@ -273,7 +278,7 @@
           <div class="stat-icon" style="background:var(--color-estudiante-suave);">👧</div>
           <div>
             <div class="stat-label">Hijos registrados</div>
-            <div class="stat-value">2</div>
+            <div class="stat-value" id="padre-hijos-total">2</div>
             <div class="stat-sub">Activos este año</div>
           </div>
         </div>
@@ -289,7 +294,7 @@
           <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
           <div>
             <div class="stat-label">Promedio Valentina</div>
-            <div class="stat-value" style="color:var(--verde);">4.1</div>
+            <div class="stat-value" id="padre-promedio" style="color:var(--verde);">—</div>
             <div class="stat-sub">Período 1</div>
           </div>
         </div>
@@ -312,7 +317,7 @@
             <h3>Mis hijos</h3>
             <a href="notas.html" class="btn btn-ghost btn-sm">Ver notas →</a>
           </div>
-          <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="grid-2" id="padre-hijos-lista" style="grid-template-columns: 1fr 1fr; gap:10px;">
 
             <div class="hijo-card" onclick="window.location.href='notas.html'">
               <div class="hijo-header" style="background:var(--color-estudiante);"></div>
@@ -489,9 +494,42 @@
     </div><!-- /app-content -->
   </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script>
+async function cargarDashboardPadre(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const { data: vinculos, error } = await client.from('padres_estudiantes').select('estudiantes(id,nombre,grupo_id,grupos(grado,seccion),notas(periodo,final))').eq('padre_id', usuario.id);
+    if (error) throw error;
+    const hijos = (vinculos || []).map(v => v.estudiantes).filter(Boolean);
+    document.getElementById('padre-hijos-total').textContent = hijos.length;
+    const colores = ['var(--color-estudiante)', '#0891b2', '#7c3aed', '#ea580c'];
+    const lista = document.getElementById('padre-hijos-lista');
+    if (lista && hijos.length) {
+      lista.innerHTML = hijos.map((hijo, i) => {
+        const valores = (hijo.notas || []).filter(n => Number(n.periodo) === 1).map(n => Number(n.final)).filter(Number.isFinite);
+        const promedioHijo = valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null;
+        const nombre = hijo.nombre || 'Estudiante';
+        const iniciales = nombre.split(/\\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase();
+        const grupo = hijo.grupos ? `Grado ${hijo.grupos.grado}°${hijo.grupos.seccion}` : 'Grupo sin registrar';
+        const color = colores[i % colores.length];
+        return `<div class="hijo-card" onclick="window.location.href='notas.html'"><div class="hijo-header" style="background:${color};"></div><div class="hijo-body"><div class="hijo-avatar-wrap" style="background:${color};">${iniciales}</div><div class="hijo-nombre">${nombre}</div><div class="hijo-grado">${grupo}</div><div class="hijo-nota"><span class="nota-num" style="color:${color};">${promedioHijo === null ? '—' : promedioHijo.toFixed(1)}</span><div class="nota-label">Período 1<br><span class="badge ${promedioHijo === null ? '' : promedioHijo >= 4 ? 'badge-exito' : promedioHijo >= 3 ? 'badge-alerta' : 'badge-error'}" style="font-size:9px;">${promedioHijo === null ? 'Sin nota' : promedioHijo >= 4 ? 'Alto' : promedioHijo >= 3 ? 'Básico' : 'Bajo'}</span></div></div></div></div>`;
+      }).join('');
+    }
+    const notas = hijos.flatMap(h => (h.notas || []).filter(n => Number(n.periodo) === 1).map(n => Number(n.final))).filter(Number.isFinite);
+    if (notas.length) document.getElementById('padre-promedio').textContent = (notas.reduce((a,b) => a + b, 0) / notas.length).toFixed(1);
+  } catch (error) {
+    console.warn('No se pudieron cargar datos reales del padre.', error);
+  }
+}
+const usuarioPadre = AUTH.proteger('padre');
+if (usuarioPadre) { AUTH.pintarUsuario(usuarioPadre); cargarDashboardPadre(usuarioPadre); }
+</script>
 </body>
-</html>'''
+</html>
 

@@ -6,6 +6,7 @@
   <title>Registrar Notas — MemoCampus Docente</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .notas-tabla { width:100%; border-collapse:collapse; }
     .notas-tabla th { background:var(--bg-sidebar); color:#fff; padding:10px 12px; font-size:12px; font-weight:500; text-align:left; position:sticky; top:0; }
@@ -109,6 +110,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
 
@@ -116,7 +119,7 @@
   const usuario = AUTH.proteger('docente');
   if (usuario) AUTH.pintarUsuario(usuario);
 
-  const estudiantes = [
+  let estudiantes = [
     { nombre: "Valentina Gómez",  color:"#3b6de8", ser:4.3, saber:4.0, hacer:4.3 },
     { nombre: "Carlos Martínez",  color:"#e84c3d", ser:3.8, saber:3.5, hacer:3.7 },
     { nombre: "Laura Rodríguez",  color:"#1a9b6e", ser:4.8, saber:4.7, hacer:4.6 },
@@ -191,7 +194,26 @@
     setTimeout(()=>{ btn.textContent='💾 Guardar notas'; btn.style.background=''; }, 3000);
   }
 
-  renderTabla();
+  async function cargarNotasDocente() {
+    if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) { renderTabla(); return; }
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const { data: asignaciones, error } = await client.from('asignaciones').select('grupo_id,materia_id').eq('docente_id', usuario.id);
+      if (error) throw error;
+      const grupos = [...new Set((asignaciones || []).map(a => a.grupo_id))];
+      const materiasIds = [...new Set((asignaciones || []).map(a => a.materia_id))];
+      if (!grupos.length) { renderTabla(); return; }
+      const { data: datos, error: estudiantesError } = await client.from('estudiantes').select('id,nombre,notas(materia_id,periodo,ser,saber,hacer,final)').in('grupo_id', grupos);
+      if (estudiantesError) throw estudiantesError;
+      estudiantes = (datos || []).map((e, i) => {
+        const nota = (e.notas || []).find(n => Number(n.periodo) === 1 && materiasIds.includes(n.materia_id));
+        return { id: e.id, nombre: e.nombre, color: ['#3b6de8','#e84c3d','#1a9b6e','#9b3de8'][i % 4], ser: nota ? Number(nota.ser) : 0, saber: nota ? Number(nota.saber) : 0, hacer: nota ? Number(nota.hacer) : 0 };
+      });
+      renderTabla();
+    } catch (error) { console.warn('No se pudieron cargar las notas reales del docente.', error); renderTabla(); }
+  }
+
+  cargarNotasDocente();
 </script>
 </body>
 </html>

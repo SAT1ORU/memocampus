@@ -28,6 +28,7 @@ function cargarSidebarEstudiante() {
       <a href="cursos.html"    data-page="cursos">   <span class="nav-ico">📚</span> Mis materias</a>
       <a href="tareas.html"    data-page="tareas">   <span class="nav-ico">✅</span> Tareas ${badgeTareas}</a>
       <a href="notas.html"     data-page="notas">    <span class="nav-ico">📊</span> Mis notas</a>
+      <a href="bienestar.html" data-page="bienestar"> <span class="nav-ico">💙</span> Bienestar</a>
     </nav>
 
     <div class="sidebar-section-title">Más</div>

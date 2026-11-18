@@ -6,6 +6,7 @@
   <title>Mis Cursos — MemoCampus Docente</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .curso-card { background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); overflow:hidden; transition:var(--trans); }
     .curso-card:hover { box-shadow:var(--sombra-md); transform:translateY(-2px); }
@@ -67,7 +68,7 @@
 
       <!-- CURSOS -->
       <div class="tab-panel2 active" id="tab2-cursos">
-        <div class="grid-2">
+        <div class="grid-2" id="grid-cursos-docente">
 
           <div class="curso-card">
             <div class="curso-header" style="background:var(--mat-ciencias);">
@@ -228,6 +229,8 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
 
@@ -252,6 +255,44 @@
   document.querySelectorAll('.modal-overlay').forEach(o => {
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
   });
+
+  async function cargarCursosDocente() {
+    if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const [asig, est, notas] = await Promise.all([
+        client.from('asignaciones').select('grupo_id,materia_id,grupos(grado,seccion),materias(nombre)').eq('docente_id', usuario.id),
+        client.from('estudiantes').select('grupo_id'),
+        client.from('notas').select('final,materia_id,estudiantes(grupo_id)').eq('periodo', 1)
+      ]);
+      for (const r of [asig, est, notas]) if (r.error) throw r.error;
+      if (!asig.data?.length) return;
+
+      document.getElementById('grid-cursos-docente').innerHTML = asig.data.map(a => {
+        const n = est.data.filter(e => e.grupo_id === a.grupo_id).length;
+        const fin = notas.data.filter(x => x.materia_id === a.materia_id && x.estudiantes?.grupo_id === a.grupo_id).map(x => Number(x.final)).filter(Number.isFinite);
+        const prom = fin.length ? (fin.reduce((s, v) => s + v, 0) / fin.length).toFixed(1) : '—';
+        return `<div class="curso-card">
+            <div class="curso-header" style="background:var(--color-docente);">
+              <h4>${a.materias?.nombre || 'Materia'}</h4>
+              <span>Grado ${a.grupos?.grado}°${a.grupos?.seccion} · Período 1 — 2026</span>
+            </div>
+            <div class="curso-body">
+              <div class="curso-stats">
+                <div class="curso-stat"><div class="n">${n}</div><div class="l">Estudiantes</div></div>
+                <div class="curso-stat"><div class="n" style="color:var(--verde);">${prom}</div><div class="l">Promedio</div></div>
+              </div>
+              <div class="curso-actions">
+                <button class="btn btn-ghost btn-sm" onclick="abrirModalMaterial()">📎 Subir material</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.location.href='notas.html'">📊 Ver notas</button>
+                <button class="btn btn-ghost btn-sm" onclick="window.location.href='tareas.html'">✅ Tareas</button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (error) { console.warn('No se pudieron cargar los cursos reales.', error); }
+  }
+  cargarCursosDocente();
 </script>
 </body>
 </html>

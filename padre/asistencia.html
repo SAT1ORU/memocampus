@@ -6,6 +6,7 @@
   <title>Asistencia — MemoCampus</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     /* === Layout === */
     .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
@@ -221,6 +222,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -397,10 +400,31 @@ document.addEventListener('click', e => {
   if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
 });
 
+async function cargarAsistenciaReal(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const { data: vinculos, error } = await client.from('padres_estudiantes').select('estudiantes(id,nombre,grupo_id,grupos(grado,seccion))').eq('padre_id', usuario.id);
+    if (error) throw error;
+    const hijos = (vinculos || []).map(v => v.estudiantes).filter(Boolean);
+    const ids = hijos.map(h => h.id);
+    if (!ids.length) return;
+    const { data: registros, error: asistenciaError } = await client.from('asistencia').select('estudiante_id,fecha,estado').in('estudiante_id', ids).order('fecha', { ascending: false });
+    if (asistenciaError) throw asistenciaError;
+    hijos.forEach((hijo, i) => {
+      const rows = (registros || []).filter(r => r.estudiante_id === hijo.id);
+      const presentes = rows.filter(r => ['presente','tardanza'].includes(r.estado)).length;
+      const pct = rows.length ? Math.round(presentes / rows.length * 100) : 0;
+      if (HIJOS[i]) { HIJOS[i].pct = pct; HIJOS[i].inasistencias = rows.filter(r => ['ausente','tardanza'].includes(r.estado)).map(r => ({ fecha: r.fecha, tipo: r.estado === 'ausente' ? 'Ausencia' : 'Tardanza', excusa: r.estado === 'excusa' ? 'Aprobada' : 'Sin excusa', obs: '' })); }
+    });
+    actualizarPagina();
+  } catch (error) { console.warn('No se pudo cargar la asistencia real del padre.', error); }
+}
+
 // ============ INIT ============
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('padre');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) { AUTH.pintarUsuario(usuario); cargarAsistenciaReal(usuario); }
   actualizarPagina();
 });
 </script>
