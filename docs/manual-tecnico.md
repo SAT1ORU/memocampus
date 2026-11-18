@@ -28,7 +28,7 @@ Componentes actuales:
 | Componente | Ubicación | Estado |
 |---|---|---|
 | Prototipo visual | `index.html`, `login.html`, carpetas por rol | Hecho, con datos de demostración en el código |
-| Autenticación | `assets/js/auth.js` | Simulada con `localStorage`. **No es segura** |
+| Autenticación | `assets/js/auth.js` | Simulada con `localStorage`. **No es segura**. Redirección por rol corregida |
 | Esquema de BD | `db/schema.sql` | Hecho y probado en PostgreSQL 16 |
 | Datos ficticios | `db/seed_generator.py` → `db/seed.sql` | Hecho y probado |
 | Reglas de alerta | `db/alertas.sql` | Hecho y probado (idempotente) |
@@ -66,6 +66,8 @@ memocampus/
 ---
 
 ## 3. Frontend (prototipo)
+
+Seguridad del frontend tras la auditoría: el texto de los chats se muestra con `textContent` (antes se insertaba como HTML), todas las páginas tienen una política de contenido (CSP) mediante `<meta>`, y los enlaces externos usan `rel="noopener"`. Ver la sección 13.
 
 ### 3.1 Estilos
 - `assets/css/variables.css` define los colores como tokens (`--color-docente`, `--verde`, `--alerta`, `--error-suave`, etc.). Cambiar la paleta aquí afecta todo el sitio.
@@ -271,3 +273,38 @@ Para pruebas locales sin Supabase se puede usar un Postgres 16 temporal. Si se e
 3. Servicio de correo para alertas (Gmail institucional o transaccional).
 4. Aprobación de umbrales por coordinación (nota 3.0; 4 inasistencias por materia).
 5. Escala de ánimo: validada (con licencia) o propia revisada por psicología.
+
+## 12. Diagramas UML
+
+Las fuentes están en `docs/uml/*.mmd` (Mermaid) y los SVG renderizados junto a ellas. Los elementos planeados se marcan como tales.
+
+| Figura | Archivo | Contenido |
+|---|---|---|
+| 1 | `01-casos-de-uso` | Casos de uso por actor. Requiere ajuste de diseño y de relaciones include/extend |
+| 2 | `02-clases-dominio` | Modelo de dominio derivado del esquema |
+| 3 | `03-entidad-relacion` | Entidad-relación de la base de datos |
+| 4 | `04-estados-caso-psicologico` | Estados del caso psicológico (transiciones propuestas) |
+| 5 | `05-secuencia-alertas-padres` | Generación de alertas y aviso a padres (envío planeado) |
+| 6 | `06-secuencia-inicio-sesion` | Inicio de sesión: prototipo actual y versión planeada con Supabase Auth |
+| 7 | `07-secuencia-resumen-ia` | Resumen de grupo con IA con datos seudonimizados |
+| 8 | `08-actividad-entrega-tarea` | Flujo de entrega de tarea por el estudiante |
+| 9 | `09-componentes` | Componentes y despliegue, con servicios planeados |
+
+## 13. Auditoría y correcciones de seguridad
+
+Se realizó una auditoría en dos fases, con línea base en el commit `cdfc7a3` y reevaluación en `836ef1c`. Las herramientas fueron un analizador de patrones propio, Lighthouse con sesión de demostración y pruebas de navegador. SonarQube y OWASP ZAP no se ejecutaron en el entorno de auditoría; sus comandos están en el dictamen.
+
+| Hallazgo | Estado |
+|---|---|
+| XSS en los chats de docente y padre (texto insertado como HTML) | Corregido y verificado en navegador |
+| Redirección por rol a una ruta inexistente (404) | Corregido |
+| Política de contenido (CSP) ausente | Añadida con `<meta>` en todas las páginas |
+| Enlaces externos sin `rel="noopener"` | Corregido |
+| `doctype` inválido en el dashboard del padre | Corregido |
+| Contraste insuficiente en textos, menú e insignias | Mejorado: login y dashboard docente en 100 de accesibilidad |
+| Autenticación simulada con `localStorage` | Pendiente: requiere Supabase Auth |
+| Protección de páginas solo en el cliente | Pendiente: requiere RLS en el servidor |
+| Manejadores inline `onclick=` (188) | Pendiente: impide una CSP sin `'unsafe-inline'` |
+| Cabeceras HTTP (HSTS, `frame-ancestors`) | No aplicable en GitHub Pages; requiere servidor propio |
+
+El dictamen completo, en normas APA 7, es el documento de la auditoría.
