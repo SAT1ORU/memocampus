@@ -1,0 +1,25 @@
+sequenceDiagram
+  %% Inicio de sesión por rol. Estado actual del prototipo y versión planeada con Supabase Auth.
+  actor U as Usuario
+  participant L as login.html
+  participant AU as auth.js (prototipo)
+  participant LS as localStorage
+  participant D as Dashboard del rol
+  participant SB as Supabase Auth (planeado)
+  rect rgb(240,240,240)
+  Note over U,D: Prototipo actual
+  U->>L: selecciona perfil y pulsa "Entrar en modo demo"
+  L->>AU: login(rol)
+  AU->>LS: guarda mc_usuario
+  AU->>D: redirige según rol (ruta relativa a la carpeta)
+  D->>AU: proteger(rol) lee mc_usuario
+  AU-->>D: acceso o redirección a login
+  end
+  rect rgb(230,245,235)
+  Note over U,D: Versión planeada
+  U->>L: inicia sesión con Google
+  L->>SB: OAuth con dominio institucional
+  SB-->>L: sesión firmada con rol desde la tabla usuarios
+  L->>D: redirige según rol
+  D->>SB: consultas protegidas por RLS
+  end

@@ -1,0 +1,62 @@
+flowchart LR
+  %% Diagrama de casos de uso. Mermaid no tiene un tipo nativo de casos de uso;
+  %% los actores son rectángulos y los casos de uso son óvalos.
+  subgraph Actores
+    EST([Estudiante])
+    PAD([Padre o acudiente])
+    DOC([Docente])
+    COO([Coordinación])
+    REC([Rectoría])
+  end
+  subgraph Sistema MemoCampus
+    UC1((Iniciar sesión por rol))
+    UC2((Consultar notas y boletín))
+    UC3((Consultar asistencia))
+    UC4((Entregar tarea))
+    UC5((Responder encuesta de ánimo))
+    UC6((Enviar excusa))
+    UC7((Enviar mensaje al docente))
+    UC8((Publicar material y tareas))
+    UC9((Registrar notas))
+    UC10((Registrar asistencia))
+    UC11((Ver dashboard docente))
+    UC12((Ver ánimo agregado del grupo))
+    UC13((Recibir alerta por correo))
+    UC14((Vincular padre con hijo))
+    UC15((Gestionar caso psicológico))
+    UC16((Ver encuesta individual))
+    UC17((Generar resumen con IA))
+    UC18((Ver reportes institucionales))
+    UC19((Gestionar usuarios))
+  end
+  EST --- UC1
+  EST --- UC2
+  EST --- UC4
+  EST --- UC5
+  EST --- UC7
+  PAD --- UC1
+  PAD --- UC2
+  PAD --- UC3
+  PAD --- UC6
+  PAD --- UC7
+  PAD --- UC13
+  DOC --- UC1
+  DOC --- UC8
+  DOC --- UC9
+  DOC --- UC10
+  DOC --- UC11
+  DOC --- UC12
+  DOC --- UC17
+  COO --- UC1
+  COO --- UC3
+  COO --- UC14
+  COO --- UC18
+  REC --- UC1
+  REC --- UC15
+  REC --- UC16
+  REC --- UC17
+  REC --- UC18
+  REC --- UC19
+  UC5 -. "incluye" .-> UC1
+  UC11 -. "extiende" .-> UC17
+  UC15 -. "activado por" .-> UC5
