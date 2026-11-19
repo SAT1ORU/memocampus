@@ -9,8 +9,8 @@ const AUTH = {
   /* Usuarios de demo por rol */
   USUARIOS_DEMO: {
     estudiante: {
-      nombre: 'Valentina Gómez',
-      correo: 'vgomez@iearmonia.edu.co',
+      nombre: 'Valentina Gómez Valencia',
+      correo: 'latricolorcol00@gmail.com',
       rol: 'estudiante',
       grado: '10°A',
       avatar_color: '#3b6de8',

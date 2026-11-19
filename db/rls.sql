@@ -115,6 +115,32 @@ USING (
   OR public.mc_tiene_rol(ARRAY['docente','coordinacion','rectoria']::public.rol_usuario[])
 );
 
+DROP POLICY IF EXISTS asistencia_insert_docente ON public.asistencia;
+CREATE POLICY asistencia_insert_docente ON public.asistencia FOR INSERT TO authenticated
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.asignaciones a
+    JOIN public.estudiantes e ON a.grupo_id = e.grupo_id
+    WHERE a.docente_id = public.mc_usuario_id()
+      AND a.materia_id = asistencia.materia_id
+      AND e.id = asistencia.estudiante_id
+  )
+  OR public.mc_tiene_rol(ARRAY['coordinacion','rectoria']::public.rol_usuario[])
+);
+
+DROP POLICY IF EXISTS asistencia_update_docente ON public.asistencia;
+CREATE POLICY asistencia_update_docente ON public.asistencia FOR UPDATE TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM public.asignaciones a
+    JOIN public.estudiantes e ON a.grupo_id = e.grupo_id
+    WHERE a.docente_id = public.mc_usuario_id()
+      AND a.materia_id = asistencia.materia_id
+      AND e.id = asistencia.estudiante_id
+  )
+  OR public.mc_tiene_rol(ARRAY['coordinacion','rectoria']::public.rol_usuario[])
+);
+
 DROP POLICY IF EXISTS parametros_select_staff ON public.parametros;
 CREATE POLICY parametros_select_staff ON public.parametros FOR SELECT TO authenticated
 USING (public.mc_tiene_rol(ARRAY['docente','coordinacion','rectoria']::public.rol_usuario[]));

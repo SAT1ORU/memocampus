@@ -1,9 +1,8 @@
 
-function cargarSidebarEstudiante() {
+async function cargarSidebarEstudiante() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  // Sin badge hasta conectar con Supabase: el conteo vive en tareas.html (shortcut: badge vacío, conectar a tareas del grupo)
   const badgeTareas = '';
 
   sidebar.innerHTML = `
@@ -38,10 +37,10 @@ function cargarSidebarEstudiante() {
       <div class="sidebar-avatar" data-user-avatar
            style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
                   justify-content:center;font-size:13px;font-weight:700;color:#fff;
-                  flex-shrink:0;background:#3b6de8;">VG</div>
+                  flex-shrink:0;background:#3b6de8;">ES</div>
       <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Valentina Gómez</div>
-        <div class="sidebar-user-rol"  data-user-rol>Estudiante · 10°A</div>
+        <div class="sidebar-user-name" data-user-name>Estudiante</div>
+        <div class="sidebar-user-rol"  data-user-rol>Cargando...</div>
       </div>
       <button class="btn-logout-side" title="Cerrar sesión" data-logout>⏏</button>
     </div>
@@ -52,18 +51,43 @@ function cargarSidebarEstudiante() {
   const link = sidebar.querySelector(`[data-page="${pagina}"]`);
   if (link) link.classList.add('activo');
 
-  // Logout — AUTH se evalúa solo cuando el usuario hace clic
+  // Logout
   sidebar.querySelector('[data-logout]')?.addEventListener('click', () => {
     if (typeof AUTH !== 'undefined') AUTH.logout();
     else window.location.href = '../login.html';
   });
+
+  // Cargar datos reales del estudiante
+  try {
+    const usuario = AUTH.getUsuario();
+    if (!usuario?.id) return;
+
+    const client = AUTH.clienteSupabase();
+    const { data: estudiante, error } = await client
+      .from('estudiantes')
+      .select('id, nombre, grupo_id, grupos(grado, seccion)')
+      .eq('usuario_id', usuario.id)
+      .maybeSingle();
+
+    if (error || !estudiante) {
+      console.warn('Error cargando estudiante:', error);
+      return;
+    }
+
+    // Pintar datos reales
+    const nameEl = sidebar.querySelector('[data-user-name]');
+    const rolEl = sidebar.querySelector('[data-user-rol]');
+    const avatarEl = sidebar.querySelector('[data-user-avatar]');
+
+    if (nameEl) nameEl.textContent = estudiante.nombre || 'Estudiante';
+    if (rolEl) rolEl.textContent = `Estudiante · ${estudiante.grupos?.grado}°${estudiante.grupos?.seccion || 'A'}`;
+    if (avatarEl) {
+      const initials = estudiante.nombre ? estudiante.nombre.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase() : 'ES';
+      avatarEl.textContent = initials;
+    }
+  } catch (e) {
+    console.warn('Error en sidebar estudiante:', e);
+  }
 }
 
-// ✅ Llamada directa — no depende de DOMContentLoaded
-// Funciona porque este script está al final del <body>
-// y el DOM ya está listo cuando se ejecuta
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', cargarSidebarEstudiante);
-} else {
-  cargarSidebarEstudiante();
-}
+document.addEventListener('DOMContentLoaded', () => cargarSidebarEstudiante());
