@@ -210,4 +210,24 @@ const DOCENTE_MATERIALES = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => DOCENTE_MATERIALES.init());
+document.addEventListener('DOMContentLoaded', () => {
+  DOCENTE_MATERIALES.init();
+
+  // Mostrar nombre del archivo cuando se selecciona
+  const fileInput = document.getElementById('f-material');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const area = document.querySelector('.material-upload-area');
+      if (e.target.files.length > 0) {
+        const nombre = e.target.files[0].name;
+        area.querySelector('p:first-of-type').textContent = `✓ ${nombre}`;
+        area.style.borderColor = 'var(--color-docente)';
+        area.style.background = 'var(--color-docente-suave)';
+      } else {
+        area.querySelector('p:first-of-type').textContent = 'Haz clic para seleccionar archivo';
+        area.style.borderColor = '';
+        area.style.background = '';
+      }
+    });
+  }
+});
