@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienestar — MemoCampus Admin</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <style>
+    .animo-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:10px; }
+    .animo-card { text-align:center; padding:14px 8px; background:var(--bg-app); border-radius:var(--radio-md); border:1px solid var(--borde); }
+    .animo-emoji { font-size:2rem; }
+    .animo-label { font-size:12px; color:var(--txt-muted); margin:4px 0; }
+    .animo-valor { font-size:1.5rem; font-weight:800; color:var(--txt-primario); }
+    .animo-pct { font-size:11px; color:var(--txt-muted); }
+    .tabla-sem { width:100%; border-collapse:collapse; font-size:13px; }
+    .tabla-sem th, .tabla-sem td { padding:8px; border-bottom:1px solid var(--borde); text-align:center; }
+    .tabla-sem th:first-child, .tabla-sem td:first-child { text-align:left; }
+    .flag-item { padding:10px 12px; background:var(--error-suave); border-left:4px solid var(--error); border-radius:var(--radio-md); margin-bottom:8px; }
+    .flag-seud { font-weight:600; color:var(--txt-primario); }
+    .flag-meta { font-size:11px; color:var(--txt-muted); }
+    .aviso { padding:12px; border-radius:var(--radio-md); font-size:12px; margin-top:1rem; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Encuesta de bienestar</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar" data-user-avatar style="background:var(--verde); margin-left:8px;">RA</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div id="sin-acceso" class="aviso" style="background:var(--alerta-suave); border:1px solid #fed7aa; color:#854d0e; margin:0 0 1.5rem;">
+        Cargando datos de la encuesta…
+      </div>
+
+      <div id="contenido" hidden>
+        <div class="grid-4 mb-3">
+          <div class="stat-card"><div class="stat-icon" style="background:var(--verde-suave);">📋</div><div><div class="stat-label">Respuestas (última semana)</div><div class="stat-value" id="kpi-total">—</div><div class="stat-sub" id="kpi-semana">—</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">😊</div><div><div class="stat-label">Bien o muy bien</div><div class="stat-value" id="kpi-positivo" style="color:var(--verde);">—</div><div class="stat-sub">Última semana</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--alerta-suave);">😟</div><div><div class="stat-label">Mal o muy mal</div><div class="stat-value" id="kpi-negativo" style="color:var(--alerta);">—</div><div class="stat-sub">Última semana</div></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:var(--error-suave);">🚩</div><div><div class="stat-label">Requieren atención</div><div class="stat-value" id="kpi-atencion" style="color:var(--error);">—</div><div class="stat-sub">Estudiantes, últimas 4 semanas</div></div></div>
+        </div>
+
+        <div class="grid-2 mb-3">
+          <div class="card">
+            <div class="flex-between mb-3">
+              <h3>Ánimo — semana del <span id="titulo-semana">—</span></h3>
+              <select id="sel-semana" style="padding:6px 10px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui);" aria-label="Semana"></select>
+            </div>
+            <div class="animo-grid" id="animo-grid"></div>
+            <p class="aviso" style="background:var(--bg-app); color:var(--txt-muted);">Conteos agregados de todos los grupos. No incluye comentarios ni identidades.</p>
+          </div>
+
+          <div class="card">
+            <h3 class="mb-3">🚩 Seguimiento (últimas 4 semanas)</h3>
+            <div id="flags"></div>
+            <p class="aviso" style="background:var(--error-suave); color:#7f1d1d;">Solo seudónimos. La marca activa el protocolo de orientación escolar; no es un diagnóstico ni se informa a padres desde aquí.</p>
+          </div>
+        </div>
+
+        <div class="card" style="overflow-x:auto;">
+          <h3 class="mb-3">Tendencia por semana</h3>
+          <table class="tabla-sem">
+            <thead><tr><th>Semana</th><th>😊</th><th>🙂</th><th>😐</th><th>😟</th><th>😢</th><th>Total</th><th>% bien</th></tr></thead>
+            <tbody id="tendencia"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/sidebar-admin.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script>
+  const usuario = AUTH.proteger('admin');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  const NIVELES = [['muy_bien','😊','Muy bien'],['bien','🙂','Bien'],['regular','😐','Regular'],['mal','😟','Mal'],['muy_mal','😢','Muy mal']];
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+  // 'YYYY-MM-DD' sin pasar por Date: evita el corrimiento de un día por zona horaria.
+  const fecha = s => s.split('-').reverse().join('/');
+
+  function sinAcceso(msg) {
+    document.getElementById('sin-acceso').textContent = msg;
+    document.getElementById('contenido').hidden = true;
+  }
+
+  // Sin datos de demostración a propósito: inventar respuestas de ánimo sería engañoso.
+  async function cargarBienestar() {
+    if (!usuario) return;
+    if (!window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return sinAcceso('Supabase no está configurado. Esta sección solo muestra datos reales.');
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const { data: filas, error } = await client.from('vw_animo_grupo').select('semana,animo,total');
+      if (error) throw error;
+      // RLS devuelve vacío (no error) sin sesión de rectoría: no confundirlo con "no hay casos".
+      if (!filas?.length) return sinAcceso('Sin acceso a la encuesta. Inicia sesión con una cuenta de rectoría (Google) para ver estos datos.');
+
+      const porSemana = {};
+      filas.forEach(r => {
+        porSemana[r.semana] ??= {};
+        porSemana[r.semana][r.animo] = (porSemana[r.semana][r.animo] || 0) + Number(r.total);
+      });
+      const semanas = Object.keys(porSemana).sort().reverse();
+      const resumen = s => {
+        const c = porSemana[s];
+        const total = NIVELES.reduce((a, [k]) => a + (c[k] || 0), 0);
+        return { c, total, pos: (c.muy_bien || 0) + (c.bien || 0), neg: (c.mal || 0) + (c.muy_mal || 0) };
+      };
+      const pct = (n, t) => t ? Math.round(n / t * 100) + '%' : '—';
+
+      const ult = resumen(semanas[0]);
+      document.getElementById('kpi-total').textContent = ult.total;
+      document.getElementById('kpi-semana').textContent = 'Semana del ' + fecha(semanas[0]);
+      document.getElementById('kpi-positivo').textContent = pct(ult.pos, ult.total);
+      document.getElementById('kpi-negativo').textContent = pct(ult.neg, ult.total);
+
+      const sel = document.getElementById('sel-semana');
+      sel.innerHTML = semanas.map(s => `<option value="${s}">${fecha(s)}</option>`).join('');
+      const pintarSemana = s => {
+        const r = resumen(s);
+        document.getElementById('titulo-semana').textContent = fecha(s);
+        document.getElementById('animo-grid').innerHTML = NIVELES.map(([k, emoji, label]) =>
+          `<div class="animo-card"><div class="animo-emoji">${emoji}</div><div class="animo-label">${label}</div><div class="animo-valor">${r.c[k] || 0}</div><div class="animo-pct">${pct(r.c[k] || 0, r.total)}</div></div>`).join('');
+      };
+      sel.addEventListener('change', () => pintarSemana(sel.value));
+      pintarSemana(semanas[0]);
+
+      document.getElementById('tendencia').innerHTML = semanas.map(s => {
+        const r = resumen(s);
+        return `<tr><td>${fecha(s)}</td>${NIVELES.map(([k]) => `<td>${r.c[k] || 0}</td>`).join('')}<td><strong>${r.total}</strong></td><td>${pct(r.pos, r.total)}</td></tr>`;
+      }).join('');
+
+      // Marcas individuales: solo seudónimo, grupo, semana y nivel. Nunca el comentario.
+      const desde = semanas[Math.min(3, semanas.length - 1)];
+      const { data: marcas, error: mError } = await client.from('encuestas_animo')
+        .select('estudiante_id,semana,animo,estudiantes(seudonimo,grupos(grado,seccion))')
+        .eq('requiere_atencion', true).gte('semana', desde).order('semana', { ascending: false });
+      if (mError) throw mError;
+      const unicos = [...new Map((marcas || []).map(m => [m.estudiante_id, m])).values()];
+      document.getElementById('kpi-atencion').textContent = unicos.length;
+      document.getElementById('flags').innerHTML = unicos.length
+        ? unicos.map(m => `<div class="flag-item"><div class="flag-seud">${esc(m.estudiantes?.seudonimo)} · ${esc(m.estudiantes?.grupos?.grado)}°${esc(m.estudiantes?.grupos?.seccion)}</div><div class="flag-meta">Última marca: semana del ${fecha(m.semana)} · ánimo ${esc(m.animo.replace('_', ' '))}</div></div>`).join('')
+        : '<p class="text-sm text-muted">Ningún estudiante marcado en las últimas 4 semanas.</p>';
+
+      document.getElementById('sin-acceso').hidden = true;
+      document.getElementById('contenido').hidden = false;
+    } catch (error) {
+      console.warn('No se pudo cargar la encuesta de bienestar.', error);
+      sinAcceso('No se pudieron cargar los datos de la encuesta. Intenta de nuevo más tarde.');
+    }
+  }
+  cargarBienestar();
+</script>
+</body>
+</html>

@@ -6,6 +6,7 @@
   <title>Dashboard Docente — MemoCampus</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     /* === Estudiante row === */
     .estudiante-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--borde); }
@@ -65,6 +66,11 @@
     .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
     .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
     .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+    @media (max-width:960px) {
+      .app-sidebar { transform:translateX(-100%); }
+      .app-sidebar.open { transform:translateX(0); }
+      .app-main { margin-left:0 !important; }
+    }
 
     /* === Notif dropdown === */
     .notif-wrapper { position:relative; }
@@ -168,8 +174,8 @@
           <div class="stat-icon" style="background:var(--color-docente-suave);">👨‍🏫</div>
           <div>
             <div class="stat-label">Estudiantes</div>
-            <div class="stat-value">38</div>
-            <div class="stat-sub">Grado 10°A</div>
+            <div class="stat-value" id="docente-estudiantes-total">—</div>
+            <div class="stat-sub" id="docente-grupos-label">—</div>
           </div>
         </div>
         <div class="stat-card">
@@ -202,39 +208,10 @@
       <div class="grid-2 mb-3" style="grid-template-columns:1.4fr 1fr;">
         <div class="card">
           <div class="flex-between mb-2">
-            <h3>Estudiantes — 10°A</h3>
+            <h3>Estudiantes</h3>
             <a href="notas.html" class="btn btn-ghost btn-sm">Ver notas →</a>
           </div>
-          <div class="estudiante-row">
-            <div class="est-avatar">VG</div>
-            <div><div class="est-nombre">Valentina Gómez</div><div class="est-grado">10°A · Puesto 1</div></div>
-            <div class="est-nota" style="color:var(--verde);">4.8</div>
-            <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
-          </div>
-          <div class="estudiante-row">
-            <div class="est-avatar">CM</div>
-            <div><div class="est-nombre">Carlos Moreno</div><div class="est-grado">10°A · Puesto 2</div></div>
-            <div class="est-nota" style="color:var(--verde);">4.5</div>
-            <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
-          </div>
-          <div class="estudiante-row">
-            <div class="est-avatar" style="background:#0891b2;">LP</div>
-            <div><div class="est-nombre">Laura Pineda</div><div class="est-grado">10°A · Puesto 3</div></div>
-            <div class="est-nota" style="color:var(--alerta);">3.5</div>
-            <span class="badge badge-alerta" style="margin-left:8px;">Básico</span>
-          </div>
-          <div class="estudiante-row">
-            <div class="est-avatar" style="background:#dc2626;">JT</div>
-            <div><div class="est-nombre">Julián Torres</div><div class="est-grado">10°A · En riesgo</div></div>
-            <div class="est-nota" style="color:var(--error);">2.9</div>
-            <span class="badge badge-error" style="margin-left:8px;">Bajo</span>
-          </div>
-          <div class="estudiante-row">
-            <div class="est-avatar" style="background:#7c3aed;">SR</div>
-            <div><div class="est-nombre">Sofía Ramos</div><div class="est-grado">10°A</div></div>
-            <div class="est-nota" style="color:var(--verde);">4.1</div>
-            <span class="badge badge-exito" style="margin-left:8px;">Alto</span>
-          </div>
+          <div data-estudiantes-lista><p style="text-align:center;color:var(--txt-muted);padding:1rem;">Cargando…</p></div>
           <a href="notas.html" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:1rem;">Ver todos los estudiantes →</a>
         </div>
 
@@ -294,7 +271,7 @@
           </div>
           <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;">
             <span class="text-sm text-muted">Promedio general del curso</span>
-            <span style="font-size:1.4rem;font-weight:800;color:var(--color-docente);">4.0</span>
+            <span id="docente-promedio" style="font-size:1.4rem;font-weight:800;color:var(--color-docente);">—</span>
           </div>
         </div>
 
@@ -327,6 +304,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
@@ -348,6 +327,58 @@ document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('docente');
   if (usuario) AUTH.pintarUsuario(usuario);
 });
+async function cargarDashboardDocente(usuario) {
+  if (!usuario?.id) return;
+  try {
+    const client = AUTH.clienteSupabase();
+    const { data: asig, error: asigError } = await client.from('asignaciones').select('grupo_id,materia_id').eq('docente_id', usuario.id);
+    if (asigError) throw asigError;
+    const grupoIds = [...new Set((asig || []).map(a => a.grupo_id))];
+    const materiaIds = [...new Set((asig || []).map(a => a.materia_id))];
+    if (!grupoIds.length) return;
+
+    const { data: estudiantes, error: estError } = await client
+      .from('estudiantes').select('id,nombre,grupos(grado,seccion)').in('grupo_id', grupoIds).order('nombre');
+    if (estError) throw estError;
+    const estIds = (estudiantes || []).map(e => e.id);
+
+    const { data: notas, error: notasError } = estIds.length
+      ? await client.from('notas').select('estudiante_id,final').in('estudiante_id', estIds).in('materia_id', materiaIds).eq('periodo', 1)
+      : { data: [], error: null };
+    if (notasError) throw notasError;
+
+    const notaPorEst = {};
+    (notas || []).forEach(n => { notaPorEst[n.estudiante_id] = Number(n.final); });
+    const valores = Object.values(notaPorEst).filter(Number.isFinite);
+
+    const grupoLabel = [...new Set((estudiantes || []).map(e => `${e.grupos.grado}°${e.grupos.seccion}`))].join(', ');
+    document.getElementById('docente-grupos-label').textContent = grupoLabel || '—';
+    document.getElementById('docente-estudiantes-total').textContent = (estudiantes || []).length;
+    if (valores.length) document.getElementById('docente-promedio').textContent = (valores.reduce((a, b) => a + b, 0) / valores.length).toFixed(1);
+
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+    const html = (estudiantes || []).map(e => {
+      const nota = notaPorEst[e.id];
+      const tiene = Number.isFinite(nota);
+      const color = !tiene ? 'var(--txt-muted)' : nota >= 4.0 ? 'var(--verde)' : nota >= 3.0 ? 'var(--alerta)' : 'var(--error)';
+      const badge = !tiene ? ['', 'Sin nota'] : nota >= 4.0 ? ['badge-exito', 'Alto'] : nota >= 3.0 ? ['badge-alerta', 'Básico'] : ['badge-error', 'Bajo'];
+      const ini = String(e.nombre).split(/\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase();
+      return `<div class="estudiante-row">
+        <div class="est-avatar">${esc(ini)}</div>
+        <div><div class="est-nombre">${esc(e.nombre)}</div><div class="est-grado">${esc(e.grupos.grado)}°${esc(e.grupos.seccion)}</div></div>
+        <div class="est-nota" style="color:${color};">${tiene ? nota.toFixed(1) : '—'}</div>
+        <span class="badge ${badge[0]}" style="margin-left:8px;">${badge[1]}</span>
+      </div>`;
+    }).join('');
+    document.querySelector('[data-estudiantes-lista]').innerHTML = html || '<p style="text-align:center;color:var(--txt-muted);padding:1rem;">No hay estudiantes en tus cursos</p>';
+  } catch (error) {
+    console.warn('No se pudieron cargar datos reales del docente.', error);
+  }
+}
+</script>
+<script>
+const usuarioDocente = AUTH.proteger('docente');
+if (usuarioDocente) { AUTH.pintarUsuario(usuarioDocente); cargarDashboardDocente(usuarioDocente); }
 </script>
 </body>
 </html>

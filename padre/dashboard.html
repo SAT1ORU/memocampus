@@ -1,6 +1,9 @@
-'''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi Dashboard — MemoCampus</title>
@@ -88,14 +91,14 @@
     .sidebar-logo { padding: 1.25rem !important; display: flex !important; align-items: center !important; gap: 10px !important; border-bottom: 1px solid rgba(255,255,255,0.07) !important; }
     .sidebar-logo-mark { width: 36px !important; height: 36px !important; border-radius: 10px !important; background: var(--color-padre) !important; display: flex !important; align-items: center !important; justify-content: center !important; font-weight: 900 !important; font-size: 16px !important; color: #fff !important; flex-shrink: 0 !important; }
     .sidebar-logo-name { font-size: 14px !important; font-weight: 700 !important; color: #fff !important; }
-    .sidebar-logo-sub  { font-size: 10px !important; color: rgba(255,255,255,0.4) !important; }
+    .sidebar-logo-sub  { font-size: 10px !important; color: rgba(255,255,255,0.6) !important; }
     .sidebar-nav a { display: flex !important; align-items: center !important; gap: 11px !important; padding: 10px 1.25rem !important; color: rgba(255,255,255,0.75) !important; font-size: 13.5px !important; transition: all 0.2s !important; }
     .sidebar-nav a:hover { background: rgba(255,255,255,0.07) !important; color: #fff !important; }
     .sidebar-nav a.activo { background: rgba(255,255,255,0.13) !important; color: #fff !important; }
-    .sidebar-section-title { font-size: 10px !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 1.5px !important; color: rgba(255,255,255,0.3) !important; padding: 1rem 1.25rem 0.4rem !important; }
+    .sidebar-section-title { font-size: 10px !important; font-weight: 600 !important; text-transform: uppercase !important; letter-spacing: 1.5px !important; color: rgba(255,255,255,0.6) !important; padding: 1rem 1.25rem 0.4rem !important; }
     .sidebar-user { margin-top: auto !important; border-top: 1px solid rgba(255,255,255,0.07) !important; padding: 1rem 1.25rem !important; display: flex !important; align-items: center !important; gap: 10px !important; }
     .sidebar-user-name { font-size: 13px !important; font-weight: 500 !important; color: #fff !important; }
-    .sidebar-user-rol  { font-size: 11px !important; color: rgba(255,255,255,0.4) !important; }
+    .sidebar-user-rol  { font-size: 11px !important; color: rgba(255,255,255,0.6) !important; }
 
     /* === Logout btn === */
     .btn-logout-side {
@@ -105,6 +108,11 @@
       border-radius: 6px; line-height: 1;
     }
     .btn-logout-side:hover { color: var(--error); background: rgba(220,38,38,0.12); }
+    @media (max-width:960px) {
+      .app-sidebar { transform:translateX(-100%); }
+      .app-sidebar.open { transform:translateX(0); }
+      .app-main { margin-left:0 !important; }
+    }
 
     /* === Btn alertas === */
     .notif-wrapper {
@@ -273,7 +281,7 @@
           <div class="stat-icon" style="background:var(--color-estudiante-suave);">👧</div>
           <div>
             <div class="stat-label">Hijos registrados</div>
-            <div class="stat-value">2</div>
+            <div class="stat-value" id="padre-hijos-total">2</div>
             <div class="stat-sub">Activos este año</div>
           </div>
         </div>
@@ -289,7 +297,7 @@
           <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
           <div>
             <div class="stat-label">Promedio Valentina</div>
-            <div class="stat-value" style="color:var(--verde);">4.1</div>
+            <div class="stat-value" id="padre-promedio" style="color:var(--verde);">—</div>
             <div class="stat-sub">Período 1</div>
           </div>
         </div>
@@ -312,7 +320,7 @@
             <h3>Mis hijos</h3>
             <a href="notas.html" class="btn btn-ghost btn-sm">Ver notas →</a>
           </div>
-          <div class="grid-2" style="grid-template-columns: 1fr 1fr; gap:10px;">
+          <div class="grid-2" id="padre-hijos-lista" style="grid-template-columns: 1fr 1fr; gap:10px;">
 
             <div class="hijo-card" onclick="window.location.href='notas.html'">
               <div class="hijo-header" style="background:var(--color-estudiante);"></div>
@@ -328,9 +336,9 @@
             </div>
 
             <div class="hijo-card" onclick="window.location.href='notas.html'">
-              <div class="hijo-header" style="background:#0891b2;"></div>
+              <div class="hijo-header" style="background:#0e7490;"></div>
               <div class="hijo-body">
-                <div class="hijo-avatar-wrap" style="background:#0891b2;">AG</div>
+                <div class="hijo-avatar-wrap" style="background:#0e7490;">AG</div>
                 <div class="hijo-nombre">Andrés Gómez</div>
                 <div class="hijo-grado">Grado 7°B</div>
                 <div class="hijo-nota">
@@ -385,7 +393,7 @@
               </div>
             </div>
             <div class="tarea-item">
-              <div class="tarea-color" style="background:#0891b2;"></div>
+              <div class="tarea-color" style="background:#0e7490;"></div>
               <div style="flex:1;">
                 <div class="tarea-nombre">Taller de fracciones</div>
                 <div class="tarea-meta"><span>Andrés</span><span>Matemáticas</span></div>
@@ -396,7 +404,7 @@
               </div>
             </div>
             <div class="tarea-item">
-              <div class="tarea-color" style="background:#0891b2;"></div>
+              <div class="tarea-color" style="background:#0e7490;"></div>
               <div style="flex:1;">
                 <div class="tarea-nombre">Mapa conceptual historia</div>
                 <div class="tarea-meta"><span>Andrés</span><span>Sociales</span></div>
@@ -438,7 +446,7 @@
             </div>
             <div>
               <div class="flex-between mb-1"><span class="text-sm fw-600">Sociales</span><span class="text-sm" style="color:#0891b2; font-weight:700;">4.3</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:86%; background:#0891b2;"></div></div>
+              <div class="progress-wrap"><div class="progress-bar" style="width:86%; background:#0e7490;"></div></div>
             </div>
           </div>
           <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
@@ -489,9 +497,42 @@
     </div><!-- /app-content -->
   </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script>
+async function cargarDashboardPadre(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const { data: vinculos, error } = await client.from('padres_estudiantes').select('estudiantes(id,nombre,grupo_id,grupos(grado,seccion),notas(periodo,final))').eq('padre_id', usuario.id);
+    if (error) throw error;
+    const hijos = (vinculos || []).map(v => v.estudiantes).filter(Boolean);
+    document.getElementById('padre-hijos-total').textContent = hijos.length;
+    const colores = ['var(--color-estudiante)', '#0891b2', '#7c3aed', '#ea580c'];
+    const lista = document.getElementById('padre-hijos-lista');
+    if (lista && hijos.length) {
+      lista.innerHTML = hijos.map((hijo, i) => {
+        const valores = (hijo.notas || []).filter(n => Number(n.periodo) === 1).map(n => Number(n.final)).filter(Number.isFinite);
+        const promedioHijo = valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null;
+        const nombre = hijo.nombre || 'Estudiante';
+        const iniciales = nombre.split(/\\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase();
+        const grupo = hijo.grupos ? `Grado ${hijo.grupos.grado}°${hijo.grupos.seccion}` : 'Grupo sin registrar';
+        const color = colores[i % colores.length];
+        return `<div class="hijo-card" onclick="window.location.href='notas.html'"><div class="hijo-header" style="background:${color};"></div><div class="hijo-body"><div class="hijo-avatar-wrap" style="background:${color};">${iniciales}</div><div class="hijo-nombre">${nombre}</div><div class="hijo-grado">${grupo}</div><div class="hijo-nota"><span class="nota-num" style="color:${color};">${promedioHijo === null ? '—' : promedioHijo.toFixed(1)}</span><div class="nota-label">Período 1<br><span class="badge ${promedioHijo === null ? '' : promedioHijo >= 4 ? 'badge-exito' : promedioHijo >= 3 ? 'badge-alerta' : 'badge-error'}" style="font-size:9px;">${promedioHijo === null ? 'Sin nota' : promedioHijo >= 4 ? 'Alto' : promedioHijo >= 3 ? 'Básico' : 'Bajo'}</span></div></div></div></div>`;
+      }).join('');
+    }
+    const notas = hijos.flatMap(h => (h.notas || []).filter(n => Number(n.periodo) === 1).map(n => Number(n.final))).filter(Number.isFinite);
+    if (notas.length) document.getElementById('padre-promedio').textContent = (notas.reduce((a,b) => a + b, 0) / notas.length).toFixed(1);
+  } catch (error) {
+    console.warn('No se pudieron cargar datos reales del padre.', error);
+  }
+}
+const usuarioPadre = AUTH.proteger('padre');
+if (usuarioPadre) { AUTH.pintarUsuario(usuarioPadre); cargarDashboardPadre(usuarioPadre); }
+</script>
 </body>
-</html>'''
+</html>
 

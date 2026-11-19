@@ -23,6 +23,7 @@ function cargarSidebarAdmin() {
       <a href="cursos.html" data-page="cursos"><span class="nav-ico">📚</span> Cursos</a>
       <a href="asistencia.html"   data-page="asistencia">   <span class="nav-ico">📅</span> Asistencia</a>
       <a href="reportes.html"     data-page="reportes">     <span class="nav-ico">📊</span> Reportes</a>
+      <a href="bienestar.html"    data-page="bienestar">    <span class="nav-ico">💙</span> Bienestar</a>
     </nav>
 
     <div class="sidebar-section-title">Comunicación</div>
@@ -32,7 +33,7 @@ function cargarSidebarAdmin() {
 
     <div class="sidebar-section-title">Sistema</div>
     <nav class="sidebar-nav">
-      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank">
+      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank" rel="noopener">
         <span class="nav-ico">🌐</span> Portal del colegio
       </a>
     </nav>

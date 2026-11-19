@@ -6,6 +6,7 @@
   <title>Registrar Notas — MemoCampus Docente</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .notas-tabla { width:100%; border-collapse:collapse; }
     .notas-tabla th { background:var(--bg-sidebar); color:#fff; padding:10px 12px; font-size:12px; font-weight:500; text-align:left; position:sticky; top:0; }
@@ -56,9 +57,9 @@
         <span class="topbar-title">Registrar notas</span>
       </div>
       <div class="topbar-right">
-        <select style="padding:7px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none;">
-          <option>Período 1</option><option>Período 2</option>
-          <option>Período 3</option><option>Período 4</option>
+        <select style="padding:7px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-family:var(--font-ui); font-size:13px; outline:none;" onchange="periodoActual=parseInt(this.value);cargarNotasGrupo();">
+          <option value="1">Período 1</option><option value="2">Período 2</option>
+          <option value="3">Período 3</option><option value="4">Período 4</option>
         </select>
         <div class="topbar-avatar" data-user-avatar style="background:var(--color-docente); margin-left:8px;">AM</div>
       </div>
@@ -70,12 +71,7 @@
         ⚠️ <strong>Importante:</strong> Las notas se calculan automáticamente con los pesos: Ser 30% · Saber 40% · Hacer 30%. Presiona "Guardar notas" para confirmar los cambios.
       </div>
 
-      <div class="curso-selector">
-        <button class="curso-pill active" onclick="selCurso(this)">Ciencias 10°A (38 est.)</button>
-        <button class="curso-pill" onclick="selCurso(this)">Ciencias 10°B (36 est.)</button>
-        <button class="curso-pill" onclick="selCurso(this)">Física 11°A (35 est.)</button>
-        <button class="curso-pill" onclick="selCurso(this)">Física 11°B (34 est.)</button>
-      </div>
+      <div class="curso-selector"></div>
 
       <div class="card" style="padding:0; overflow:hidden;">
         <div class="tabla-wrap">
@@ -96,7 +92,7 @@
         <div class="guardar-banner">
           <div>
             <span style="font-size:13px; color:var(--txt-muted);">Promedio del curso: </span>
-            <span id="promedio-curso" style="font-size:15px; font-weight:700; color:var(--verde);">4.0</span>
+            <span id="promedio-curso" style="font-size:15px; font-weight:700; color:var(--verde);">—</span>
           </div>
           <div style="display:flex; gap:10px;">
             <button class="btn btn-ghost">Exportar Excel</button>
@@ -109,6 +105,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
 
@@ -116,20 +114,11 @@
   const usuario = AUTH.proteger('docente');
   if (usuario) AUTH.pintarUsuario(usuario);
 
-  const estudiantes = [
-    { nombre: "Valentina Gómez",  color:"#3b6de8", ser:4.3, saber:4.0, hacer:4.3 },
-    { nombre: "Carlos Martínez",  color:"#e84c3d", ser:3.8, saber:3.5, hacer:3.7 },
-    { nombre: "Laura Rodríguez",  color:"#1a9b6e", ser:4.8, saber:4.7, hacer:4.6 },
-    { nombre: "Juan Pérez",       color:"#9b3de8", ser:4.0, saber:3.8, hacer:3.9 },
-    { nombre: "María López",      color:"#e87d1e", ser:4.5, saber:4.3, hacer:4.4 },
-    { nombre: "Andrés Torres",    color:"#e83d8a", ser:3.5, saber:3.2, hacer:3.4 },
-    { nombre: "Sofía Vargas",     color:"#6db83b", ser:5.0, saber:4.9, hacer:4.8 },
-    { nombre: "Diego Ramírez",    color:"#1e9ee8", ser:4.2, saber:4.0, hacer:4.1 },
-    { nombre: "Paula Jiménez",    color:"#888",    ser:4.6, saber:4.4, hacer:4.5 },
-    { nombre: "Santiago Castro",  color:"#3b6de8", ser:3.2, saber:2.9, hacer:3.0 },
-    { nombre: "Camila Herrera",   color:"#e84c3d", ser:4.4, saber:4.2, hacer:4.3 },
-    { nombre: "Felipe Moreno",    color:"#1a9b6e", ser:4.1, saber:3.9, hacer:4.0 },
-  ];
+  let estudiantes = [];
+  let grupos = [];
+  let materias = {};
+  let grupoSeleccionado = null;
+  let periodoActual = 1;
 
   function calc(e) {
     return Math.round((e.ser*0.3 + e.saber*0.4 + e.hacer*0.3)*10)/10;
@@ -145,6 +134,10 @@
   function renderTabla() {
     const tbody = document.getElementById('tbody-notas');
     tbody.innerHTML = '';
+    if (estudiantes.length === 0) {
+      document.getElementById('promedio-curso').textContent = '—';
+      return;
+    }
     let total = 0;
     estudiantes.forEach((e, i) => {
       const nota = calc(e);
@@ -179,19 +172,82 @@
     document.getElementById('promedio-curso').textContent = (total/estudiantes.length).toFixed(1);
   }
 
-  function selCurso(btn) {
+  async function cargarGruposYMaterias() {
+    if (!usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: asig, error } = await client.from('asignaciones').select('grupo_id,materia_id,grupos(grado,seccion),materias(id,nombre)').eq('docente_id', usuario.id);
+      if (error) throw error;
+
+      // Una asignación = un grupo con una materia del docente (UNIQUE grupo_id, materia_id)
+      grupos = (asig || []).map(a => ({ id: a.grupo_id, materia_id: a.materia_id, materia: a.materias.nombre, grado: a.grupos.grado, seccion: a.grupos.seccion }));
+
+      const container = document.querySelector('.curso-selector');
+      container.innerHTML = grupos.map((g, i) => `<button class="curso-pill ${i===0?'active':''}" onclick="selCurso(${g.id}, this)">${g.materia} ${g.grado}°${g.seccion}</button>`).join('');
+
+      if (grupos.length) {
+        grupoSeleccionado = grupos[0].id;
+        await cargarNotasGrupo();
+      }
+    } catch (error) { console.warn('Error cargando grupos y materias:', error); }
+  }
+
+  async function cargarNotasGrupo() {
+    if (!grupoSeleccionado || !usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: est, error: estError } = await client.from('estudiantes').select('id,nombre,grupo_id,usuario_id').eq('grupo_id', grupoSeleccionado).order('nombre');
+      if (estError) throw estError;
+
+      // Filtrar solo estudiantes con usuario_id (descartar fogueo)
+      const estFiltrados = (est || []).filter(e => e.usuario_id !== null);
+      console.log('Estudiantes cargados para grupo', grupoSeleccionado, ':', estFiltrados.length, 'de', est?.length);
+      const estIds = estFiltrados.map(e => e.id);
+      const { data: notas, error: notasError } = estIds.length
+        ? await client.from('notas').select('estudiante_id,ser,saber,hacer,final').in('estudiante_id', estIds).eq('periodo', periodoActual)
+        : { data: [], error: null };
+      if (notasError) throw notasError;
+
+      const notaMap = {};
+      (notas || []).forEach(n => { notaMap[n.estudiante_id] = { ser: Number(n.ser), saber: Number(n.saber), hacer: Number(n.hacer), final: Number(n.final) }; });
+
+      estudiantes = estFiltrados.map((e, i) => {
+        const n = notaMap[e.id] || { ser: 0, saber: 0, hacer: 0, final: 0 };
+        return { id: e.id, nombre: e.nombre, color: ['#3b6de8','#e84c3d','#1a9b6e','#9b3de8'][i % 4], ser: n.ser, saber: n.saber, hacer: n.hacer, final: n.final };
+      });
+      renderTabla();
+    } catch (error) { console.warn('Error cargando notas del grupo:', error); }
+  }
+
+  function selCurso(grupoId, btn) {
     document.querySelectorAll('.curso-pill').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
+    grupoSeleccionado = grupoId;
+    cargarNotasGrupo();
   }
 
   function guardarNotas() {
+    if (!usuario?.id || !grupoSeleccionado) return;
     const btn = document.querySelector('[onclick="guardarNotas()"]');
-    btn.textContent = '✔ Notas guardadas';
-    btn.style.background = 'var(--exito)';
-    setTimeout(()=>{ btn.textContent='💾 Guardar notas'; btn.style.background=''; }, 3000);
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    const client = AUTH.clienteSupabase();
+    const materiaId = grupos.find(g => g.id === grupoSeleccionado)?.materia_id;
+    const filas = estudiantes.map(e => ({ estudiante_id: e.id, materia_id: materiaId, periodo: periodoActual, ser: e.ser, saber: e.saber, hacer: e.hacer }));
+
+    client.from('notas').upsert(filas, { onConflict: 'estudiante_id,materia_id,periodo' }).then(() => {
+      btn.textContent = '✔ Notas guardadas';
+      btn.style.background = 'var(--exito)';
+      setTimeout(() => { btn.textContent='💾 Guardar notas'; btn.style.background=''; btn.disabled=false; }, 2000);
+    }).catch(e => {
+      console.error('Error guardando:', e);
+      btn.textContent='💾 Guardar notas';
+      btn.disabled=false;
+    });
   }
 
-  renderTabla();
+  cargarGruposYMaterias();
 </script>
 </body>
 </html>

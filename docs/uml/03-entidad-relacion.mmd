@@ -1,0 +1,98 @@
+erDiagram
+  %% Modelo entidad-relación de db/schema.sql
+  USUARIOS ||--o{ ASIGNACIONES : "dicta (docente_id)"
+  GRUPOS ||--o{ ASIGNACIONES : ""
+  MATERIAS ||--o{ ASIGNACIONES : ""
+  GRUPOS ||--o{ ESTUDIANTES : "agrupa"
+  USUARIOS ||--o| ESTUDIANTES : "cuenta propia (usuario_id)"
+  USUARIOS ||--o{ PADRES_ESTUDIANTES : "padre_id"
+  ESTUDIANTES ||--o{ PADRES_ESTUDIANTES : "estudiante_id"
+  ESTUDIANTES ||--o{ ASISTENCIA : ""
+  MATERIAS ||--o{ ASISTENCIA : ""
+  ESTUDIANTES ||--o{ NOTAS : ""
+  MATERIAS ||--o{ NOTAS : ""
+  ESTUDIANTES ||--o{ ENCUESTAS_ANIMO : ""
+  ESTUDIANTES ||--o{ CASOS_PSICOLOGICOS : ""
+  ESTUDIANTES ||--o{ ALERTAS : ""
+  USUARIOS ||--o{ ACCESOS_LOG : ""
+  USUARIOS {
+    int id PK
+    text correo UK
+    text nombre
+    rol_usuario rol
+    boolean activo
+  }
+  GRUPOS {
+    int id PK
+    smallint grado
+    char seccion
+    smallint anio
+  }
+  MATERIAS {
+    int id PK
+    text nombre UK
+  }
+  ASIGNACIONES {
+    int id PK
+    int grupo_id FK
+    int materia_id FK
+    int docente_id FK
+  }
+  ESTUDIANTES {
+    int id PK
+    text seudonimo UK
+    text nombre
+    int grupo_id FK
+    int usuario_id FK
+  }
+  PADRES_ESTUDIANTES {
+    int padre_id PK, FK
+    int estudiante_id PK, FK
+  }
+  ASISTENCIA {
+    int estudiante_id PK, FK
+    int materia_id PK, FK
+    date fecha PK
+    estado_asistencia estado
+  }
+  NOTAS {
+    int estudiante_id PK, FK
+    int materia_id PK, FK
+    smallint periodo PK
+    numeric ser
+    numeric saber
+    numeric hacer
+    numeric final "generada"
+  }
+  PARAMETROS {
+    text clave PK
+    numeric valor
+  }
+  ENCUESTAS_ANIMO {
+    int id PK
+    int estudiante_id FK
+    date semana UK
+    nivel_animo animo
+    text comentario
+    boolean requiere_atencion
+  }
+  CASOS_PSICOLOGICOS {
+    int id PK
+    int estudiante_id FK
+    text origen
+    estado_caso estado
+    text notas
+  }
+  ALERTAS {
+    int id PK
+    int estudiante_id FK
+    text tipo
+    text detalle
+    boolean enviada_a_padres
+  }
+  ACCESOS_LOG {
+    bigint id PK
+    int usuario_id FK
+    text recurso
+    text accion
+  }

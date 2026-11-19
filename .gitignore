@@ -1,0 +1,6 @@
+# Secret/local configuration
+.env
+.env.*
+!.env.example
+assets/js/supabase-config.js
+db/usuarios_demo.sql

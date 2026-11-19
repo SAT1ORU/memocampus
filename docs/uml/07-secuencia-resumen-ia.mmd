@@ -1,0 +1,20 @@
+sequenceDiagram
+  %% Resumen de grupo con IA (ai/resumen_grupo.py). Solo datos seudonimizados.
+  actor D as Docente o rectoría
+  participant S as resumen_grupo.py
+  participant PS as psql
+  participant V as Vistas agregadas
+  participant API as API de Anthropic
+  D->>S: --grupo 9 --seccion A --periodo 3
+  S->>PS: consulta de payload (SQL)
+  PS->>V: vw_resumen_grupo, vw_asistencia_grupo, alertas
+  V-->>PS: promedios, notas bajas, asistencia, seudónimos
+  PS-->>S: JSON sin nombres ni comentarios
+  alt ANTHROPIC_API_KEY definida
+    S->>API: prompt con JSON seudonimizado
+    API-->>S: resumen redactado
+  else Sin clave (modo local)
+    S->>S: resumen con reglas
+  end
+  S-->>D: texto del resumen
+  Note over S,API: La IA redacta, no decide alertas ni diagnostica.

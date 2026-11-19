@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alertas y Notificaciones — MemoCampus Padre</title>
@@ -53,34 +56,7 @@
 </head>
 <body>
 <div class="app-layout">
-  <aside class="app-sidebar">
-    <div class="sidebar-logo">
-      <div class="sidebar-logo-mark">M</div>
-      <div class="sidebar-logo-text"><div class="sidebar-logo-name">MemoCampus</div><div class="sidebar-logo-sub">IE La Armonía</div></div>
-    </div>
-    <div class="sidebar-section-title">Mi hijo/a</div>
-    <nav class="sidebar-nav">
-      <a href="dashboard.html"><span class="nav-ico">🏠</span> Inicio</a>
-      <a href="notas.html"><span class="nav-ico">📊</span> Notas</a>
-      <a href="dashboard.html#asistencia"><span class="nav-ico">📅</span> Asistencia</a>
-      <a href="#" onclick="document.getElementById('modal-excusa').classList.add('open')"><span class="nav-ico">📎</span> Adjuntar excusa</a>
-    </nav>
-    <div class="sidebar-section-title">Comunicación</div>
-    <nav class="sidebar-nav">
-      <a href="alertas.html" class="activo"><span class="nav-ico">🔔</span> Alertas <span class="sidebar-badge">5</span></a>
-      <a href="mensajes.html"><span class="nav-ico">💬</span> Mensajes al docente</a>
-      <a href="dashboard.html#comunicados"><span class="nav-ico">📢</span> Comunicados</a>
-      <a href="../index.html"><span class="nav-ico">🌐</span> Portal del colegio</a>
-    </nav>
-    <div class="sidebar-user">
-      <div class="sidebar-avatar" data-user-avatar style="background:var(--color-padre);">CG</div>
-      <div class="sidebar-user-info">
-        <div class="sidebar-user-name" data-user-name>Carlos Gómez</div>
-        <div class="sidebar-user-rol">Padre de familia</div>
-      </div>
-      <span class="sidebar-logout" data-logout>⏏</span>
-    </div>
-  </aside>
+  <aside class="app-sidebar" id="sidebar"></aside>
   <div class="sidebar-overlay"></div>
 
   <main class="app-main">
@@ -100,8 +76,8 @@
       <!-- Resumen -->
       <div class="resumen-banner">
         <div>
-          <h2>Alertas de Valentina Gómez 🔔</h2>
-          <p>Grado 10°A · IE La Armonía · Actualizado hoy</p>
+          <h2 id="alertas-titulo">Alertas 🔔</h2>
+          <p id="alertas-sub">IE La Armonía</p>
         </div>
         <div style="display:flex; gap:12px; flex-wrap:wrap;">
           <div style="text-align:center; background:rgba(255,255,255,0.12); padding:10px 16px; border-radius:var(--radio-md);">
@@ -113,7 +89,7 @@
             <div style="color:rgba(255,255,255,0.65); font-size:11px;">Comunicados nuevos</div>
           </div>
           <div style="text-align:center; background:rgba(255,255,255,0.12); padding:10px 16px; border-radius:var(--radio-md);">
-            <div style="color:#fff; font-size:1.6rem; font-weight:800;">0</div>
+            <div style="color:#fff; font-size:1.6rem; font-weight:800;" id="kpi-inasistencias">0</div>
             <div style="color:rgba(255,255,255,0.65); font-size:11px;">Inasistencias sin justificar</div>
           </div>
         </div>
@@ -129,137 +105,73 @@
       </div>
 
       <!-- Lista de alertas -->
-      <div class="card" style="padding:0 1.5rem;">
+      <div class="card" style="padding:1.5rem;">
 
-        <!-- TAREA VENCIDA HOY -->
-        <div class="alerta-item no-leida urgente" data-tipo="tareas">
-          <div class="alerta-ico-wrap" style="background:var(--error-suave);">⚠️</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Tarea vence HOY — Matemáticas</div>
-            <div class="alerta-desc">Valentina tiene pendiente entregar <strong>"Ejercicios de trigonometría — Unidad 3"</strong> del Prof. Ramírez. La fecha límite es hoy 25 de marzo a las 11:59 pm.</div>
-            <div class="alerta-meta">
-              <span>📚 Matemáticas</span>
-              <span>👤 Prof. Ramírez</span>
-              <span style="color:var(--error); font-weight:600;">⏰ Vence hoy</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-danger btn-sm" onclick="marcarLeida(this)">Entendido</button>
-          </div>
-        </div>
+        <div data-alertas-container></div>
 
-        <!-- TAREA EN 2 DÍAS -->
-        <div class="alerta-item no-leida media" data-tipo="tareas">
-          <div class="alerta-ico-wrap" style="background:var(--alerta-suave);">📋</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Tarea pendiente — Ciencias Naturales</div>
-            <div class="alerta-desc">Valentina aún no ha entregado <strong>"Informe práctica de laboratorio"</strong>. Le quedan 2 días. Fecha límite: 27 de marzo.</div>
-            <div class="alerta-meta">
-              <span>🔬 Ciencias Nat.</span>
-              <span>👤 Prof. Morales</span>
-              <span style="color:var(--alerta); font-weight:600;">⏰ 2 días</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Entendido</button>
-          </div>
-        </div>
-
-        <!-- TAREA EN 5 DÍAS -->
-        <div class="alerta-item no-leida info" data-tipo="tareas">
-          <div class="alerta-ico-wrap" style="background:var(--color-estudiante-suave);">📖</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Tarea próxima — Inglés</div>
-            <div class="alerta-desc">Se acerca la fecha de entrega de <strong>"Reading comprehension — Unit 3"</strong> del Prof. Torres. Faltan 5 días: 30 de marzo.</div>
-            <div class="alerta-meta">
-              <span>🌍 Inglés</span>
-              <span>👤 Prof. Torres</span>
-              <span style="color:var(--verde); font-weight:600;">⏰ 5 días</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Entendido</button>
-          </div>
-        </div>
-
-        <!-- NOTA PUBLICADA -->
-        <div class="alerta-item no-leida ok" data-tipo="notas">
-          <div class="alerta-ico-wrap" style="background:var(--exito-suave);">📊</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Nueva nota publicada — Ciencias Naturales</div>
-            <div class="alerta-desc">El Prof. Morales publicó la nota del <strong>cuestionario átomo</strong>. Valentina obtuvo <strong style="color:var(--verde);">4.5 / 5.0</strong> — desempeño Alto.</div>
-            <div class="alerta-meta">
-              <span>🔬 Ciencias Nat.</span>
-              <span>Hoy, 9:30 am</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Ver nota</button>
-          </div>
-        </div>
-
-        <!-- COMUNICADO REUNIÓN -->
-        <div class="alerta-item no-leida info" data-tipo="comunicados">
-          <div class="alerta-ico-wrap" style="background:var(--color-estudiante-suave);">📢</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Reunión de padres — 4 de abril</div>
-            <div class="alerta-desc">La rectoría convoca a todos los padres de familia a la reunión del 1er período el sábado 4 de abril a las 8:00 am en el auditorio principal de la Sede Central.</div>
-            <div class="alerta-meta">
-              <span>🏫 Rectoría</span>
-              <span>22 mar 2026</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Leído</button>
-          </div>
-        </div>
-
-        <!-- COMUNICADO ENTREGA BOLETINES -->
-        <div class="alerta-item no-leida info" data-tipo="comunicados">
-          <div class="alerta-ico-wrap" style="background:var(--color-estudiante-suave);">📋</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Entrega de boletines — Período 1</div>
-            <div class="alerta-desc">Los boletines del primer período estarán disponibles en MemoCampus a partir del 28 de marzo. También podrá reclamarlos físicamente en secretaría del 28 al 31 de marzo.</div>
-            <div class="alerta-meta">
-              <span>📋 Coordinación académica</span>
-              <span>24 mar 2026</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Leído</button>
-          </div>
-        </div>
-
-        <!-- ASISTENCIA OK -->
-        <div class="alerta-item ok" data-tipo="asistencia">
-          <div class="alerta-ico-wrap" style="background:var(--exito-suave);">✅</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Asistencia confirmada esta semana</div>
-            <div class="alerta-desc">Valentina asistió los 5 días hábiles de la semana del 17 al 21 de marzo. Asistencia acumulada del mes: <strong style="color:var(--verde);">94%</strong>.</div>
-            <div class="alerta-meta">
-              <span>📅 Semana del 17 mar</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <span class="badge badge-exito">Al día</span>
-          </div>
-        </div>
 
       </div><!-- /card -->
 
     </div>
   </main>
 </div>
-<script src="../assets/js/comunicados.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script src="../assets/js/padre-alertas.js"></script>
+<script>
+  function filtrar(btn, tipo) {
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Filtrado por tipo — próxima versión
+  }
+  function marcarTodasLeidas() {
+    alert('Marcadas como leídas');
+  }
+</script>
 <script>
   const usuario = AUTH.proteger('padre');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) { AUTH.pintarUsuario(usuario); cargarAlertasPadre(usuario); }
+
+  async function cargarAlertasPadre(usuario) {
+    if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const { data: vinculos, error: vError } = await client.from('padres_estudiantes').select('estudiante_id,estudiantes(nombre,grupos(grado,seccion))').eq('padre_id', usuario.id).limit(1);
+      if (vError) throw vError;
+      const vinculo = vinculos?.[0];
+      if (!vinculo) return;
+      const est = vinculo.estudiantes;
+      const [alr, asis] = await Promise.all([
+        client.from('alertas').select('tipo,detalle,creada_en').eq('estudiante_id', vinculo.estudiante_id).eq('enviada_a_padres', true).order('creada_en', { ascending: false }),
+        client.from('asistencia').select('estado').eq('estudiante_id', vinculo.estudiante_id).eq('estado', 'ausente')
+      ]);
+      if (alr.error) throw alr.error;
+      if (asis.error) throw asis.error;
+
+      const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+      document.getElementById('alertas-titulo').textContent = `Alertas de ${est.nombre} 🔔`;
+      document.getElementById('alertas-sub').textContent = `Grado ${est.grupos.grado}°${est.grupos.seccion} · IE La Armonía`;
+      document.getElementById('kpi-inasistencias').textContent = asis.data.length;
+      document.getElementById('alertas-reales').innerHTML = (alr.data || []).map(a => {
+        const esNota = a.tipo === 'nota_baja';
+        return `<div class="alerta-item no-leida ${esNota ? 'urgente' : 'media'}" data-tipo="${esNota ? 'notas' : 'asistencia'}">
+          <div class="alerta-ico-wrap" style="background:${esNota ? 'var(--error-suave)' : 'var(--alerta-suave)'};">${esNota ? '📊' : '📅'}</div>
+          <div style="flex:1;">
+            <div class="alerta-titulo">${esNota ? 'Nota baja' : 'Inasistencias'} — ${esc(est.nombre)}</div>
+            <div class="alerta-desc">${esc(a.detalle)}</div>
+            <div class="alerta-meta"><span>${new Date(a.creada_en).toLocaleDateString('es-CO')}</span></div>
+          </div>
+          <div class="alerta-acciones">
+            <div class="punto-no-leida"></div>
+            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Entendido</button>
+          </div>
+        </div>`;
+      }).join('');
+      document.querySelector('.fbtn').textContent = `Todas (${document.querySelectorAll('.alerta-item').length})`;
+    } catch (error) { console.warn('No se pudieron cargar las alertas reales.', error); }
+  }
 
   function filtrar(btn, tipo) {
     document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));

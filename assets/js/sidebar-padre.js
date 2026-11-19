@@ -3,19 +3,26 @@
    MemoCampus · Prototipo
    ============================================ */
 
-function cargarSidebarPadre() {
+async function cargarSidebarPadre() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  let noLeidos = 0;
-  try {
-    const data = localStorage.getItem('memocampus_comunicados');
-    if (data) noLeidos = JSON.parse(data).filter(c => !c.leido).length;
-  } catch(e) {}
+  let badgeMsg = '';
+  const usuario = AUTH.getUsuario();
+  if (usuario?.id) {
+    try {
+      const client = AUTH.clienteSupabase();
+      const { count } = await client
+        .from('mensajes')
+        .select('*', { count: 'exact', head: true })
+        .eq('para_usuario_id', usuario.id)
+        .eq('leido', false);
+      badgeMsg = count > 0 ? `<span class="sidebar-badge">${count}</span>` : '';
+    } catch(e) {}
+  }
 
-  const badgeCom = noLeidos > 0
-    ? `<span class="sidebar-badge" id="badge-comunicados">${noLeidos}</span>`
-    : `<span class="sidebar-badge" id="badge-comunicados" style="display:none">0</span>`;
+  // Sin badge: se actualiza dinámicamente desde padre-alertas.js
+  const badgeCom = '';
 
   sidebar.innerHTML = `
     <div class="sidebar-logo">
@@ -36,9 +43,9 @@ function cargarSidebarPadre() {
 
     <div class="sidebar-section-title">Comunicación</div>
     <nav class="sidebar-nav">
-      <a href="mensajes.html"    data-page="mensajes">    <span class="nav-ico">💬</span> Mensajes al docente</a>
+      <a href="mensajes.html"    data-page="mensajes">    <span class="nav-ico">💬</span> Mensajes al docente ${badgeMsg}</a>
       <a href="comunicados.html" data-page="comunicados"> <span class="nav-ico">📢</span> Comunicados ${badgeCom}</a>
-      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank">
+      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank" rel="noopener">
         <span class="nav-ico">🌐</span> Portal del colegio
       </a>
     </nav>
