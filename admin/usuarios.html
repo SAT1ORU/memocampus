@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Usuarios — MemoCampus Admin</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .welcome-banner { background:linear-gradient(135deg,var(--verde-oscuro,#0d4a25) 0%,var(--verde) 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; }
     .welcome-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
@@ -147,13 +151,15 @@
     </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-admin.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('admin');
   if (usuario) AUTH.pintarUsuario(usuario);
 
-  const usuarios = [
+  let usuarios = [
     { nombre:"Valentina Gómez",     correo:"valentina.gomez@iearmonia.edu.co",    rol:"Estudiante", color:"#3b6de8", ini:"VG", activo:true },
     { nombre:"Carlos Martínez",     correo:"carlos.martinez@iearmonia.edu.co",     rol:"Estudiante", color:"#e84c3d", ini:"CM", activo:true },
     { nombre:"Laura Rodríguez",     correo:"laura.rodriguez@iearmonia.edu.co",     rol:"Estudiante", color:"#1a9b6e", ini:"LR", activo:true },
@@ -219,7 +225,17 @@
     if(e.target===e.currentTarget) cerrarModal();
   });
 
-  renderUsuarios(usuarios);
+  async function cargarUsuariosReales() {
+    if (!window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL || !usuario?.id) { renderUsuarios(usuarios); return; }
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const { data, error } = await client.from('usuarios').select('id,nombre,correo,rol,activo').order('creado_en', { ascending: false });
+      if (error) throw error;
+      usuarios = (data || []).map((u, i) => ({ ...u, rol: u.rol === 'rectoria' ? 'Administrador' : u.rol.charAt(0).toUpperCase() + u.rol.slice(1), color: ['#3b6de8','#e84c3d','#1a9b6e','#e87d1e','#9b3de8'][i % 5], ini: u.nombre.split(/\\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase() }));
+      renderUsuarios(usuarios);
+    } catch (error) { console.warn('No se pudieron cargar los usuarios reales.', error); renderUsuarios(usuarios); }
+  }
+  cargarUsuariosReales();
 </script>
 </body>
 </html>

@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Asistencia — MemoCampus</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     /* === Layout === */
     .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
@@ -86,8 +90,8 @@
     .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
     .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
     .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
-    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
-    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.6); }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.6); padding:1rem 1.25rem 0.4rem; }
     .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
     .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
     .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
@@ -221,6 +225,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/auth.js"></script>
@@ -397,10 +403,31 @@ document.addEventListener('click', e => {
   if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
 });
 
+async function cargarAsistenciaReal(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const { data: vinculos, error } = await client.from('padres_estudiantes').select('estudiantes(id,nombre,grupo_id,grupos(grado,seccion))').eq('padre_id', usuario.id);
+    if (error) throw error;
+    const hijos = (vinculos || []).map(v => v.estudiantes).filter(Boolean);
+    const ids = hijos.map(h => h.id);
+    if (!ids.length) return;
+    const { data: registros, error: asistenciaError } = await client.from('asistencia').select('estudiante_id,fecha,estado').in('estudiante_id', ids).order('fecha', { ascending: false });
+    if (asistenciaError) throw asistenciaError;
+    hijos.forEach((hijo, i) => {
+      const rows = (registros || []).filter(r => r.estudiante_id === hijo.id);
+      const presentes = rows.filter(r => ['presente','tardanza'].includes(r.estado)).length;
+      const pct = rows.length ? Math.round(presentes / rows.length * 100) : 0;
+      if (HIJOS[i]) { HIJOS[i].pct = pct; HIJOS[i].inasistencias = rows.filter(r => ['ausente','tardanza'].includes(r.estado)).map(r => ({ fecha: r.fecha, tipo: r.estado === 'ausente' ? 'Ausencia' : 'Tardanza', excusa: r.estado === 'excusa' ? 'Aprobada' : 'Sin excusa', obs: '' })); }
+    });
+    actualizarPagina();
+  } catch (error) { console.warn('No se pudo cargar la asistencia real del padre.', error); }
+}
+
 // ============ INIT ============
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('padre');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) { AUTH.pintarUsuario(usuario); cargarAsistenciaReal(usuario); }
   actualizarPagina();
 });
 </script>

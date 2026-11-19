@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reportes — MemoCampus Admin</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .welcome-banner { background:linear-gradient(135deg,var(--verde-oscuro,#0d4a25) 0%,var(--verde) 100%); border-radius:var(--radio-xl); padding:1.5rem 2rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.75rem; }
     .welcome-banner h2 { color:#fff; font-size:1.2rem; margin-bottom:4px; }
@@ -50,9 +54,9 @@
 
       <!-- Stats globales -->
       <div class="grid-4 mb-3">
-        <div class="stat-card"><div class="stat-icon" style="background:var(--verde-suave);">📊</div><div><div class="stat-label">Promedio institucional</div><div class="stat-value" style="color:var(--verde);">4.0</div><div class="stat-sub">Período 1</div></div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">✅</div><div><div class="stat-label">Asistencia promedio</div><div class="stat-value" style="color:var(--exito);">91%</div><div class="stat-sub">Este mes</div></div></div>
-        <div class="stat-card"><div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div><div><div class="stat-label">Estudiantes en riesgo</div><div class="stat-value" style="color:var(--alerta);">38</div><div class="stat-sub">Desempeño Bajo</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--verde-suave);">📊</div><div><div class="stat-label">Promedio institucional</div><div class="stat-value" id="reporte-promedio" style="color:var(--verde);">—</div><div class="stat-sub">Período 1</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--exito-suave);">✅</div><div><div class="stat-label">Asistencia promedio</div><div class="stat-value" id="reporte-asistencia" style="color:var(--exito);">—</div><div class="stat-sub">Este mes</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div><div><div class="stat-label">Estudiantes en riesgo</div><div class="stat-value" id="reporte-riesgo" style="color:var(--alerta);">—</div><div class="stat-sub">Desempeño Bajo</div></div></div>
         <div class="stat-card"><div class="stat-icon" style="background:var(--color-estudiante-suave);">🎯</div><div><div class="stat-label">Tareas entregadas</div><div class="stat-value" style="color:var(--color-estudiante);">87%</div><div class="stat-sub">Del total asignado</div></div></div>
       </div>
 
@@ -61,43 +65,38 @@
         <!-- Rendimiento por grado -->
         <div class="card">
           <div class="flex-between mb-3"><h3>Promedio por grado</h3><span class="badge badge-verde">Período 1</span></div>
-          <div>
-            <div class="chart-row"><div class="chart-label">Grado 11°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:84%; background:var(--verde);"></div></div><div class="chart-val" style="color:var(--verde);">4.2</div></div>
-            <div class="chart-row"><div class="chart-label">Grado 10°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:82%; background:var(--mat-matematicas);"></div></div><div class="chart-val" style="color:var(--mat-matematicas);">4.1</div></div>
-            <div class="chart-row"><div class="chart-label">Grado 9°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:78%; background:var(--mat-ciencias);"></div></div><div class="chart-val" style="color:var(--mat-ciencias);">3.9</div></div>
-            <div class="chart-row"><div class="chart-label">Grado 8°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:80%; background:var(--mat-ingles);"></div></div><div class="chart-val" style="color:var(--mat-ingles);">4.0</div></div>
-            <div class="chart-row"><div class="chart-label">Grado 7°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:76%; background:var(--mat-sociales);"></div></div><div class="chart-val" style="color:var(--mat-sociales);">3.8</div></div>
-            <div class="chart-row"><div class="chart-label">Grado 6°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:74%; background:var(--mat-artistica);"></div></div><div class="chart-val" style="color:var(--mat-artistica);">3.7</div></div>
+          <div id="reporte-chart-grados">
+            <p class="text-sm text-muted">Cargando datos reales…</p>
           </div>
           <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
             <span class="text-sm text-muted">Promedio institucional</span>
-            <span style="font-size:1.4rem; font-weight:800; color:var(--verde);">4.0</span>
+            <span id="reporte-promedio-institucional" style="font-size:1.4rem; font-weight:800; color:var(--verde);">—</span>
           </div>
         </div>
 
         <!-- Distribución de desempeño -->
         <div class="card">
           <div class="flex-between mb-3"><h3>Distribución de desempeño</h3></div>
-          <div style="display:flex; flex-direction:column; gap:14px; margin-top:0.5rem;">
+          <div id="reporte-distribucion" style="display:flex; flex-direction:column; gap:14px; margin-top:0.5rem;">
             <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:#9b3de8;">Superior (4.6 – 5.0)</span><span class="text-sm fw-600" style="color:#9b3de8;">18%</span></div>
-              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:18%; background:#9b3de8;"></div></div>
-              <span style="font-size:11px; color:var(--txt-muted);">224 estudiantes</span>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:#9b3de8;">Superior (4.6 – 5.0)</span><span class="text-sm fw-600" id="dist-superior-pct" style="color:#9b3de8;">—</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" id="dist-superior-bar" style="width:0%; background:#9b3de8;"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);"><span id="dist-superior-n">—</span> estudiantes</span>
             </div>
             <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--verde);">Alto (4.0 – 4.5)</span><span class="text-sm fw-600" style="color:var(--verde);">45%</span></div>
-              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:45%; background:var(--verde);"></div></div>
-              <span style="font-size:11px; color:var(--txt-muted);">559 estudiantes</span>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--verde);">Alto (4.0 – 4.5)</span><span class="text-sm fw-600" id="dist-alto-pct" style="color:var(--verde);">—</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" id="dist-alto-bar" style="width:0%; background:var(--verde);"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);"><span id="dist-alto-n">—</span> estudiantes</span>
             </div>
             <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--alerta);">Básico (3.0 – 3.9)</span><span class="text-sm fw-600" style="color:var(--alerta);">34%</span></div>
-              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:34%; background:var(--alerta);"></div></div>
-              <span style="font-size:11px; color:var(--txt-muted);">422 estudiantes</span>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--alerta);">Básico (3.0 – 3.9)</span><span class="text-sm fw-600" id="dist-basico-pct" style="color:var(--alerta);">—</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" id="dist-basico-bar" style="width:0%; background:var(--alerta);"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);"><span id="dist-basico-n">—</span> estudiantes</span>
             </div>
             <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--error);">Bajo (1.0 – 2.9)</span><span class="text-sm fw-600" style="color:var(--error);">3%</span></div>
-              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" style="width:3%; background:var(--error);"></div></div>
-              <span style="font-size:11px; color:var(--txt-muted);">38 estudiantes</span>
+              <div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--error);">Bajo (1.0 – 2.9)</span><span class="text-sm fw-600" id="dist-bajo-pct" style="color:var(--error);">—</span></div>
+              <div class="progress-wrap" style="height:12px;"><div class="progress-bar" id="dist-bajo-bar" style="width:0%; background:var(--error);"></div></div>
+              <span style="font-size:11px; color:var(--txt-muted);"><span id="dist-bajo-n">—</span> estudiantes</span>
             </div>
           </div>
         </div>
@@ -120,11 +119,75 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-admin.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('admin');
   if (usuario) AUTH.pintarUsuario(usuario);
+
+  function desempenoReporte(n) {
+    if (n >= 4.6) return 'superior';
+    if (n >= 4.0) return 'alto';
+    if (n >= 3.0) return 'basico';
+    return 'bajo';
+  }
+
+  async function cargarReportesAdmin() {
+    if (!usuario || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+    try {
+      const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+      const [{ data: notas, error: notasError }, { data: asistencia, error: asistenciaError }] = await Promise.all([
+        client.from('notas').select('final,periodo,estudiantes(grupo_id,grupos(grado))').eq('periodo', 1),
+        client.from('asistencia').select('estado')
+      ]);
+      if (notasError) throw notasError;
+      if (asistenciaError) throw asistenciaError;
+
+      const finales = (notas || []).map(n => Number(n.final)).filter(Number.isFinite);
+      if (finales.length) {
+        const promedio = finales.reduce((a, b) => a + b, 0) / finales.length;
+        document.getElementById('reporte-promedio').textContent = promedio.toFixed(1);
+        document.getElementById('reporte-promedio-institucional').textContent = promedio.toFixed(1);
+        const enRiesgo = finales.filter(f => f < 3.0).length;
+        document.getElementById('reporte-riesgo').textContent = enRiesgo;
+
+        const conteo = { superior: 0, alto: 0, basico: 0, bajo: 0 };
+        finales.forEach(f => conteo[desempenoReporte(f)]++);
+        Object.entries(conteo).forEach(([tier, n]) => {
+          const pct = Math.round(n / finales.length * 100);
+          document.getElementById(`dist-${tier}-pct`).textContent = `${pct}%`;
+          document.getElementById(`dist-${tier}-bar`).style.width = `${pct}%`;
+          document.getElementById(`dist-${tier}-n`).textContent = n;
+        });
+      }
+
+      if (asistencia?.length) {
+        const presentes = asistencia.filter(a => ['presente', 'tardanza'].includes(a.estado)).length;
+        document.getElementById('reporte-asistencia').textContent = `${Math.round(presentes / asistencia.length * 100)}%`;
+      }
+
+      const porGrado = new Map();
+      (notas || []).forEach(n => {
+        const grado = n.estudiantes?.grupos?.grado;
+        const final = Number(n.final);
+        if (!grado || !Number.isFinite(final)) return;
+        if (!porGrado.has(grado)) porGrado.set(grado, []);
+        porGrado.get(grado).push(final);
+      });
+      const colores = ['var(--verde)','var(--mat-matematicas)','var(--mat-ciencias)','var(--mat-ingles)','var(--mat-sociales)','var(--mat-artistica)'];
+      const filas = [...porGrado.entries()]
+        .sort((a, b) => b[0] - a[0])
+        .map(([grado, valores], i) => {
+          const prom = valores.reduce((a, b) => a + b, 0) / valores.length;
+          const color = colores[i % colores.length];
+          return `<div class="chart-row"><div class="chart-label">Grado ${grado}°</div><div class="chart-bar-wrap"><div class="chart-bar" style="width:${Math.round(prom/5*100)}%; background:${color};"></div></div><div class="chart-val" style="color:${color};">${prom.toFixed(1)}</div></div>`;
+        });
+      if (filas.length) document.getElementById('reporte-chart-grados').innerHTML = filas.join('');
+    } catch (error) { console.warn('No se pudieron cargar los reportes reales.', error); }
+  }
+  cargarReportesAdmin();
 </script>
 </body>
 </html>

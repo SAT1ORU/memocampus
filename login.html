@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar sesión — MemoCampus</title>
@@ -62,7 +65,7 @@
     .rol-btn.selected { border-color: var(--verde); background: var(--verde-suave); }
     .rol-btn .rol-emoji { font-size: 1.6rem; }
     .rol-btn .rol-name  { font-size: 12px; font-weight: 600; color: var(--txt-primario); }
-    .rol-btn .rol-desc  { font-size: 10px; color: var(--txt-muted); }
+    .rol-btn .rol-desc  { font-size: 10px; color: #475569; }
 
     /* Botón Google */
     .btn-google {
@@ -195,6 +198,8 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="assets/js/supabase-config.js"></script>
 <script src="assets/js/auth.js"></script>
 <script>
   let rolSeleccionado = 'estudiante';
@@ -227,16 +232,17 @@
     document.getElementById('dominio-texto').innerHTML = textos[rol] || textos.estudiante;
   }
 
-  function loginConGoogle() {
-    /* En producción: aquí iría Google OAuth 2.0
-       Por ahora simula el flujo con los datos demo */
+  async function loginConGoogle() {
     const btn = document.querySelector('.btn-google');
     btn.textContent = 'Conectando con Google...';
     btn.disabled = true;
-    setTimeout(() => {
-      AUTH.login(rolSeleccionado);
-      AUTH.redirigirSegunRol(rolSeleccionado);
-    }, 1200);
+    try {
+      await AUTH.loginConGoogle();
+    } catch (error) {
+      btn.textContent = 'Continuar con Google';
+      btn.disabled = false;
+      alert(error.message);
+    }
   }
 
   function loginDemo() {
@@ -249,10 +255,23 @@
     }, 800);
   }
 
-  /* Si ya está autenticado, redirigir directamente */
-  if (AUTH.isAutenticado()) {
-    AUTH.redirigirSegunRol(AUTH.getUsuario().rol);
-  }
+  /* Procesar retorno de Google y conservar demo separado */
+  (async () => {
+    if (window.location.hash.includes('access_token') || window.location.search.includes('code=')) {
+      try {
+        const usuario = await AUTH.procesarCallbackOAuth();
+        if (usuario) AUTH.redirigirSegunRol(usuario.rol);
+      } catch (error) {
+        alert(error.message);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    } else if (AUTH.isAutenticado()) {
+      const sesion = AUTH.getUsuario();
+      // Sesión demo (sin id de Supabase): se descarta para que el ingreso con Google sea el que cuente
+      if (sesion.id) AUTH.redirigirSegunRol(sesion.rol);
+      else localStorage.removeItem('mc_usuario');
+    }
+  })();
 </script>
 </body>
 </html>

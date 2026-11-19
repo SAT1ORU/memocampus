@@ -57,85 +57,27 @@
       <!-- Lista de conversaciones -->
       <div class="chat-list">
         <div style="padding:10px 16px; border-bottom:1px solid var(--borde); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--txt-muted);">Conversaciones</div>
-
-        <div class="chat-item active unread" onclick="selChat(this,'carlos')">
-          <div class="chat-avatar" style="background:#9b3de8;">CG</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">Carlos Gómez</div>
-            <div class="chat-item-preview">Consulta sobre la nota del informe de laboratorio</div>
-          </div>
-          <div class="chat-item-meta">
-            <div class="chat-item-hora">10:24 am</div>
-            <div class="unread-dot"></div>
-          </div>
-        </div>
-
-        <div class="chat-item unread" onclick="selChat(this,'maria')">
-          <div class="chat-avatar" style="background:#e87d1e;">ML</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">María López</div>
-            <div class="chat-item-preview">Inasistencia del día 21, adjunto excusa</div>
-          </div>
-          <div class="chat-item-meta">
-            <div class="chat-item-hora">Ayer</div>
-            <div class="unread-dot"></div>
-          </div>
-        </div>
-
-        <div class="chat-item unread" onclick="selChat(this,'pedro')">
-          <div class="chat-avatar" style="background:#3b6de8;">PR</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">Pedro Rodríguez</div>
-            <div class="chat-item-preview">Muchas gracias por el apoyo con Laura 🙏</div>
-          </div>
-          <div class="chat-item-meta">
-            <div class="chat-item-hora">20 mar</div>
-            <div class="unread-dot"></div>
-          </div>
-        </div>
-
-        <div class="chat-item" onclick="selChat(this,'ana')">
-          <div class="chat-avatar" style="background:#1a9b6e;">AT</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">Ana Torres</div>
-            <div class="chat-item-preview">Entendido, muchas gracias profe</div>
-          </div>
-          <div class="chat-item-meta">
-            <div class="chat-item-hora">18 mar</div>
-          </div>
-        </div>
       </div>
 
       <!-- Ventana de chat -->
       <div class="chat-window">
         <div class="chat-header">
-          <div class="chat-avatar" style="background:#9b3de8; width:36px; height:36px; font-size:12px;">CG</div>
-          <div>
-            <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Carlos Gómez</div>
-            <div style="font-size:12px; color:var(--txt-muted);">Padre de Valentina Gómez · 10°A</div>
-          </div>
+          <div style="color:var(--txt-muted); padding:1.25rem; text-align:center;">Selecciona un padre para ver la conversación</div>
         </div>
 
-        <div class="chat-messages" id="chat-messages">
-          <div class="msg msg-recibido">
-            Buenas tardes profe Morales. Quería preguntarle sobre la nota que le puso a Valentina en el informe del laboratorio. Ella me dice que entregó todo completo.
-            <div class="msg-hora">10:24 am</div>
-          </div>
-          <div class="msg msg-recibido">
-            ¿Hay alguna observación específica que deba mejorar?
-            <div class="msg-hora">10:25 am</div>
-          </div>
-        </div>
+        <div class="chat-messages" id="chat-messages"></div>
 
         <div class="chat-input-area">
-          <input type="text" id="chat-input" placeholder="Escribe una respuesta..." onkeydown="if(event.key==='Enter') enviarMsg()">
-          <button class="btn-send" onclick="enviarMsg()">➤</button>
+          <input type="text" id="chat-input" placeholder="Escribe una respuesta..." onkeydown="if(event.key==='Enter') enviarMsg()" disabled>
+          <button class="btn-send" onclick="enviarMsg()" disabled>➤</button>
         </div>
       </div>
     </div>
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
 
@@ -143,26 +85,155 @@
   const usuario = AUTH.proteger('docente');
   if (usuario) AUTH.pintarUsuario(usuario);
 
-  function selChat(el, id) {
-    document.querySelectorAll('.chat-item').forEach(i=>i.classList.remove('active'));
-    el.classList.add('active');
-    el.classList.remove('unread');
-    el.querySelector('.unread-dot')?.remove();
+  let padreSeleccionado = null;
+
+  async function cargarPadres() {
+    console.log('cargarPadres: usuario=', usuario?.id);
+    if (!usuario?.id) { console.warn('Sin usuario'); return; }
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: asig } = await client
+        .from('asignaciones')
+        .select('grupo_id')
+        .eq('docente_id', usuario.id);
+
+      console.log('Asignaciones:', asig);
+      if (!asig?.length) { console.warn('Sin asignaciones'); return; }
+
+      const grupoIds = [...new Set(asig.map(a => a.grupo_id))];
+      const { data: ests } = await client
+        .from('estudiantes')
+        .select('id')
+        .in('grupo_id', grupoIds);
+
+      console.log('Estudiantes:', ests);
+      if (!ests?.length) { console.warn('Sin estudiantes'); return; }
+
+      const estIds = ests.map(e => e.id);
+      const { data: padres } = await client
+        .from('padres_estudiantes')
+        .select('padre_id')
+        .in('estudiante_id', estIds);
+
+      console.log('Padres:', padres);
+      if (!padres?.length) { console.warn('Sin padres vinculados'); return; }
+
+      const padreIds = [...new Set(padres.map(p => p.padre_id))];
+      const { data: usuariosPadres } = await client
+        .from('usuarios')
+        .select('id, nombre, correo')
+        .in('id', padreIds);
+
+      console.log('Usuarios padres:', usuariosPadres);
+      renderizarPadres(usuariosPadres || []);
+    } catch (e) { console.error('Error cargando padres:', e); }
   }
 
-  function enviarMsg() {
-    const input = document.getElementById('chat-input');
-    const text  = input.value.trim();
-    if (!text) return;
-    const msgs = document.getElementById('chat-messages');
-    const div  = document.createElement('div');
-    div.className = 'msg msg-enviado';
-    const hora = new Date().toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
-    div.innerHTML = `${text}<div class="msg-hora">${hora}</div>`;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    input.value = '';
+  function renderizarPadres(padres) {
+    const lista = document.querySelector('.chat-list');
+    const titulo = lista.querySelector('div:first-child');
+    lista.innerHTML = '';
+    lista.appendChild(titulo);
+
+    padres.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.dataset.padreId = p.id;
+      const initials = p.nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      const colores = ['#9b3de8', '#e87d1e', '#3b6de8', '#1a9b6e', '#d4a574'];
+      const color = colores[p.id % colores.length];
+      div.innerHTML = `
+        <div class="chat-avatar" style="background:${color};">${initials}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="chat-item-name">${p.nombre}</div>
+          <div class="chat-item-preview">${p.correo}</div>
+        </div>
+      `;
+      div.onclick = () => selChat(div, p.id);
+      lista.appendChild(div);
+    });
   }
+
+  async function selChat(el, padreId) {
+    document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    padreSeleccionado = padreId;
+    document.getElementById('chat-input').disabled = false;
+    document.querySelector('.btn-send').disabled = false;
+    await cargarMensajes(padreId);
+  }
+
+  async function cargarMensajes(padreId) {
+    if (!usuario?.id || !padreId) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: msgs } = await client
+        .from('mensajes')
+        .select('*')
+        .or(`and(de_usuario_id.eq.${usuario.id},para_usuario_id.eq.${padreId}),and(de_usuario_id.eq.${padreId},para_usuario_id.eq.${usuario.id})`)
+        .order('creado_en', { ascending: true });
+
+      // Marcar como leído todos los mensajes recibidos de este padre
+      if (msgs?.length) {
+        const msgIds = msgs.filter(m => m.de_usuario_id === padreId && !m.leido).map(m => m.id);
+        if (msgIds.length > 0) {
+          await client.from('mensajes').update({ leido: true }).in('id', msgIds);
+          cargarSidebarDocente();
+        }
+      }
+
+      const { data: padreData } = await client
+        .from('usuarios')
+        .select('nombre')
+        .eq('id', padreId)
+        .single();
+
+      renderizarMensajes(msgs || [], padreData?.nombre || 'Usuario');
+    } catch (e) { console.warn('Error cargando mensajes:', e); }
+  }
+
+  function renderizarMensajes(msgs, nombrePadre) {
+    const header = document.querySelector('.chat-header');
+    const initials = nombrePadre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    header.innerHTML = `
+      <div class="chat-avatar" style="background:#9b3de8; width:36px; height:36px; font-size:12px;">${initials}</div>
+      <div>
+        <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">${nombrePadre}</div>
+        <div style="font-size:12px; color:var(--txt-muted);">Padre de familia</div>
+      </div>
+    `;
+
+    const msgDiv = document.getElementById('chat-messages');
+    msgDiv.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = m.de_usuario_id === usuario.id ? 'msg msg-enviado' : 'msg msg-recibido';
+      const fecha = new Date(m.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+      div.innerHTML = `${m.contenido}<div class="msg-hora">${fecha}</div>`;
+      msgDiv.appendChild(div);
+    });
+    msgDiv.scrollTop = msgDiv.scrollHeight;
+  }
+
+  async function enviarMsg() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || !padreSeleccionado) return;
+
+    try {
+      const client = AUTH.clienteSupabase();
+      const { error } = await client.from('mensajes').insert({
+        de_usuario_id: usuario.id,
+        para_usuario_id: padreSeleccionado,
+        contenido: text
+      });
+      if (error) { alert('No se pudo enviar: ' + error.message); return; }
+      input.value = '';
+      await cargarMensajes(padreSeleccionado);
+    } catch (e) { console.error('Error enviando mensaje:', e); }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => cargarPadres());
 </script>
 </body>
 </html>

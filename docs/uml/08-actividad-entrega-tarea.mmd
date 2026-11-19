@@ -1,0 +1,18 @@
+flowchart TD
+  %% Actividad: entrega de una tarea por el estudiante (prototipo estudiante/tareas.html)
+  classDef paso fill:#e8f5ee,stroke:#1a6b3c
+  classDef decision fill:#fef3c7,stroke:#b45309
+  classDef planeado fill:#f3f4f6,stroke:#6b7280,stroke-dasharray:4 3
+  A([Inicio]) --> B[Abrir Tareas]:::paso
+  B --> C[Seleccionar actividad y revisar instrucciones]:::paso
+  C --> D[Pulsar Entregar y elegir archivo]:::paso
+  D --> E{Extensión PDF, DOC, DOCX, JPG o PNG?}:::decision
+  E -- No --> F[Mostrar formato no permitido]:::paso
+  F --> D
+  E -- Sí --> G{Tamaño de 10 MB o menos?}:::decision
+  G -- No --> H[Mostrar límite de tamaño]:::paso
+  H --> D
+  G -- Sí --> I[Confirmar entrega]:::paso
+  I --> J[(Guardar entrega en el servidor, planeado)]:::planeado
+  J --> K[Actualizar estado de la tarea a entregada]:::planeado
+  K --> L([Fin])

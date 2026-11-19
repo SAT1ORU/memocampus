@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Admin — MemoCampus</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     /* === Layout === */
     .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
@@ -71,8 +75,8 @@
     .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
     .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
     .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
-    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
-    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.6); }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.6); padding:1rem 1.25rem 0.4rem; }
     .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
     .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
     .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
@@ -81,6 +85,11 @@
     .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.45) !important; }
     .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; }
     .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
+    @media (max-width:960px) {
+      .app-sidebar { transform:translateX(-100%); }
+      .app-sidebar.open { transform:translateX(0); }
+      .app-main { margin-left:0 !important; }
+    }
     /* Notif */
     .notif-wrapper { position:relative; }
     .notif-dropdown { display:none; position:absolute; top:calc(100% + 10px); right:0; width:300px; background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); box-shadow:var(--sombra-lg); z-index:200; overflow:hidden; }
@@ -144,9 +153,9 @@
           <p>IE La Armonía · Panel de control institucional · Año 2026</p>
         </div>
         <div class="banner-kpis">
-          <div class="bkpi"><div class="bkpi-val">342</div><div class="bkpi-lbl">Estudiantes</div></div>
-          <div class="bkpi"><div class="bkpi-val">18</div><div class="bkpi-lbl">Docentes</div></div>
-          <div class="bkpi"><div class="bkpi-val">91%</div><div class="bkpi-lbl">Asistencia hoy</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="admin-estudiantes-total">—</div><div class="bkpi-lbl">Estudiantes</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="admin-docentes-total">—</div><div class="bkpi-lbl">Docentes</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="admin-asistencia-total">—</div><div class="bkpi-lbl">Asistencia hoy</div></div>
           <div class="bkpi"><div class="bkpi-val">4</div><div class="bkpi-lbl">Alertas</div></div>
         </div>
       </div>
@@ -242,6 +251,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-admin.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
@@ -329,9 +340,32 @@ document.addEventListener('click', e => {
   if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
 });
 
+async function cargarDashboardAdmin(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const [{ data: usuarios, error: usuariosError }, { data: asistencia, error: asistenciaError }] = await Promise.all([
+      client.from('usuarios').select('id, nombre, correo, rol, activo').limit(50),
+      client.from('asistencia').select('estado')
+    ]);
+    if (usuariosError) throw usuariosError;
+    if (asistenciaError) throw asistenciaError;
+    document.getElementById('admin-estudiantes-total').textContent = (usuarios || []).filter(u => u.rol === 'estudiante').length;
+    document.getElementById('admin-docentes-total').textContent = (usuarios || []).filter(u => u.rol === 'docente').length;
+    if (asistencia?.length) {
+      const presentes = asistencia.filter(a => ['presente', 'tardanza'].includes(a.estado)).length;
+      document.getElementById('admin-asistencia-total').textContent = `${Math.round(presentes / asistencia.length * 100)}%`;
+    }
+    const recientes = (usuarios || []).slice(0, 5).map(u => ({ nombre: u.nombre, rol: u.rol, correo: u.correo, area: '—', activo: u.activo }));
+    if (recientes.length) document.getElementById('tabla-usuarios').innerHTML = recientes.map(u => `<div class="user-row"><div class="user-cell" style="display:flex;align-items:center;gap:10px;"><div class="user-avatar-sm" style="background:#2563eb;">${u.nombre.split(' ').map(n=>n[0]).join('').slice(0,2)}</div><span style="font-weight:500;color:var(--txt-primario);">${u.nombre}</span></div><div class="user-cell"><span class="badge ${ROL_COLOR[u.rol] || 'badge-azul'}">${ROL_LABEL[u.rol] || u.rol}</span></div><div class="user-cell" style="font-size:12px;">${u.correo}</div><div class="user-cell">${u.area}</div><div class="user-cell"><span class="badge ${u.activo ? 'badge-exito' : 'badge-error'}">${u.activo ? 'Activo' : 'Inactivo'}</span></div></div>`).join('');
+  } catch (error) {
+    console.warn('No se pudieron cargar datos reales de administración.', error);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('admin');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) { AUTH.pintarUsuario(usuario); cargarDashboardAdmin(usuario); }
 });
 </script>
 </body>

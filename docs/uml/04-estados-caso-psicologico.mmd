@@ -1,0 +1,9 @@
+stateDiagram-v2
+  %% Estados de un caso psicológico (enum estado_caso en db/schema.sql).
+  %% Las transiciones son propuestas: el código aún no las impone.
+  [*] --> abierto : se crea desde encuesta o remisión
+  abierto --> en_seguimiento : rectoría asigna seguimiento
+  en_seguimiento --> remitido : se deriva a entidad externa
+  en_seguimiento --> cerrado : se resuelve en el colegio
+  remitido --> cerrado : se confirma la atención externa
+  cerrado --> [*]

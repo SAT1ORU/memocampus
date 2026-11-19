@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mis Materias — MemoCampus</title>
@@ -109,280 +112,72 @@
         <button class="mtab" onclick="filtrarArea(this,'otros')">Otros</button>
       </div>
 
-      <!-- Grid de materias -->
-      <div class="materia-grid" id="materia-grid">
-
-        <!-- Matemáticas -->
-        <div class="materia-big-card" data-area="matematicas">
-          <div class="materia-header-bar" style="background:var(--mat-matematicas);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">➗</div>
-              <div class="materia-info">
-                <h4>Matemáticas</h4>
-                <span>Prof. Ramírez · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-matematicas);">4.2</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge badge-azul">12 materiales</span>
-              <span class="badge badge-alerta">1 tarea activa</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Guía trigonometría — Unidad 3</div><div class="material-fecha">22 mar</div></div>
-              <div class="material-item"><div class="material-ico">🎥</div><div class="material-nombre">Video: Funciones trigonométricas</div><div class="material-fecha">20 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Taller álgebra — Período 1</div><div class="material-fecha">15 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ciencias Naturales -->
-        <div class="materia-big-card" data-area="ciencias">
-          <div class="materia-header-bar" style="background:var(--mat-ciencias);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">🔬</div>
-              <div class="materia-info">
-                <h4>Ciencias Naturales</h4>
-                <span>Prof. Morales · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-ciencias);">4.5</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge badge-verde">9 materiales</span>
-              <span class="badge badge-alerta">1 tarea activa</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Guía reacciones químicas</div><div class="material-fecha">21 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Protocolo práctica de laboratorio</div><div class="material-fecha">18 mar</div></div>
-              <div class="material-item"><div class="material-ico">🔗</div><div class="material-nombre">Enlace: Simulador PhET</div><div class="material-fecha">16 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Inglés -->
-        <div class="materia-big-card" data-area="humanidades">
-          <div class="materia-header-bar" style="background:var(--mat-ingles);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">🌍</div>
-              <div class="materia-info">
-                <h4>Inglés</h4>
-                <span>Prof. Torres · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-ingles);">3.8</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge badge-morado">8 materiales</span>
-              <span class="badge badge-alerta">1 tarea activa</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Student Book — Unit 3 (pp. 45-52)</div><div class="material-fecha">20 mar</div></div>
-              <div class="material-item"><div class="material-ico">🎧</div><div class="material-nombre">Listening: Technology podcast</div><div class="material-fecha">18 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Vocabulary list — Unit 3</div><div class="material-fecha">15 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Español -->
-        <div class="materia-big-card" data-area="humanidades">
-          <div class="materia-header-bar" style="background:var(--mat-español);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">📖</div>
-              <div class="materia-info">
-                <h4>Español</h4>
-                <span>Prof. Vargas · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-español);">4.0</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge" style="background:#ffeaea; color:#c0392b;">7 materiales</span>
-              <span class="badge badge-error">1 vencida</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Literatura colombiana S. XX — Guía</div><div class="material-fecha">19 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Taller texto argumentativo</div><div class="material-fecha">14 mar</div></div>
-              <div class="material-item"><div class="material-ico">🎥</div><div class="material-nombre">Video: Análisis literario</div><div class="material-fecha">12 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ciencias Sociales -->
-        <div class="materia-big-card" data-area="sociales">
-          <div class="materia-header-bar" style="background:var(--mat-sociales);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">🌎</div>
-              <div class="materia-info">
-                <h4>Ciencias Sociales</h4>
-                <span>Prof. Castro · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-sociales);">4.3</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge badge-naranja">6 materiales</span>
-              <span class="badge badge-exito">Al día</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Revolución Industrial — Resumen</div><div class="material-fecha">17 mar</div></div>
-              <div class="material-item"><div class="material-ico">🗺️</div><div class="material-nombre">Mapa conceptual S. XIX</div><div class="material-fecha">13 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Guía evaluación primer período</div><div class="material-fecha">10 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ed. Artística -->
-        <div class="materia-big-card" data-area="otros">
-          <div class="materia-header-bar" style="background:var(--mat-artistica);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">🎨</div>
-              <div class="materia-info">
-                <h4>Educación Artística</h4>
-                <span>Prof. Niño · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-artistica);">4.8</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge" style="background:#fde8f4; color:#c0398a;">5 materiales</span>
-              <span class="badge badge-exito">Superior</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">🖼️</div><div class="material-nombre">Referentes artísticos colombianos</div><div class="material-fecha">16 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Técnicas de acuarela — Guía</div><div class="material-fecha">11 mar</div></div>
-              <div class="material-item"><div class="material-ico">🎥</div><div class="material-nombre">Video tutorial: bodegón</div><div class="material-fecha">8 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Física -->
-        <div class="materia-big-card" data-area="ciencias">
-          <div class="materia-header-bar" style="background:var(--mat-fisica);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">⚗️</div>
-              <div class="materia-info">
-                <h4>Física</h4>
-                <span>Prof. Morales · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-fisica);">3.9</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge" style="background:#e8f4fb; color:#1e9ee8;">6 materiales</span>
-              <span class="badge badge-exito">Al día</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Cinemática — Guía teórica</div><div class="material-fecha">15 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Ejercicios MRU y MRUV</div><div class="material-fecha">12 mar</div></div>
-              <div class="material-item"><div class="material-ico">🔗</div><div class="material-nombre">Simulador movimiento PhET</div><div class="material-fecha">10 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ética -->
-        <div class="materia-big-card" data-area="otros">
-          <div class="materia-header-bar" style="background:var(--mat-etica);"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">⚖️</div>
-              <div class="materia-info">
-                <h4>Ética y Valores</h4>
-                <span>Prof. Peña · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:var(--mat-etica);">4.6</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge badge-verde">4 materiales</span>
-              <span class="badge badge-exito">Al día</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Proyecto de vida — Guía</div><div class="material-fecha">14 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Reflexión: ciudadanía activa</div><div class="material-fecha">9 mar</div></div>
-              <div class="material-item"><div class="material-ico">🎥</div><div class="material-nombre">Video: Derechos humanos Colombia</div><div class="material-fecha">5 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Ed. Física -->
-        <div class="materia-big-card" data-area="otros">
-          <div class="materia-header-bar" style="background:#888888;"></div>
-          <div class="materia-card-body">
-            <div class="materia-top">
-              <div class="materia-emoji">⚽</div>
-              <div class="materia-info">
-                <h4>Educación Física</h4>
-                <span>Prof. Ríos · 10°A</span>
-              </div>
-              <div class="materia-nota-badge">
-                <div class="num" style="color:#555;">4.4</div>
-                <span class="lbl">Período 1</span>
-              </div>
-            </div>
-            <div style="display:flex; gap:6px; flex-wrap:wrap;">
-              <span class="badge badge-verde">3 materiales</span>
-              <span class="badge badge-exito">Al día</span>
-            </div>
-            <div class="materiales-lista">
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Plan de entrenamiento período 1</div><div class="material-fecha">8 mar</div></div>
-              <div class="material-item"><div class="material-ico">📄</div><div class="material-nombre">Normas deportivas — fútbol sala</div><div class="material-fecha">5 mar</div></div>
-              <div class="material-item" style="color:var(--verde); font-size:12px; justify-content:center;">Ver todos los materiales →</div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /materia-grid -->
+      <!-- Grid de materias (cargado desde Supabase) -->
+      <div class="materia-grid" id="materia-grid"></div><!-- /materia-grid -->
     </div>
   </main>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-estudiante.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('estudiante');
   if (usuario) AUTH.pintarUsuario(usuario);
 
+  async function cargarMaterias() {
+    if (!usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: est, error: estError } = await client
+        .from('estudiantes')
+        .select('id, grupo_id, notas(materia_id, periodo, final, materias(nombre))')
+        .eq('usuario_id', usuario.id)
+        .maybeSingle();
+      if (estError || !est) return;
+
+      const { data: asig, error: asigError } = await client
+        .from('asignaciones')
+        .select('materia_id, materias(nombre)')
+        .eq('grupo_id', est.grupo_id);
+      if (asigError) return;
+
+      const notas = (est.notas || []).filter(n => n.periodo === 1);
+      const notaMap = Object.fromEntries(notas.map(n => [n.materia_id, n.final]));
+      const materias = (asig || []).map(a => ({
+        nombre: a.materias.nombre,
+        nota: notaMap[a.materia_id] || null
+      }));
+
+      const colores = ['var(--mat-matematicas)','var(--mat-ciencias)','var(--mat-ingles)','var(--mat-español)','var(--mat-sociales)'];
+      const emojis = ['➗','🔬','🌍','📖','🌎'];
+      const grid = document.getElementById('materia-grid');
+      grid.innerHTML = materias.map((m, i) => `
+        <div class="materia-big-card">
+          <div class="materia-header-bar" style="background:${colores[i % colores.length]};"></div>
+          <div class="materia-card-body">
+            <div class="materia-top">
+              <div class="materia-emoji">${emojis[i % emojis.length]}</div>
+              <div class="materia-info">
+                <h4>${m.nombre}</h4>
+                <span>Materia asignada</span>
+              </div>
+              <div class="materia-nota-badge">
+                <div class="num" style="color:${colores[i % colores.length]};">${m.nota ? m.nota.toFixed(1) : '—'}</div>
+                <span class="lbl">Período 1</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <span class="badge" style="background:${colores[i % colores.length]}40;">Activa</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    } catch (error) { console.warn('Error cargando materias:', error); }
+  }
+
   function filtrarArea(btn, area) {
-    document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.materia-big-card').forEach(card => {
-      if (area === 'todas' || card.dataset.area === area) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
-    });
+    // Placeholder para mantener compatibilidad con filtros
   }
 
   function filtrar() {
@@ -391,6 +186,8 @@
       card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
     });
   }
+
+  document.addEventListener('DOMContentLoaded', cargarMaterias);
 </script>
 </body>
 </html>

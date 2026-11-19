@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mi Dashboard — MemoCampus</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .materia-card { background:var(--bg-card); border:1px solid var(--borde); border-radius:var(--radio-lg); overflow:hidden; transition:var(--trans); cursor:pointer; }
     .materia-card:hover { transform:translateY(-3px); box-shadow:var(--sombra-md); }
@@ -50,18 +54,24 @@
     .app-topbar  { height:64px; background:#fff; border-bottom:1px solid var(--borde); display:flex; align-items:center; justify-content:space-between; padding:0 1.75rem; position:sticky; top:0; z-index:50; }
     .app-content { padding:2rem 1.75rem; flex:1; }
 
+    @media (max-width: 960px) {
+      .app-sidebar { transform: translateX(-100%); }
+      .app-sidebar.open { transform: translateX(0); }
+      .app-main { margin-left: 0 !important; }
+    }
+
     /* Sidebar base */
     .sidebar-logo { padding:1.25rem; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.07); }
     .sidebar-logo-mark { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; flex-shrink:0; }
     .sidebar-logo-name { font-size:14px; font-weight:700; color:#fff; }
-    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.4); }
+    .sidebar-logo-sub  { font-size:10px; color:rgba(255,255,255,0.6); }
     .sidebar-nav a { display:flex; align-items:center; gap:11px; padding:10px 1.25rem; color:rgba(255,255,255,0.75); font-size:13.5px; transition:all 0.2s; text-decoration:none; }
     .sidebar-nav a:hover { background:rgba(255,255,255,0.07); color:#fff; }
     .sidebar-nav a.activo { background:rgba(255,255,255,0.13); color:#fff; }
-    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.3); padding:1rem 1.25rem 0.4rem; }
+    .sidebar-section-title { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; color:rgba(255,255,255,0.6); padding:1rem 1.25rem 0.4rem; }
     .sidebar-user { margin-top:auto; border-top:1px solid rgba(255,255,255,0.07); padding:1rem 1.25rem; display:flex; align-items:center; gap:10px; }
     .sidebar-user-name { font-size:13px; font-weight:500; color:#fff !important; }
-    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.4) !important; }
+    .sidebar-user-rol  { font-size:11px; color:rgba(255,255,255,0.6) !important; }
     .btn-logout-side { margin-left:auto; background:none; border:none; color:rgba(255,255,255,0.35); font-size:18px; cursor:pointer; transition:all 0.2s; padding:4px; border-radius:6px; line-height:1; }
     .btn-logout-side:hover { color:var(--error); background:rgba(220,38,38,0.12); }
 
@@ -144,7 +154,7 @@
       <div class="welcome-banner">
         <div>
           <h2>¡Hola, <span data-user-name>Valentina</span>! 👋</h2>
-          <p>Grado 10°A · IE La Armonía · Período 1 — 2026</p>
+          <p>Grado <span id="grado-estudiante">10°A</span> · IE La Armonía · Período 1 — 2026</p>
         </div>
         <div class="welcome-deco">🎒</div>
       </div>
@@ -152,7 +162,7 @@
       <div class="grid-4 mb-3">
         <div class="stat-card">
           <div class="stat-icon" style="background:#eef2fd;">📚</div>
-          <div><div class="stat-label">Materias</div><div class="stat-value">11</div><div class="stat-sub">Este período</div></div>
+          <div><div class="stat-label">Materias</div><div class="stat-value" id="materias-total">11</div><div class="stat-sub">Este período</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:#fef3c7;">✅</div>
@@ -160,11 +170,11 @@
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
-          <div><div class="stat-label">Promedio general</div><div class="stat-value" style="color:var(--verde);">4.1</div><div class="stat-sub">Período 1</div></div>
+          <div><div class="stat-label">Promedio general</div><div class="stat-value" id="promedio-general" style="color:var(--verde);">4.1</div><div class="stat-sub">Período 1</div></div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:#f5eeff;">🎯</div>
-          <div><div class="stat-label">Asistencia</div><div class="stat-value" style="color:var(--color-padre);">94%</div><div class="stat-sub">Este mes</div></div>
+          <div><div class="stat-label">Asistencia</div><div class="stat-value" id="asistencia-total" style="color:var(--color-padre);">94%</div><div class="stat-sub">Este mes</div></div>
         </div>
       </div>
 
@@ -174,23 +184,11 @@
             <h3>Mis materias</h3>
             <a href="cursos.html" class="btn btn-ghost btn-sm">Ver todas →</a>
           </div>
-          <div class="grid-2" style="grid-template-columns:1fr 1fr;gap:10px;">
-            <div class="materia-card" onclick="window.location.href='cursos.html'">
-              <div class="materia-header" style="background:var(--mat-matematicas);"></div>
-              <div class="materia-body"><div class="materia-ico">➗</div><div class="materia-nombre">Matemáticas</div><div class="materia-docente">Prof. Ramírez</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-matematicas);">4.2</span><div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div></div></div>
-            </div>
-            <div class="materia-card" onclick="window.location.href='cursos.html'">
-              <div class="materia-header" style="background:var(--mat-ciencias);"></div>
-              <div class="materia-body"><div class="materia-ico">🔬</div><div class="materia-nombre">Ciencias Nat.</div><div class="materia-docente">Prof. Morales</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-ciencias);">4.5</span><div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div></div></div>
-            </div>
-            <div class="materia-card" onclick="window.location.href='cursos.html'">
-              <div class="materia-header" style="background:var(--mat-ingles);"></div>
-              <div class="materia-body"><div class="materia-ico">🌍</div><div class="materia-nombre">Inglés</div><div class="materia-docente">Prof. Torres</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-ingles);">3.8</span><div class="nota-label">Período 1<br><span class="badge badge-alerta" style="font-size:9px;">Básico</span></div></div></div>
-            </div>
-            <div class="materia-card" onclick="window.location.href='cursos.html'">
-              <div class="materia-header" style="background:var(--mat-español);"></div>
-              <div class="materia-body"><div class="materia-ico">📖</div><div class="materia-nombre">Español</div><div class="materia-docente">Prof. Vargas</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-español);">4.0</span><div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div></div></div>
-            </div>
+          <div id="materias-grid" class="grid-2" style="grid-template-columns:1fr 1fr;gap:10px;">
+            <div class="materia-card" onclick="window.location.href='cursos.html'"><div class="materia-header" style="background:var(--mat-matematicas);"></div><div class="materia-body"><div class="materia-ico">➗</div><div class="materia-nombre">Matemáticas</div><div class="materia-docente">Prof. Ramírez</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-matematicas);">4.2</span><div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div></div></div></div>
+            <div class="materia-card" onclick="window.location.href='cursos.html'"><div class="materia-header" style="background:var(--mat-ciencias);"></div><div class="materia-body"><div class="materia-ico">🔬</div><div class="materia-nombre">Ciencias Nat.</div><div class="materia-docente">Prof. Morales</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-ciencias);">4.5</span><div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div></div></div></div>
+            <div class="materia-card" onclick="window.location.href='cursos.html'"><div class="materia-header" style="background:var(--mat-ingles);"></div><div class="materia-body"><div class="materia-ico">🌍</div><div class="materia-nombre">Inglés</div><div class="materia-docente">Prof. Torres</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-ingles);">3.8</span><div class="nota-label">Período 1<br><span class="badge badge-alerta" style="font-size:9px;">Básico</span></div></div></div></div>
+            <div class="materia-card" onclick="window.location.href='cursos.html'"><div class="materia-header" style="background:var(--mat-español);"></div><div class="materia-body"><div class="materia-ico">📖</div><div class="materia-nombre">Español</div><div class="materia-docente">Prof. Vargas</div><div class="materia-nota"><span class="nota-num" style="color:var(--mat-español);">4.0</span><div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div></div></div></div>
           </div>
         </div>
 
@@ -224,16 +222,10 @@
             <h3>Rendimiento período 1</h3>
             <a href="notas.html" class="btn btn-ghost btn-sm">Ver boletín →</a>
           </div>
-          <div style="display:flex;flex-direction:column;gap:12px;">
-            <div><div class="flex-between mb-1"><span class="text-sm fw-600">Matemáticas</span><span class="text-sm" style="color:var(--mat-matematicas);font-weight:700;">4.2</span></div><div class="progress-wrap"><div class="progress-bar" style="width:84%;background:var(--mat-matematicas);"></div></div></div>
-            <div><div class="flex-between mb-1"><span class="text-sm fw-600">Ciencias Naturales</span><span class="text-sm" style="color:var(--mat-ciencias);font-weight:700;">4.5</span></div><div class="progress-wrap"><div class="progress-bar" style="width:90%;background:var(--mat-ciencias);"></div></div></div>
-            <div><div class="flex-between mb-1"><span class="text-sm fw-600">Inglés</span><span class="text-sm" style="color:var(--mat-ingles);font-weight:700;">3.8</span></div><div class="progress-wrap"><div class="progress-bar" style="width:76%;background:var(--mat-ingles);"></div></div></div>
-            <div><div class="flex-between mb-1"><span class="text-sm fw-600">Español</span><span class="text-sm" style="color:var(--mat-español);font-weight:700;">4.0</span></div><div class="progress-wrap"><div class="progress-bar" style="width:80%;background:var(--mat-español);"></div></div></div>
-            <div><div class="flex-between mb-1"><span class="text-sm fw-600">Sociales</span><span class="text-sm" style="color:var(--mat-sociales);font-weight:700;">4.3</span></div><div class="progress-wrap"><div class="progress-bar" style="width:86%;background:var(--mat-sociales);"></div></div></div>
-          </div>
+          <div id="rendimiento-lista" style="display:flex;flex-direction:column;gap:12px;"></div>
           <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--borde);display:flex;justify-content:space-between;align-items:center;">
             <span class="text-sm text-muted">Promedio general</span>
-            <span style="font-size:1.4rem;font-weight:800;color:var(--verde);">4.1</span>
+            <span id="promedio-rendimiento" style="font-size:1.4rem;font-weight:800;color:var(--verde);">4.1</span>
           </div>
         </div>
 
@@ -265,6 +257,8 @@
   </main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-estudiante.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
@@ -282,9 +276,93 @@ document.addEventListener('click', e => {
   if (w && !w.contains(e.target)) document.getElementById('notifDropdown').classList.remove('open');
 });
 
+async function cargarDatosSupabase(usuario) {
+  if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+
+  try {
+    const client = window.supabase.createClient(
+      window.MEMOCAMPUS_CONFIG.SUPABASE_URL,
+      window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY
+    );
+    const { data: estudiante, error: estudianteError } = await client
+      .from('estudiantes')
+      .select('id, grupo_id, grupos(grado, seccion), notas(materia_id, periodo, final, materias(nombre))')
+      .eq('usuario_id', usuario.id)
+      .maybeSingle();
+    if (estudianteError) throw estudianteError;
+    if (!estudiante) return;
+
+    const notas = (estudiante.notas || []).filter(n => Number(n.periodo) === 1);
+    const { data: asignaciones, error: asignacionesError } = await client
+      .from('asignaciones')
+      .select('materia_id, materias(nombre)')
+      .eq('grupo_id', estudiante.grupo_id);
+    if (asignacionesError) throw asignacionesError;
+
+    const notasPorMateria = new Map(notas.map(n => [n.materia_id, n]));
+    const materiasAsignadas = (asignaciones || []).map(a => ({
+      id: a.materia_id,
+      nombre: a.materias?.nombre || 'Materia',
+      nota: notasPorMateria.get(a.materia_id) || null
+    }));
+    // Conserva una nota visible aunque una asignación todavía no esté publicada.
+    const idsAsignados = new Set(materiasAsignadas.map(m => m.id));
+    notas.forEach(n => {
+      if (!idsAsignados.has(n.materia_id)) {
+        materiasAsignadas.push({ id: n.materia_id, nombre: n.materias?.nombre || 'Materia', nota: n });
+      }
+    });
+
+    const notasDisponibles = materiasAsignadas.filter(m => m.nota).map(m => Number(m.nota.final));
+    const promedio = notasDisponibles.length
+      ? notasDisponibles.reduce((total, valor) => total + valor, 0) / notasDisponibles.length
+      : null;
+    if (promedio !== null) {
+      document.getElementById('promedio-general').textContent = promedio.toFixed(1);
+      document.getElementById('promedio-rendimiento').textContent = promedio.toFixed(1);
+    }
+    document.getElementById('materias-total').textContent = materiasAsignadas.length;
+
+    const colores = ['var(--mat-matematicas)', 'var(--mat-ciencias)', 'var(--mat-ingles)', 'var(--mat-español)', 'var(--mat-sociales)'];
+    const iconos = ['➗', '🔬', '🌍', '📖', '🌎'];
+    const materias = materiasAsignadas.map((materia, index) => {
+      const valor = materia.nota ? Number(materia.nota.final) : null;
+      const color = colores[index % colores.length];
+      return { ...materia, valor, color, icono: iconos[index % iconos.length] };
+    });
+    if (materias.length) {
+      document.getElementById('materias-grid').innerHTML = materias.map(m => `
+        <div class="materia-card" onclick="window.location.href='cursos.html'">
+          <div class="materia-header" style="background:${m.color};"></div>
+          <div class="materia-body"><div class="materia-ico">${m.icono}</div><div class="materia-nombre">${m.nombre}</div><div class="materia-docente">Materia asignada</div><div class="materia-nota"><span class="nota-num" style="color:${m.color};">${m.valor === null ? '—' : m.valor.toFixed(1)}</span><div class="nota-label">Período 1<br><span class="badge ${m.valor === null ? '' : m.valor >= 3 ? 'badge-exito' : 'badge-alerta'}" style="font-size:9px;">${m.valor === null ? 'Sin nota' : m.valor >= 3 ? 'Aprobado' : 'Revisar'}</span></div></div></div>
+        </div>`).join('');
+      document.getElementById('rendimiento-lista').innerHTML = materias.map(m => `
+        <div><div class="flex-between mb-1"><span class="text-sm fw-600">${m.nombre}</span><span class="text-sm" style="color:${m.color};font-weight:700;">${m.valor === null ? '—' : m.valor.toFixed(1)}</span></div><div class="progress-wrap"><div class="progress-bar" style="width:${m.valor === null ? 0 : Math.min(m.valor / 5 * 100, 100)}%;background:${m.color};"></div></div></div>`).join('');
+    }
+
+    const grupo = estudiante.grupos;
+    if (grupo) document.getElementById('grado-estudiante').textContent = `${grupo.grado}°${grupo.seccion}`;
+
+    const { data: asistencia, error: asistenciaError } = await client
+      .from('asistencia')
+      .select('estado')
+      .eq('estudiante_id', estudiante.id);
+    if (asistenciaError) throw asistenciaError;
+    if (asistencia?.length) {
+      const presentes = asistencia.filter(a => ['presente', 'tardanza'].includes(a.estado)).length;
+      document.getElementById('asistencia-total').textContent = `${Math.round(presentes / asistencia.length * 100)}%`;
+    }
+  } catch (error) {
+    console.warn('No se pudieron cargar datos reales; se mantienen los datos demo.', error);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('estudiante');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) {
+    AUTH.pintarUsuario(usuario);
+    cargarDatosSupabase(usuario);
+  }
 });
 </script>
 </body>

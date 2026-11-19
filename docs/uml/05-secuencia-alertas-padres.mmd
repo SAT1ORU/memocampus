@@ -1,0 +1,20 @@
+sequenceDiagram
+  %% Generación de alertas y aviso a padres (db/alertas.sql). El envío de correo es planeado.
+  participant P as Proceso programado
+  participant BD as PostgreSQL
+  participant A as alertas
+  participant V as vw_alertas_pendientes
+  participant C as Servicio de correo (planeado)
+  participant PA as Padre o acudiente
+  P->>BD: SELECT generar_alertas(periodo)
+  BD->>BD: Regla nota_baja (2 o más materias < nota mínima)
+  BD->>A: INSERT si no existe alerta del periodo
+  BD->>BD: Regla inasistencias (ausencias > umbral)
+  BD->>A: INSERT si no hay alerta en 7 días
+  BD-->>P: número de alertas nuevas
+  P->>V: consulta alertas no enviadas
+  V-->>P: seudónimo, tipo y detalle
+  P->>C: envía plantilla aprobada por coordinación
+  C-->>PA: correo de aviso
+  P->>A: UPDATE enviada_a_padres = true
+  Note over P,PA: Las alertas de ánimo nunca se envían a padres.

@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.supabase.co https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="description" content="MemoCampus, plataforma educativa de IE La Armonía (prototipo).">
+  <link rel="icon" href="data:,">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cursos — MemoCampus Admin</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
     .app-layout  { display:flex; min-height:100vh; background:var(--bg-app); }
     .app-sidebar { width:240px; min-width:240px; background:var(--bg-sidebar); position:fixed; top:0; left:0; height:100vh; overflow-y:auto; z-index:100; display:flex; flex-direction:column; }
@@ -105,10 +109,10 @@
           <p>IE La Armonía · Año lectivo 2026 · Jornada mañana y tarde</p>
         </div>
         <div class="banner-kpis" style="position:relative;z-index:1;">
-          <div class="bkpi"><div class="bkpi-val">12</div><div class="bkpi-lbl">Cursos activos</div></div>
-          <div class="bkpi"><div class="bkpi-val">342</div><div class="bkpi-lbl">Estudiantes</div></div>
-          <div class="bkpi"><div class="bkpi-val">18</div><div class="bkpi-lbl">Docentes</div></div>
-          <div class="bkpi"><div class="bkpi-val">3.9</div><div class="bkpi-lbl">Promedio inst.</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="kpi-cursos">12</div><div class="bkpi-lbl">Cursos activos</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="kpi-est">342</div><div class="bkpi-lbl">Estudiantes</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="kpi-doc">18</div><div class="bkpi-lbl">Docentes</div></div>
+          <div class="bkpi"><div class="bkpi-val" id="kpi-prom">3.9</div><div class="bkpi-lbl">Promedio inst.</div></div>
         </div>
       </div>
 
@@ -228,10 +232,12 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-admin.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
-const CURSOS = [
+let CURSOS = [
   { id:'6a', nombre:'6°A', grado:'6°', jornada:'Mañana', estudiantes:32, docente:'Prof. Carmen López',  doc_av:'CL', doc_color:'#db2777', promedio:3.8, asistencia:93, superior:3,  bajo:1, color:'#2563eb' },
   { id:'6b', nombre:'6°B', grado:'6°', jornada:'Tarde',  estudiantes:30, docente:'Prof. Ricardo Díaz',  doc_av:'RD', doc_color:'#ea580c', promedio:3.6, asistencia:90, superior:2,  bajo:2, color:'#0891b2' },
   { id:'7a', nombre:'7°A', grado:'7°', jornada:'Mañana', estudiantes:31, docente:'Prof. Sandra Ruiz',   doc_av:'SR', doc_color:'#059669', promedio:3.9, asistencia:88, superior:4,  bajo:1, color:'#7c3aed' },
@@ -248,8 +254,9 @@ const CURSOS = [
 
 const DOCENTES = ['Prof. Andrés Morales','Prof. Laura Reyes','Prof. Carmen López','Prof. Ricardo Díaz','Prof. Sandra Ruiz'];
 
+function renderCursos(cursos) {
 // TAB 1 — Lista de cursos
-document.getElementById('grid-cursos').innerHTML = CURSOS.map(c => {
+document.getElementById('grid-cursos').innerHTML = cursos.map(c => {
   const pct = (c.promedio/5*100).toFixed(0);
   const color_asist = c.asistencia >= 92 ? 'var(--verde)' : c.asistencia >= 85 ? 'var(--alerta)' : 'var(--error)';
   return `<div class="curso-card" style="--cc-color:${c.color};">
@@ -289,7 +296,7 @@ document.getElementById('grid-cursos').innerHTML = CURSOS.map(c => {
 }).join('');
 
 // TAB 2 — Asignación
-document.getElementById('tabla-asignacion').innerHTML = CURSOS.map(c => `
+document.getElementById('tabla-asignacion').innerHTML = cursos.map(c => `
   <div class="asig-row">
     <div class="asig-cell">
       <span style="display:inline-flex;align-items:center;gap:8px;">
@@ -308,7 +315,7 @@ document.getElementById('tabla-asignacion').innerHTML = CURSOS.map(c => `
   </div>`).join('');
 
 // TAB 3 — Estadísticas
-document.getElementById('stat-promedios').innerHTML = CURSOS.map(c => {
+document.getElementById('stat-promedios').innerHTML = cursos.map(c => {
   const pct = (c.promedio/5*100).toFixed(0);
   return `<div class="stat-curso-row">
     <div class="stat-curso-nombre">${c.nombre}</div>
@@ -317,7 +324,7 @@ document.getElementById('stat-promedios').innerHTML = CURSOS.map(c => {
   </div>`;
 }).join('');
 
-document.getElementById('stat-asistencia').innerHTML = CURSOS.map(c => {
+document.getElementById('stat-asistencia').innerHTML = cursos.map(c => {
   const color = c.asistencia >= 92 ? 'var(--verde)' : c.asistencia >= 85 ? 'var(--alerta)' : 'var(--error)';
   return `<div class="stat-curso-row">
     <div class="stat-curso-nombre">${c.nombre}</div>
@@ -326,7 +333,7 @@ document.getElementById('stat-asistencia').innerHTML = CURSOS.map(c => {
   </div>`;
 }).join('');
 
-document.getElementById('tabla-resumen').innerHTML = CURSOS.map(c => {
+document.getElementById('tabla-resumen').innerHTML = cursos.map(c => {
   const dp = c.promedio >= 4.6 ? {txt:'Superior',cls:'badge-morado'} : c.promedio >= 4.0 ? {txt:'Alto',cls:'badge-exito'} : c.promedio >= 3.0 ? {txt:'Básico',cls:'badge-alerta'} : {txt:'Bajo',cls:'badge-error'};
   return `<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr;border-bottom:1px solid var(--borde);" onmouseover="this.style.background='var(--bg-app)'" onmouseout="this.style.background=''">
     <div class="asig-cell" style="font-weight:600;color:var(--txt-primario);">
@@ -341,6 +348,8 @@ document.getElementById('tabla-resumen').innerHTML = CURSOS.map(c => {
     <div class="asig-cell" style="color:${c.bajo>0?'var(--error)':'var(--txt-muted)'};font-weight:700;">${c.bajo}</div>
   </div>`;
 }).join('');
+}
+renderCursos(CURSOS);
 
 // Helpers
 function getEmoji(g) {
@@ -371,9 +380,47 @@ document.getElementById('modal-curso').addEventListener('click', function(e) {
   if (e.target === this) cerrarModal();
 });
 
+async function cargarCursosAdmin() {
+  if (!window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
+  try {
+    const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
+    const [grupos, asig, est, notas, asis] = await Promise.all([
+      client.from('grupos').select('id,grado,seccion'),
+      client.from('asignaciones').select('grupo_id,docente_id,usuarios(nombre)'),
+      client.from('estudiantes').select('id,grupo_id'),
+      client.from('notas').select('final,estudiantes(grupo_id)').eq('periodo', 1),
+      client.from('asistencia').select('estado,estudiantes(grupo_id)')
+    ]);
+    for (const r of [grupos, asig, est, notas, asis]) if (r.error) throw r.error;
+    if (!grupos.data?.length) return;
+
+    const colores = ['#2563eb','#0891b2','#7c3aed','#ea580c','#059669','#db2777','#4f46e5','#1a6b3c','#16a34a'];
+    CURSOS = grupos.data.map((g, i) => {
+      const asignado = asig.data.find(a => a.grupo_id === g.id);
+      const docente = asignado?.usuarios?.nombre || 'Sin asignar';
+      const fin = notas.data.filter(n => n.estudiantes?.grupo_id === g.id).map(n => Number(n.final)).filter(Number.isFinite);
+      const asisG = asis.data.filter(r => r.estudiantes?.grupo_id === g.id);
+      const color = colores[i % colores.length];
+      return {
+        id: g.id, nombre: `${g.grado}°${g.seccion}`, grado: `${g.grado}°`, jornada: 'Mañana',
+        estudiantes: est.data.filter(e => e.grupo_id === g.id).length, docente,
+        doc_av: docente.split(' ').slice(-2).map(p => p[0]).join('').toUpperCase(), doc_color: color,
+        promedio: fin.length ? fin.reduce((s, v) => s + v, 0) / fin.length : 0,
+        asistencia: asisG.length ? Math.round(asisG.filter(r => ['presente','tardanza'].includes(r.estado)).length / asisG.length * 100) : 0,
+        superior: fin.filter(f => f >= 4.6).length, bajo: fin.filter(f => f < 3.0).length, color
+      };
+    });
+    renderCursos(CURSOS);
+    document.getElementById('kpi-cursos').textContent = CURSOS.length;
+    document.getElementById('kpi-est').textContent = CURSOS.reduce((s, c) => s + c.estudiantes, 0);
+    document.getElementById('kpi-doc').textContent = new Set(asig.data.map(a => a.docente_id)).size;
+    if (notas.data.length) document.getElementById('kpi-prom').textContent = (notas.data.reduce((s, n) => s + Number(n.final), 0) / notas.data.length).toFixed(1);
+  } catch (error) { console.warn('No se pudieron cargar los cursos reales.', error); }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const usuario = AUTH.proteger('admin');
-  if (usuario) AUTH.pintarUsuario(usuario);
+  if (usuario) { AUTH.pintarUsuario(usuario); cargarCursosAdmin(); }
 });
 </script>
 </body>

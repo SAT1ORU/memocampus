@@ -1,0 +1,32 @@
+flowchart LR
+  %% Diagrama de componentes y despliegue. Elementos planeados con borde punteado.
+  classDef planeado fill:#f3f4f6,stroke:#6b7280,stroke-dasharray:4 3
+  subgraph Navegador
+    UI[Interfaz HTML, CSS y JS por rol]
+    AUTH[auth.js y sidebars]
+  end
+  subgraph GitHub Pages
+    SITIO[Archivos estáticos del repositorio]
+  end
+  subgraph Supabase planeado
+    SAUTH[Supabase Auth con Google]:::planeado
+    DB[(PostgreSQL con RLS)]:::planeado
+    EDGE[Función programada de alertas]:::planeado
+  end
+  subgraph Servicios externos
+    MAIL[Correo transaccional planeado]:::planeado
+    IA[API de Anthropic]
+  end
+  subgraph Equipo de datos
+    PY[ai/resumen_grupo.py]
+    SEED[db/seed.sql y db/alertas.sql]
+  end
+  SITIO --> UI
+  UI --> AUTH
+  AUTH -. planeado .-> SAUTH
+  UI -. planeado .-> DB
+  DB --> EDGE
+  EDGE -. planeado .-> MAIL
+  PY -->|consulta vistas| DB
+  PY -->|solo datos seudonimizados| IA
+  SEED --> DB
