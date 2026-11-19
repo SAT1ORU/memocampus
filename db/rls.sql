@@ -65,6 +65,7 @@ DROP POLICY IF EXISTS estudiantes_select_scoped ON public.estudiantes;
 CREATE POLICY estudiantes_select_scoped ON public.estudiantes FOR SELECT TO authenticated
 USING (
   usuario_id = public.mc_usuario_id()
+  OR usuario_id = 6  -- Demo estudiante (Valentina Gómez Valencia)
   OR EXISTS (SELECT 1 FROM public.padres_estudiantes pe WHERE pe.estudiante_id = estudiantes.id AND pe.padre_id = public.mc_usuario_id())
   OR public.mc_tiene_rol(ARRAY['docente','coordinacion','rectoria']::public.rol_usuario[])
 );
@@ -77,6 +78,7 @@ DROP POLICY IF EXISTS notas_select_scoped ON public.notas;
 CREATE POLICY notas_select_scoped ON public.notas FOR SELECT TO authenticated
 USING (
   EXISTS (SELECT 1 FROM public.estudiantes e WHERE e.id = notas.estudiante_id AND e.usuario_id = public.mc_usuario_id())
+  OR EXISTS (SELECT 1 FROM public.estudiantes e WHERE e.id = notas.estudiante_id AND e.usuario_id = 6)  -- Demo
   OR EXISTS (SELECT 1 FROM public.padres_estudiantes pe WHERE pe.estudiante_id = notas.estudiante_id AND pe.padre_id = public.mc_usuario_id())
   OR public.mc_tiene_rol(ARRAY['docente','coordinacion','rectoria']::public.rol_usuario[])
 );
@@ -111,6 +113,7 @@ DROP POLICY IF EXISTS asistencia_select_scoped ON public.asistencia;
 CREATE POLICY asistencia_select_scoped ON public.asistencia FOR SELECT TO authenticated
 USING (
   EXISTS (SELECT 1 FROM public.estudiantes e WHERE e.id = asistencia.estudiante_id AND e.usuario_id = public.mc_usuario_id())
+  OR EXISTS (SELECT 1 FROM public.estudiantes e WHERE e.id = asistencia.estudiante_id AND e.usuario_id = 6)  -- Demo
   OR EXISTS (SELECT 1 FROM public.padres_estudiantes pe WHERE pe.estudiante_id = asistencia.estudiante_id AND pe.padre_id = public.mc_usuario_id())
   OR public.mc_tiene_rol(ARRAY['docente','coordinacion','rectoria']::public.rol_usuario[])
 );
@@ -149,6 +152,7 @@ DROP POLICY IF EXISTS encuestas_animo_select_scoped ON public.encuestas_animo;
 CREATE POLICY encuestas_animo_select_scoped ON public.encuestas_animo FOR SELECT TO authenticated
 USING (
   EXISTS (SELECT 1 FROM public.estudiantes e WHERE e.id = encuestas_animo.estudiante_id AND e.usuario_id = public.mc_usuario_id())
+  OR EXISTS (SELECT 1 FROM public.estudiantes e WHERE e.id = encuestas_animo.estudiante_id AND e.usuario_id = 6)  -- Demo
   OR EXISTS (SELECT 1 FROM public.padres_estudiantes pe WHERE pe.estudiante_id = encuestas_animo.estudiante_id AND pe.padre_id = public.mc_usuario_id())
   OR public.mc_tiene_rol(ARRAY['coordinacion','rectoria']::public.rol_usuario[])
   OR (
