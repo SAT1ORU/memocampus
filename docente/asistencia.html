@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrar Asistencia — MemoCampus Docente</title>
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <style>
+    .asistencia-tabla { width:100%; border-collapse:collapse; }
+    .asistencia-tabla th { background:var(--bg-sidebar); color:#fff; padding:10px 12px; font-size:12px; font-weight:500; text-align:left; position:sticky; top:0; }
+    .asistencia-tabla td { padding:10px 12px; border-bottom:1px solid var(--borde); font-size:13px; vertical-align:middle; }
+    .asistencia-tabla tr:hover td { background:var(--bg-app); }
+    .avatar-mini { width:28px; height:28px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; margin-right:8px; flex-shrink:0; }
+    .curso-selector { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:1.5rem; }
+    .curso-pill {
+      padding:7px 18px; border-radius:var(--radio-full);
+      border:1.5px solid var(--borde); background:transparent;
+      font-size:13px; font-weight:400; color:var(--txt-secundario);
+      cursor:pointer; transition:var(--trans); font-family:var(--font-ui);
+    }
+    .curso-pill.active { background:var(--color-docente); color:#fff; border-color:var(--color-docente); font-weight:500; }
+    .curso-pill:hover:not(.active) { background:var(--color-docente-suave); border-color:var(--color-docente); color:var(--color-docente); }
+    .tabla-wrap { overflow-x:auto; border-radius:var(--radio-lg); border:1px solid var(--borde); max-height:520px; overflow-y:auto; }
+    .guardar-banner { position:sticky; bottom:0; background:var(--bg-card); border-top:1px solid var(--borde); padding:12px 1.5rem; display:flex; justify-content:flex-end; gap:10px; margin:0 -1.5rem; }
+    .estado-btn { padding:4px 10px; border:1px solid var(--borde); background:transparent; border-radius:var(--radio-sm); cursor:pointer; font-size:11px; font-weight:500; transition:var(--trans); }
+    .estado-btn.presente { background:var(--exito); color:#fff; border-color:var(--exito); }
+    .estado-btn.ausente { background:var(--error); color:#fff; border-color:var(--error); }
+    .estado-btn.tardio { background:var(--alerta); color:#fff; border-color:var(--alerta); }
+    .estado-btn:not(.presente):not(.ausente):not(.tardio) { color:var(--txt-muted); }
+    .fecha-input { padding:6px 8px; border:1px solid var(--borde); border-radius:var(--radio-sm); font-size:12px; font-family:var(--font-ui); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="app-sidebar" id="sidebar"></aside>
+  <div class="sidebar-overlay"></div>
+
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn">☰</button>
+        <span class="topbar-title">Registrar asistencia</span>
+      </div>
+      <div class="topbar-right">
+        <input type="date" id="fecha-asistencia" class="fecha-input" style="margin-right:12px;">
+        <div class="topbar-avatar" data-user-avatar style="background:var(--color-docente); margin-left:8px;">AM</div>
+      </div>
+    </header>
+
+    <div class="app-content">
+
+      <div style="background:var(--color-docente-suave); border:1px solid rgba(232,125,30,0.25); border-radius:var(--radio-md); padding:10px 16px; margin-bottom:1.5rem; font-size:13px; color:var(--color-docente);">
+        ⚠️ <strong>Importante:</strong> Selecciona la fecha y el curso, luego marca la asistencia de cada estudiante. Presiona "Guardar asistencia" para confirmar.
+      </div>
+
+      <div class="curso-selector"></div>
+
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div class="tabla-wrap">
+          <table class="asistencia-tabla" id="tabla-asistencia">
+            <thead>
+              <tr>
+                <th style="min-width:200px;">Estudiante</th>
+                <th style="text-align:center; min-width:120px;">Presente</th>
+                <th style="text-align:center; min-width:120px;">Tardío</th>
+                <th style="text-align:center; min-width:120px;">Ausente</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-asistencia"></tbody>
+          </table>
+        </div>
+        <div class="guardar-banner">
+          <button class="btn btn-ghost" onclick="limpiarAsistencia()">Limpiar</button>
+          <button class="btn btn-primary" onclick="guardarAsistencia()">💾 Guardar asistencia</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
+<script src="../assets/js/sidebar-docente.js"></script>
+<script src="../assets/js/auth.js"></script>
+
+<script>
+  const usuario = AUTH.proteger('docente');
+  if (usuario) AUTH.pintarUsuario(usuario);
+
+  let estudiantes = [];
+  let grupos = [];
+  let grupoSeleccionado = null;
+  let asistenciaData = {}; // { estudiante_id: 'presente' | 'ausente' | 'tardanza' }
+
+  function iniciales(n) { return n.split(" ").map(p=>p[0]).join("").substring(0,2).toUpperCase(); }
+
+  function setEstado(estudianteId, estado) {
+    asistenciaData[estudianteId] = estado;
+    renderTabla();
+  }
+
+  function renderTabla() {
+    const tbody = document.getElementById('tbody-asistencia');
+    tbody.innerHTML = '';
+    if (estudiantes.length === 0) return;
+
+    estudiantes.forEach(e => {
+      const estado = asistenciaData[e.id] || '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="display:flex; align-items:center;">
+          <div class="avatar-mini" style="background:${e.color};">${iniciales(e.nombre)}</div>
+          <span style="font-weight:500;">${e.nombre}</span>
+        </td>
+        <td style="text-align:center;">
+          <button class="estado-btn ${estado==='presente'?'presente':''}" onclick="setEstado(${e.id},'presente')">✓ Presente</button>
+        </td>
+        <td style="text-align:center;">
+          <button class="estado-btn ${estado==='tardanza'?'tardio':''}" onclick="setEstado(${e.id},'tardanza')">⏰ Tardío</button>
+        </td>
+        <td style="text-align:center;">
+          <button class="estado-btn ${estado==='ausente'?'ausente':''}" onclick="setEstado(${e.id},'ausente')">✗ Ausente</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function cargarGruposYMaterias() {
+    if (!usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: asig, error } = await client.from('asignaciones').select('grupo_id,materia_id,grupos(grado,seccion),materias(id,nombre)').eq('docente_id', usuario.id);
+      if (error) throw error;
+
+      grupos = (asig || []).map(a => ({ id: a.grupo_id, materia_id: a.materia_id, materia: a.materias.nombre, grado: a.grupos.grado, seccion: a.grupos.seccion }));
+
+      const container = document.querySelector('.curso-selector');
+      container.innerHTML = grupos.map((g, i) => `<button class="curso-pill ${i===0?'active':''}" onclick="selCurso(${g.id}, this)">${g.materia} ${g.grado}°${g.seccion}</button>`).join('');
+
+      if (grupos.length) {
+        grupoSeleccionado = grupos[0].id;
+        await cargarEstudiantesGrupo();
+      }
+    } catch (error) { console.warn('Error cargando grupos:', error); }
+  }
+
+  async function cargarEstudiantesGrupo() {
+    if (!grupoSeleccionado || !usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: est, error } = await client.from('estudiantes').select('id,nombre,grupo_id,usuario_id').eq('grupo_id', grupoSeleccionado).order('nombre');
+      if (error) throw error;
+
+      // Filtrar solo estudiantes reales (usuario_id !== null)
+      const estFiltrados = (est || []).filter(e => e.usuario_id !== null);
+      console.log('Estudiantes para asistencia:', estFiltrados.length);
+
+      estudiantes = estFiltrados.map((e, i) => ({
+        id: e.id,
+        nombre: e.nombre,
+        color: ['#3b6de8','#e84c3d','#1a9b6e','#9b3de8'][i % 4]
+      }));
+
+      asistenciaData = {};
+      renderTabla();
+    } catch (error) { console.warn('Error cargando estudiantes:', error); }
+  }
+
+  function selCurso(grupoId, btn) {
+    document.querySelectorAll('.curso-pill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    grupoSeleccionado = grupoId;
+    cargarEstudiantesGrupo();
+  }
+
+  function limpiarAsistencia() {
+    asistenciaData = {};
+    renderTabla();
+  }
+
+  async function guardarAsistencia() {
+    if (!usuario?.id || !grupoSeleccionado) return;
+    const fecha = document.getElementById('fecha-asistencia').value;
+    if (!fecha) {
+      alert('Selecciona una fecha');
+      return;
+    }
+
+    const btn = document.querySelector('[onclick="guardarAsistencia()"]');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      const client = AUTH.clienteSupabase();
+      const materiaId = grupos.find(g => g.id === grupoSeleccionado)?.materia_id;
+
+      const filas = Object.entries(asistenciaData).map(([estId, estado]) => ({
+        estudiante_id: parseInt(estId),
+        materia_id: materiaId,
+        fecha: fecha,
+        estado: estado
+      }));
+
+      if (filas.length === 0) {
+        alert('Marca al menos un estudiante');
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar asistencia';
+        return;
+      }
+
+      const { error } = await client.from('asistencia').upsert(filas, { onConflict: 'estudiante_id,materia_id,fecha' });
+
+      if (error) {
+        console.error('Error:', error);
+        alert('Error al guardar: ' + error.message);
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar asistencia';
+        return;
+      }
+
+      btn.textContent = '✔ Asistencia guardada';
+      btn.style.background = 'var(--exito)';
+      setTimeout(() => {
+        btn.textContent = '💾 Guardar asistencia';
+        btn.style.background = '';
+        btn.disabled = false;
+        limpiarAsistencia();
+      }, 1500);
+    } catch (e) {
+      console.error('Error inesperado:', e);
+      alert('Error: ' + e.message);
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar asistencia';
+    }
+  }
+
+  // Inicializar con la fecha de hoy
+  const hoy = new Date();
+  document.getElementById('fecha-asistencia').valueAsDate = hoy;
+
+  cargarGruposYMaterias();
+</script>
+</body>
+</html>

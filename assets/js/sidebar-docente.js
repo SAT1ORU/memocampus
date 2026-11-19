@@ -36,6 +36,7 @@ async function cargarSidebarDocente() {
       <a href="cursos.html"    data-page="cursos">    <span class="nav-ico">📚</span> Mis cursos</a>
       <a href="tareas.html"    data-page="tareas">    <span class="nav-ico">✅</span> Tareas <span class="sidebar-badge" id="docente-badge-tareas" style="display:none;"></span></a>
       <a href="notas.html"     data-page="notas">     <span class="nav-ico">📊</span> Notas</a>
+      <a href="asistencia.html" data-page="asistencia"> <span class="nav-ico">📋</span> Asistencia</a>
     </nav>
 
     <div class="sidebar-section-title">Más</div>
