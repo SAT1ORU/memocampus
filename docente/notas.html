@@ -196,10 +196,13 @@
     if (!grupoSeleccionado || !usuario?.id) return;
     try {
       const client = AUTH.clienteSupabase();
-      const { data: est, error: estError } = await client.from('estudiantes').select('id,nombre,grupo_id').eq('grupo_id', grupoSeleccionado).order('nombre');
+      const { data: est, error: estError } = await client.from('estudiantes').select('id,nombre,grupo_id,usuario_id').eq('grupo_id', grupoSeleccionado).order('nombre');
       if (estError) throw estError;
 
-      const estIds = (est || []).map(e => e.id);
+      // Filtrar solo estudiantes con usuario_id (descartar fogueo)
+      const estFiltrados = (est || []).filter(e => e.usuario_id !== null);
+      console.log('Estudiantes cargados para grupo', grupoSeleccionado, ':', estFiltrados.length, 'de', est?.length);
+      const estIds = estFiltrados.map(e => e.id);
       const { data: notas, error: notasError } = estIds.length
         ? await client.from('notas').select('estudiante_id,ser,saber,hacer,final').in('estudiante_id', estIds).eq('periodo', periodoActual)
         : { data: [], error: null };
@@ -208,7 +211,7 @@
       const notaMap = {};
       (notas || []).forEach(n => { notaMap[n.estudiante_id] = { ser: Number(n.ser), saber: Number(n.saber), hacer: Number(n.hacer), final: Number(n.final) }; });
 
-      estudiantes = (est || []).map((e, i) => {
+      estudiantes = estFiltrados.map((e, i) => {
         const n = notaMap[e.id] || { ser: 0, saber: 0, hacer: 0, final: 0 };
         return { id: e.id, nombre: e.nombre, color: ['#3b6de8','#e84c3d','#1a9b6e','#9b3de8'][i % 4], ser: n.ser, saber: n.saber, hacer: n.hacer, final: n.final };
       });
