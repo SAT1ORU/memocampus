@@ -52,33 +52,6 @@
       <div class="chat-list">
         <div style="padding:10px 14px; border-bottom:1px solid var(--borde); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--txt-muted);">Conversaciones</div>
 
-        <div class="chat-item active" onclick="selChat(this)">
-          <div class="chat-avatar" style="background:var(--mat-ciencias);">AM</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">Prof. Andrés Morales</div>
-            <div class="chat-item-preview">Consulta sobre nota del informe de lab...</div>
-          </div>
-          <div class="chat-hora">10:24</div>
-        </div>
-
-        <div class="chat-item" onclick="selChat(this)">
-          <div class="chat-avatar" style="background:var(--mat-matematicas);">PR</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">Prof. Ramírez</div>
-            <div class="chat-item-preview">Gracias por comunicarse, con gusto...</div>
-          </div>
-          <div class="chat-hora">Ayer</div>
-        </div>
-
-        <div class="chat-item" onclick="selChat(this)">
-          <div class="chat-avatar" style="background:var(--mat-ingles);">LT</div>
-          <div style="flex:1; min-width:0;">
-            <div class="chat-item-name">Prof. Torres (Inglés)</div>
-            <div class="chat-item-preview">Orientación vocacional disponible los...</div>
-          </div>
-          <div class="chat-hora">18 mar</div>
-        </div>
-
         <div style="padding:12px 14px; border-top:1px solid var(--borde); margin-top:auto;">
           <button class="btn btn-primary" style="width:100%; justify-content:center; font-size:12px;" onclick="nuevoMsg()">+ Nuevo mensaje</button>
         </div>
@@ -86,35 +59,14 @@
 
       <div class="chat-window">
         <div class="chat-header">
-          <div class="chat-avatar" style="background:var(--mat-ciencias); width:36px; height:36px; font-size:12px;">AM</div>
-          <div>
-            <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Prof. Andrés Morales</div>
-            <div style="font-size:12px; color:var(--txt-muted);">Ciencias Naturales · Grado 10°A</div>
-          </div>
+          <div style="color:var(--txt-muted); padding:1.25rem; text-align:center;">Selecciona un docente para iniciar una conversación</div>
         </div>
 
-        <div class="chat-messages" id="chat-msgs">
-          <div class="msg msg-sent">
-            Buenas tardes profe Morales. Quería preguntarle sobre la nota que le puso a Valentina en el informe del laboratorio. Ella me dice que entregó todo completo.
-            <div class="msg-hora">10:24 am · Hoy</div>
-          </div>
-          <div class="msg msg-sent">
-            ¿Hay alguna observación específica que ella deba mejorar para el próximo período?
-            <div class="msg-hora">10:25 am · Hoy</div>
-          </div>
-          <div class="msg msg-recv">
-            Buenas tardes señor Gómez. Sí, Valentina entregó el informe completo. La nota refleja que le faltó profundizar más en las conclusiones. Le sugiero que en el próximo informe dedique más espacio al análisis de los resultados.
-            <div class="msg-hora">11:02 am · Hoy</div>
-          </div>
-          <div class="msg msg-recv">
-            En general, ella va muy bien en la materia. No hay de qué preocuparse. 👍
-            <div class="msg-hora">11:03 am · Hoy</div>
-          </div>
-        </div>
+        <div class="chat-messages" id="chat-msgs"></div>
 
         <div class="chat-input-area">
-          <input type="text" id="padre-input" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter') enviar()">
-          <button class="btn-send" onclick="enviar()">➤</button>
+          <input type="text" id="padre-input" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter') enviar()" disabled>
+          <button class="btn-send" onclick="enviar()" disabled>➤</button>
         </div>
       </div>
     </div>
@@ -122,33 +74,172 @@
 </div>
 <script src="../assets/js/sidebar-padre.js"></script>
 <script src="../assets/js/comunicados.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('padre');
   if (usuario) AUTH.pintarUsuario(usuario);
 
-  function selChat(el) {
-    document.querySelectorAll('.chat-item').forEach(i=>i.classList.remove('active'));
-    el.classList.add('active');
+  let docenteSeleccionado = null;
+
+  async function cargarDocentes() {
+    console.log('cargarDocentes: usuario=', usuario?.id);
+    if (!usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: hijos } = await client
+        .from('padres_estudiantes')
+        .select('estudiante_id')
+        .eq('padre_id', usuario.id);
+
+      console.log('Hijos:', hijos);
+      if (!hijos?.length) return;
+
+      const estIds = hijos.map(h => h.estudiante_id);
+      const { data: grupos } = await client
+        .from('estudiantes')
+        .select('grupo_id')
+        .in('id', estIds);
+
+      console.log('Grupos:', grupos);
+      if (!grupos?.length) return;
+
+      const grupoIds = [...new Set(grupos.map(g => g.grupo_id))];
+      const { data: asig } = await client
+        .from('asignaciones')
+        .select('docente_id, materia_id')
+        .in('grupo_id', grupoIds);
+
+      console.log('Asignaciones:', asig);
+      if (!asig?.length) return;
+
+      const docIds = [...new Set(asig.map(a => a.docente_id))];
+      const { data: docentes, error } = await client
+        .from('usuarios')
+        .select('id, nombre, correo')
+        .in('id', docIds);
+
+      console.log('Docentes:', docentes, 'error:', error);
+      renderizarDocentes(docentes || []);
+    } catch (e) { console.warn('Error cargando docentes:', e); }
   }
 
-  function enviar() {
+  function renderizarDocentes(docentes) {
+    const lista = document.querySelector('.chat-list');
+    const titulo = lista.querySelector('div:first-child');
+    const btn = lista.querySelector('button');
+    lista.innerHTML = '';
+    lista.appendChild(titulo);
+
+    docentes.forEach(d => {
+      const div = document.createElement('div');
+      div.className = 'chat-item';
+      div.dataset.docenteId = d.id;
+      const initials = d.nombre.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+      const colores = ['var(--mat-ciencias)', 'var(--mat-matematicas)', 'var(--mat-ingles)', 'var(--mat-sociales)', 'var(--mat-educacion)'];
+      const color = colores[d.id % colores.length];
+      div.innerHTML = `
+        <div class="chat-avatar" style="background:${color};">${initials}</div>
+        <div style="flex:1; min-width:0;">
+          <div class="chat-item-name">Prof. ${d.nombre.split(' ').pop()}</div>
+          <div class="chat-item-preview">${d.correo}</div>
+        </div>
+      `;
+      div.onclick = () => selChat(div, d.id);
+      lista.appendChild(div);
+    });
+
+    if (btn) lista.appendChild(btn);
+  }
+
+  async function selChat(el, docenteId) {
+    document.querySelectorAll('.chat-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    docenteSeleccionado = docenteId;
+    document.getElementById('padre-input').disabled = false;
+    document.querySelector('.btn-send').disabled = false;
+    await cargarMensajes(docenteId);
+  }
+
+  async function cargarMensajes(docenteId) {
+    if (!usuario?.id || !docenteId) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: msgs } = await client
+        .from('mensajes')
+        .select('*')
+        .or(`and(de_usuario_id.eq.${usuario.id},para_usuario_id.eq.${docenteId}),and(de_usuario_id.eq.${docenteId},para_usuario_id.eq.${usuario.id})`)
+        .order('creado_en', { ascending: true });
+
+      // Marcar como leído todos los mensajes recibidos de este docente
+      if (msgs?.length) {
+        const msgIds = msgs.filter(m => m.de_usuario_id === docenteId && !m.leido).map(m => m.id);
+        if (msgIds.length > 0) {
+          await client.from('mensajes').update({ leido: true }).in('id', msgIds);
+          cargarSidebarPadre();
+        }
+      }
+
+      const { data: docenteData } = await client
+        .from('usuarios')
+        .select('nombre')
+        .eq('id', docenteId)
+        .single();
+
+      renderizarMensajes(msgs || [], docenteData?.nombre || 'Docente');
+    } catch (e) { console.warn('Error cargando mensajes:', e); }
+  }
+
+  function renderizarMensajes(msgs, nombreDocente) {
+    const header = document.querySelector('.chat-header');
+    const initials = nombreDocente.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+    const colores = ['var(--mat-ciencias)', 'var(--mat-matematicas)', 'var(--mat-ingles)', 'var(--mat-sociales)', 'var(--mat-educacion)'];
+    const color = colores[docenteSeleccionado % colores.length];
+    header.innerHTML = `
+      <div class="chat-avatar" style="background:${color}; width:36px; height:36px; font-size:12px;">${initials}</div>
+      <div>
+        <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Prof. ${nombreDocente.split(' ').pop()}</div>
+        <div style="font-size:12px; color:var(--txt-muted);">Docente</div>
+      </div>
+    `;
+
+    const msgDiv = document.getElementById('chat-msgs');
+    msgDiv.innerHTML = '';
+    msgs.forEach(m => {
+      const div = document.createElement('div');
+      div.className = m.de_usuario_id === usuario.id ? 'msg msg-sent' : 'msg msg-recv';
+      const fecha = new Date(m.creado_en).toLocaleDateString('es-CO');
+      const hora = new Date(m.creado_en).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'});
+      div.innerHTML = `${m.contenido}<div class="msg-hora">${hora} · ${fecha}</div>`;
+      msgDiv.appendChild(div);
+    });
+    msgDiv.scrollTop = msgDiv.scrollHeight;
+  }
+
+  async function enviar() {
     const input = document.getElementById('padre-input');
     const text = input.value.trim();
-    if (!text) return;
-    const msgs = document.getElementById('chat-msgs');
-    const div = document.createElement('div');
-    div.className = 'msg msg-sent';
-    const hora = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
-    div.innerHTML = `${text}<div class="msg-hora">${hora} · Hoy</div>`;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-    input.value = '';
+    if (!text || !docenteSeleccionado) return;
+
+    try {
+      const client = AUTH.clienteSupabase();
+      const { error } = await client.from('mensajes').insert({
+        de_usuario_id: usuario.id,
+        para_usuario_id: docenteSeleccionado,
+        contenido: text
+      });
+      if (error) { alert('No se pudo enviar: ' + error.message); return; }
+      input.value = '';
+      await cargarMensajes(docenteSeleccionado);
+    } catch (e) { console.error('Error enviando mensaje:', e); }
   }
 
   function nuevoMsg() {
     alert('Selecciona un docente de la lista para iniciar una nueva conversación.');
   }
+
+  document.addEventListener('DOMContentLoaded', () => cargarDocentes());
 </script>
 </body>
 </html>

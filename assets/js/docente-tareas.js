@@ -4,16 +4,22 @@ const DOCENTE_TAREAS = {
   usuario: null,
   supabase: null,
   gruposDocente: [],
+  tareasCache: {},
 
   async init() {
     this.usuario = AUTH.proteger('docente');
-    if (!this.usuario) return;
+    if (!this.usuario) {
+      console.warn('⚠️ DOCENTE_TAREAS: sin sesión — usuario redirigido a login');
+      return;
+    }
 
     this.supabase = AUTH.clienteSupabase();
     AUTH.pintarUsuario(this.usuario);
 
     await this.cargarGrupos();
     await this.cargarEntregasPendientes();
+    await this.cargarEntregasRevisadas();
+    await this.cargarMisTareas();
     this.wireFormulario();
   },
 
@@ -59,6 +65,7 @@ const DOCENTE_TAREAS = {
     const container = document.querySelector('[data-entregas-container]');
     if (!container) return;
 
+    let totalPendientes = 0;
     for (const tarea of tareas) {
       const { data: entregas } = await this.supabase
         .from('entregas')
@@ -66,22 +73,160 @@ const DOCENTE_TAREAS = {
         .eq('tarea_id', tarea.id)
         .is('calificacion', null);
 
-      entregas?.forEach(e => {
-        const row = document.createElement('div');
-        row.className = 'entrega-row';
-        row.innerHTML = `
-          <div class="avatar-mini" style="background:#3b6de8;">${e.estudiantes.nombre.charAt(0).toUpperCase()}</div>
-          <div style="flex:1;">
-            <div style="font-size:14px; font-weight:600;">${e.estudiantes.nombre}</div>
-            <div style="font-size:12px; color:var(--txt-muted);">${tarea.titulo} · ${tarea.grupos.grado}°${tarea.grupos.seccion}</div>
-          </div>
-          <span style="font-size:11px; color:var(--txt-muted);">${new Date(e.fecha_entrega).toLocaleDateString('es-CO')}</span>
-          <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0" data-entrega-id="${e.id}">
-          <button class="btn btn-primary btn-sm" onclick="DOCENTE_TAREAS.calificar(${e.id}, this)">✔ Calificar</button>
+      if (entregas && entregas.length > 0) {
+        totalPendientes += entregas.length;
+        entregas.forEach(e => {
+          const row = document.createElement('div');
+          row.className = 'entrega-row';
+          row.innerHTML = `
+            <div class="avatar-mini" style="background:#3b6de8;">${e.estudiantes.nombre.charAt(0).toUpperCase()}</div>
+            <div style="flex:1;">
+              <div style="font-size:14px; font-weight:600;">${e.estudiantes.nombre}</div>
+              <div style="font-size:12px; color:var(--txt-muted);">${tarea.titulo} · ${tarea.grupos.grado}°${tarea.grupos.seccion}</div>
+            </div>
+            <span style="font-size:11px; color:var(--txt-muted);">${new Date(e.fecha_entrega).toLocaleDateString('es-CO')}</span>
+            <button class="btn btn-primary btn-sm" onclick="DOCENTE_TAREAS.abrirModalCalificar(${e.id}, '${e.estudiantes.nombre}')">📝 Calificar</button>
+          `;
+          container.appendChild(row);
+        });
+      }
+    }
+
+    // Actualizar badge en la página de tareas
+    const badge = document.querySelector('[data-contar-pendientes]');
+    if (badge) badge.textContent = totalPendientes > 0 ? `${totalPendientes} sin revisar` : 'Al día';
+
+    // Actualizar badge en sidebar
+    const sidebarBadge = document.querySelector('#docente-badge-tareas');
+    if (sidebarBadge) {
+      if (totalPendientes > 0) {
+        sidebarBadge.textContent = totalPendientes;
+        sidebarBadge.style.display = '';
+      } else {
+        sidebarBadge.style.display = 'none';
+      }
+    }
+  },
+
+  async cargarEntregasRevisadas() {
+    const tbody = document.querySelector('[data-revisadas-container]');
+    if (!tbody) return;
+
+    const { data: tareas } = await this.supabase
+      .from('tareas')
+      .select('id, titulo, grupos(grado, seccion)')
+      .eq('docente_id', this.usuario.id);
+
+    tbody.innerHTML = '';
+    let total = 0;
+    for (const tarea of tareas || []) {
+      const { data: entregas } = await this.supabase
+        .from('entregas')
+        .select('id, fecha_entrega, calificacion, estudiantes(nombre)')
+        .eq('tarea_id', tarea.id)
+        .not('calificacion', 'is', null);
+
+      (entregas || []).forEach(e => {
+        total++;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td style="padding:12px 14px;"><div style="display:flex; align-items:center; gap:8px;"><div class="avatar-mini" style="background:#3b6de8;">${e.estudiantes.nombre.charAt(0).toUpperCase()}</div>${e.estudiantes.nombre}</div></td>
+          <td>${tarea.titulo}</td>
+          <td>${tarea.grupos.grado}°${tarea.grupos.seccion}</td>
+          <td>${new Date(e.fecha_entrega).toLocaleDateString('es-CO')}</td>
+          <td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">${e.calificacion}</span></td>
         `;
-        container.appendChild(row);
+        tbody.appendChild(tr);
       });
     }
+
+    const badge = document.querySelector('[data-contar-revisadas]');
+    if (badge) badge.textContent = `${total} calificadas`;
+  },
+
+  async cargarMisTareas() {
+    const tbody = document.querySelector('[data-mis-tareas-container]');
+    if (!tbody) return;
+
+    const { data: tareas, error } = await this.supabase
+      .from('tareas')
+      .select('id, titulo, descripcion, fecha_entrega, tipo_entrega, grupos(grado, seccion)')
+      .eq('docente_id', this.usuario.id)
+      .order('fecha_entrega', { ascending: false });
+
+    if (error) {
+      console.error('Error cargando mis tareas:', error);
+      return;
+    }
+
+    this.tareasCache = Object.fromEntries((tareas || []).map(t => [t.id, t]));
+    tbody.innerHTML = '';
+    (tareas || []).forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="padding:12px 14px; font-weight:600;">${t.titulo}</td>
+        <td>${t.grupos.grado}°${t.grupos.seccion}</td>
+        <td>${new Date(t.fecha_entrega + 'T00:00:00').toLocaleDateString('es-CO')}</td>
+        <td>${t.tipo_entrega}</td>
+        <td><button class="btn-accion" onclick="DOCENTE_TAREAS.abrirModalEditar(${t.id})">✏️ Editar</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    const badge = document.querySelector('[data-contar-mis-tareas]');
+    if (badge) badge.textContent = `${(tareas || []).length} tareas`;
+  },
+
+  abrirModalEditar(tareaId) {
+    const t = this.tareasCache[tareaId];
+    if (!t) return;
+    document.getElementById('modal-edit-titulo').value = t.titulo;
+    document.getElementById('modal-edit-fecha').value = t.fecha_entrega;
+    document.getElementById('modal-edit-descripcion').value = t.descripcion || '';
+    document.getElementById('modal-edit-error').textContent = '';
+    document.getElementById('modal-editar-tarea').dataset.tareaId = tareaId;
+    document.getElementById('modal-editar-tarea').classList.add('open');
+  },
+
+  cerrarModalEditar() {
+    document.getElementById('modal-editar-tarea').classList.remove('open');
+  },
+
+  async guardarEdicionTarea() {
+    const modal = document.getElementById('modal-editar-tarea');
+    const tareaId = parseInt(modal.dataset.tareaId);
+    const titulo = document.getElementById('modal-edit-titulo').value.trim();
+    const fecha = document.getElementById('modal-edit-fecha').value;
+    const descripcion = document.getElementById('modal-edit-descripcion').value.trim();
+    const btn = document.getElementById('modal-edit-guardar');
+
+    if (!titulo || !fecha) {
+      document.getElementById('modal-edit-error').textContent = 'El título y la fecha son obligatorios';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    const { error } = await this.supabase
+      .from('tareas')
+      .update({ titulo, fecha_entrega: fecha, descripcion: descripcion || null })
+      .eq('id', tareaId);
+
+    if (error) {
+      console.error('Error editando tarea:', error);
+      document.getElementById('modal-edit-error').textContent = 'Error al guardar: ' + error.message;
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+      return;
+    }
+
+    this.cerrarModalEditar();
+    await this.cargarMisTareas();
+    await this.cargarEntregasPendientes();
+    await this.cargarEntregasRevisadas();
+    btn.disabled = false;
+    btn.textContent = 'Guardar cambios';
   },
 
   wireFormulario() {
@@ -130,30 +275,55 @@ const DOCENTE_TAREAS = {
     });
   },
 
-  async calificar(entregaId, btn) {
-    const input = btn.closest('.entrega-row').querySelector('.calif-input');
-    const calificacion = parseFloat(input.value);
+  abrirModalCalificar(entregaId, nombreEstudiante) {
+    const modal = document.getElementById('modal-calificar');
+    document.getElementById('modal-calif-estudiante').textContent = nombreEstudiante;
+    document.getElementById('modal-calif-nota').value = '';
+    document.getElementById('modal-calif-observaciones').value = '';
+    document.getElementById('modal-calif-error').textContent = '';
+    modal.dataset.entregaId = entregaId;
+    modal.classList.add('open');
+  },
 
-    if (!calificacion || isNaN(calificacion) || calificacion < 0 || calificacion > 5) {
-      alert('Ingresa una calificación entre 0 y 5');
+  cerrarModalCalificar() {
+    const modal = document.getElementById('modal-calificar');
+    modal.classList.remove('open');
+  },
+
+  async guardarCalificacion() {
+    const modal = document.getElementById('modal-calificar');
+    const entregaId = parseInt(modal.dataset.entregaId);
+    const nota = parseFloat(document.getElementById('modal-calif-nota').value);
+    const observaciones = document.getElementById('modal-calif-observaciones').value.trim();
+    const btn = document.getElementById('modal-calif-guardar');
+
+    if (!nota || isNaN(nota) || nota < 0 || nota > 5) {
+      document.getElementById('modal-calif-error').textContent = 'La nota debe estar entre 0 y 5';
       return;
     }
 
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
     const { error } = await this.supabase
       .from('entregas')
-      .update({ calificacion })
+      .update({
+        calificacion: nota,
+        observaciones: observaciones || null
+      })
       .eq('id', entregaId);
 
     if (error) {
       console.error('Error calificando:', error);
-      alert('Error al guardar calificación');
+      document.getElementById('modal-calif-error').textContent = 'Error al guardar: ' + error.message;
+      btn.disabled = false;
+      btn.textContent = 'Guardar calificación';
       return;
     }
 
-    btn.textContent = '✔ Calificada';
-    btn.style.background = 'var(--exito)';
-    btn.disabled = true;
-    btn.closest('.entrega-row').style.opacity = '0.6';
+    this.cerrarModalCalificar();
+    await this.cargarEntregasPendientes();
+    await this.cargarEntregasRevisadas();
   }
 };
 

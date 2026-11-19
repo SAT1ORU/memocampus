@@ -76,12 +76,7 @@
         <div class="card">
           <table class="tabla">
             <thead><tr><th>Material</th><th>Tipo</th><th>Curso</th><th>Fecha</th><th>Acciones</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Guía reacciones químicas</strong></td><td><span class="badge badge-verde">PDF</span></td><td>Ciencias 10°A</td><td>21 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
-              <tr><td><strong>Protocolo práctica laboratorio</strong></td><td><span class="badge badge-verde">PDF</span></td><td>Ciencias 10°A · 10°B</td><td>18 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
-              <tr><td><strong>Simulador PhET — Enlace</strong></td><td><span class="badge badge-azul">Enlace</span></td><td>Ciencias 10°A · 10°B</td><td>16 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
-              <tr><td><strong>Cinemática — Guía teórica</strong></td><td><span class="badge badge-verde">PDF</span></td><td>Física 11°A · 11°B</td><td>15 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
-              <tr><td><strong>Video: Movimiento rectilíneo</strong></td><td><span class="badge badge-naranja">Video</span></td><td>Física 11°A · 11°B</td><td>12 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
+            <tbody data-materiales-container>
             </tbody>
           </table>
         </div>
@@ -91,6 +86,42 @@
   </main>
 </div>
 
+<!-- MODAL EDITAR MATERIAL -->
+<div id="modal-editar-material" class="modal-overlay" onclick="if(event.target === this) DOCENTE_MATERIALES.cerrarModalEditar()">
+  <div class="modal">
+    <h3 style="margin-bottom:6px;">✏️ Editar material</h3>
+    <div style="margin-bottom:1.5rem;">
+      <label class="form-label" style="font-size:12px; color:var(--txt-muted); display:block; margin-bottom:6px;">Nombre *</label>
+      <input type="text" id="modal-edit-nombre" class="form-control" style="margin-bottom:1rem;">
+
+      <label class="form-label" style="font-size:12px; color:var(--txt-muted); display:block; margin-bottom:6px;">Tipo</label>
+      <select id="modal-edit-tipo" class="form-control">
+        <option value="PDF">Documento PDF</option>
+        <option value="Enlace">Enlace web / Video</option>
+        <option value="Presentación">Presentación</option>
+        <option value="Otro">Otro</option>
+      </select>
+    </div>
+    <div id="modal-edit-error" style="color:var(--error); font-size:12px; margin-bottom:1rem;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="DOCENTE_MATERIALES.cerrarModalEditar()">Cancelar</button>
+      <button class="btn btn-primary" id="modal-edit-guardar" onclick="DOCENTE_MATERIALES.guardarEdicionMaterial()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div id="modal-confirmar" class="modal-overlay" onclick="if(event.target === this) DOCENTE_MATERIALES.cerrarModalConfirmar()">
+  <div class="modal" style="max-width:420px;">
+    <h3 style="margin-bottom:1rem; text-align:center;">🗑️ Eliminar material</h3>
+    <p style="text-align:center; color:var(--txt-muted); margin-bottom:1.5rem;">¿Estás seguro de que quieres eliminar <strong id="modal-confirmar-nombre"></strong>? Esta acción no se puede deshacer.</p>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="DOCENTE_MATERIALES.cerrarModalConfirmar()">Cancelar</button>
+      <button class="btn btn-danger" data-btn-confirmar onclick="DOCENTE_MATERIALES.confirmarEliminar()">Sí, eliminar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL SUBIR MATERIAL -->
 <div class="modal-overlay" id="modal-material">
   <div class="modal">
@@ -98,40 +129,29 @@
     <p class="modal-sub">El material quedará disponible para los estudiantes del curso seleccionado.</p>
     <div class="form-group">
       <label class="form-label">Curso *</label>
-      <select class="form-control">
-        <option>Ciencias Naturales — 10°A</option>
-        <option>Ciencias Naturales — 10°B</option>
-        <option>Física — 11°A</option>
-        <option>Física — 11°B</option>
-        <option>Todos mis cursos</option>
+      <select class="form-control" data-grupos-select>
       </select>
     </div>
     <div class="form-group">
       <label class="form-label">Nombre del material *</label>
-      <input type="text" class="form-control" placeholder="Ej: Guía trigonometría Unidad 3">
+      <input type="text" class="form-control" data-nombre placeholder="Ej: Guía trigonometría Unidad 3">
     </div>
     <div class="form-group">
       <label class="form-label">Tipo</label>
-      <select class="form-control">
-        <option>Documento PDF</option>
-        <option>Enlace web / Video</option>
-        <option>Presentación</option>
-        <option>Imagen / Infografía</option>
-        <option>Otro</option>
+      <select class="form-control" data-tipo>
+        <option value="PDF">Documento PDF</option>
+        <option value="Enlace">Enlace web / Video</option>
+        <option value="Presentación">Presentación</option>
+        <option value="Otro">Otro</option>
       </select>
     </div>
     <div class="form-group">
-      <label class="form-label">Archivo</label>
-      <div class="material-upload-area" onclick="document.getElementById('f-material').click()">
-        <div style="font-size:2rem;">📄</div>
-        <p style="font-size:13px; color:var(--txt-muted); margin-top:6px;">Haz clic para seleccionar el archivo</p>
-        <p style="font-size:11px; color:var(--txt-muted);">PDF, DOCX, PPTX, MP4, JPG — Máx. 20 MB</p>
-      </div>
-      <input type="file" id="f-material" style="display:none">
+      <label class="form-label">Descripción (opcional)</label>
+      <textarea class="form-control" data-descripcion rows="3" placeholder="Describe el contenido del material..."></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="cerrarModal('modal-material')">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmarSubida()">📤 Publicar material</button>
+      <button class="btn btn-primary" data-publicar-material onclick="DOCENTE_MATERIALES.publicarMaterial()">📤 Publicar material</button>
     </div>
   </div>
 </div>
@@ -140,6 +160,7 @@
 <script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script src="../assets/js/docente-materiales.js"></script>
 
 <script>
   const usuario = AUTH.proteger('docente');
@@ -153,12 +174,6 @@
   }
   function abrirModalMaterial() { document.getElementById('modal-material').classList.add('open'); }
   function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
-  function confirmarSubida() {
-    const btn = document.querySelector('#modal-material .btn-primary');
-    btn.textContent = '✔ Material publicado';
-    btn.style.background = 'var(--exito)';
-    setTimeout(() => { cerrarModal('modal-material'); btn.textContent = '📤 Publicar material'; btn.style.background = ''; }, 2000);
-  }
   document.querySelectorAll('.modal-overlay').forEach(o => {
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
   });

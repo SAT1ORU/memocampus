@@ -19,6 +19,31 @@
     .tpanel.active { display:block; }
     .nueva-tarea-form { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
     @media(max-width:600px){ .nueva-tarea-form { grid-template-columns:1fr; } }
+
+    /* Modal calificar */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.4); display:none; align-items:center; justify-content:center; z-index:500; }
+    .modal-overlay.open { display:flex; }
+    .modal-caja { background:var(--bg-card); border-radius:var(--radio-lg); padding:1.75rem; max-width:450px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,.25); }
+    .modal-titulo { font-size:1.1rem; font-weight:700; margin-bottom:0.5rem; color:var(--txt-primario); }
+    .modal-subtitulo { font-size:13px; color:var(--txt-muted); margin-bottom:1.25rem; }
+    .form-group-modal { margin-bottom:1.25rem; }
+    .form-label-modal { display:block; font-size:12px; font-weight:600; color:var(--txt-secundario); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    .form-input-modal { width:100%; padding:10px 12px; border:1.5px solid var(--borde); border-radius:var(--radio-md); font-size:14px; font-family:var(--font-ui); color:var(--txt-primario); background:var(--bg-card); outline:none; transition:var(--trans); box-sizing:border-box; }
+    .form-input-modal:focus { border-color:var(--color-docente); box-shadow:0 0 0 3px rgba(232,125,30,.1); }
+    input[type="date"].form-input-modal { padding:8px 12px; cursor:pointer; }
+    input[type="date"].form-input-modal::-webkit-calendar-picker-indicator { cursor:pointer; border-radius:4px; margin-right:2px; opacity:0.6; transition:opacity 0.2s; }
+    input[type="date"].form-input-modal::-webkit-calendar-picker-indicator:hover { opacity:1; }
+    .modal-error { color:var(--error); font-size:12px; margin-bottom:1rem; }
+    .modal-acciones { display:flex; gap:10px; justify-content:flex-end; margin-top:1.5rem; }
+    .modal-btn { padding:10px 18px; border-radius:var(--radio-md); font-size:14px; font-weight:600; cursor:pointer; border:1.5px solid transparent; font-family:var(--font-ui); transition:var(--trans); }
+    .modal-btn:disabled { opacity:0.6; cursor:wait; }
+    .modal-btn-secondary { background:transparent; border-color:var(--borde); color:var(--txt-secundario); }
+    .modal-btn-primary { background:var(--color-docente); color:#fff; }
+
+    /* Botones de acción pequeños */
+    .btn-accion { padding:5px 10px; font-size:12px; border:1px solid var(--borde); background:transparent; border-radius:var(--radio-sm); cursor:pointer; transition:var(--trans); margin-right:4px; }
+    .btn-accion:hover { border-color:var(--color-docente); color:var(--color-docente); }
+    .btn-accion-eliminar:hover { border-color:var(--error); color:var(--error); }
   </style>
 </head>
 <body>
@@ -43,6 +68,7 @@
       <div class="tab-bar">
         <button class="tbtn active" onclick="swt(this,'pendientes')">Sin revisar</button>
         <button class="tbtn" onclick="swt(this,'revisadas')">Revisadas</button>
+        <button class="tbtn" onclick="swt(this,'mistarea')">Mis tareas</button>
         <button class="tbtn" onclick="swt(this,'crear')">+ Crear nueva tarea</button>
       </div>
 
@@ -61,12 +87,28 @@
       <!-- REVISADAS -->
       <div class="tpanel" id="tp-revisadas">
         <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Entregas calificadas</h3>
+            <span class="badge badge-exito" data-contar-revisadas></span>
+          </div>
           <table class="tabla">
             <thead><tr><th>Estudiante</th><th>Tarea</th><th>Curso</th><th>Entrega</th><th>Calificación</th></tr></thead>
-            <tbody>
-              <tr><td style="display:flex; align-items:center; gap:8px; padding:12px 14px;"><div class="avatar-mini" style="background:#1a9b6e;">LR</div>Laura Rodríguez</td><td>Cuestionario átomo</td><td>Ciencias 10°A</td><td>18 mar</td><td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.5</span></td></tr>
-              <tr><td style="display:flex; align-items:center; gap:8px; padding:12px 14px;"><div class="avatar-mini" style="background:#9b3de8;">JP</div>Juan Pérez</td><td>Cuestionario átomo</td><td>Ciencias 10°A</td><td>18 mar</td><td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.2</span></td></tr>
-              <tr><td style="display:flex; align-items:center; gap:8px; padding:12px 14px;"><div class="avatar-mini" style="background:#e87d1e;">ML</div>María López</td><td>Guía cinemática</td><td>Física 11°B</td><td>15 mar</td><td><span style="font-size:1.1rem; font-weight:800; color:var(--verde);">4.8</span></td></tr>
+            <tbody data-revisadas-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MIS TAREAS -->
+      <div class="tpanel" id="tp-mistarea">
+        <div class="card">
+          <div class="flex-between mb-3">
+            <h3>Tareas publicadas</h3>
+            <span class="badge badge-exito" data-contar-mis-tareas></span>
+          </div>
+          <table class="tabla">
+            <thead><tr><th>Título</th><th>Curso</th><th>Fecha límite</th><th>Tipo</th><th></th></tr></thead>
+            <tbody data-mis-tareas-container>
             </tbody>
           </table>
         </div>
@@ -121,6 +163,61 @@
     </div>
   </main>
 </div>
+
+<!-- Modal Editar tarea -->
+<div id="modal-editar-tarea" class="modal-overlay" onclick="if(event.target === this) DOCENTE_TAREAS.cerrarModalEditar()">
+  <div class="modal-caja">
+    <h3 class="modal-titulo">Editar tarea</h3>
+
+    <div class="form-group-modal">
+      <label class="form-label-modal">Título *</label>
+      <input type="text" id="modal-edit-titulo" class="form-input-modal">
+    </div>
+
+    <div class="form-group-modal">
+      <label class="form-label-modal">Fecha límite *</label>
+      <input type="date" id="modal-edit-fecha" class="form-input-modal">
+    </div>
+
+    <div class="form-group-modal">
+      <label class="form-label-modal">Descripción / Instrucciones</label>
+      <textarea id="modal-edit-descripcion" class="form-input-modal" rows="4"></textarea>
+    </div>
+
+    <div class="modal-error" id="modal-edit-error"></div>
+
+    <div class="modal-acciones">
+      <button class="modal-btn modal-btn-secondary" onclick="DOCENTE_TAREAS.cerrarModalEditar()">Cancelar</button>
+      <button class="modal-btn modal-btn-primary" id="modal-edit-guardar" onclick="DOCENTE_TAREAS.guardarEdicionTarea()">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Calificar -->
+<div id="modal-calificar" class="modal-overlay" onclick="if(event.target === this) DOCENTE_TAREAS.cerrarModalCalificar()">
+  <div class="modal-caja">
+    <h3 class="modal-titulo">Calificar entrega</h3>
+    <p class="modal-subtitulo">Estudiante: <strong id="modal-calif-estudiante"></strong></p>
+
+    <div class="form-group-modal">
+      <label class="form-label-modal">Nota (0.0 - 5.0) *</label>
+      <input type="number" id="modal-calif-nota" class="form-input-modal" min="0" max="5" step="0.1" placeholder="4.5">
+    </div>
+
+    <div class="form-group-modal">
+      <label class="form-label-modal">Observaciones (opcional)</label>
+      <textarea id="modal-calif-observaciones" class="form-input-modal" rows="4" placeholder="Escribe retroalimentación para el estudiante..."></textarea>
+    </div>
+
+    <div class="modal-error" id="modal-calif-error"></div>
+
+    <div class="modal-acciones">
+      <button class="modal-btn modal-btn-secondary" onclick="DOCENTE_TAREAS.cerrarModalCalificar()">Cancelar</button>
+      <button class="modal-btn modal-btn-primary" id="modal-calif-guardar" onclick="DOCENTE_TAREAS.guardarCalificacion()">Guardar calificación</button>
+    </div>
+  </div>
+</div>
+
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 <script src="../assets/js/supabase-config.js"></script>

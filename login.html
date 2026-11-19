@@ -263,7 +263,10 @@
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     } else if (AUTH.isAutenticado()) {
-      AUTH.redirigirSegunRol(AUTH.getUsuario().rol);
+      const sesion = AUTH.getUsuario();
+      // Sesión demo (sin id de Supabase): se descarta para que el ingreso con Google sea el que cuente
+      if (sesion.id) AUTH.redirigirSegunRol(sesion.rol);
+      else localStorage.removeItem('mc_usuario');
     }
   })();
 </script>

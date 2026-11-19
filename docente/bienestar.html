@@ -52,6 +52,20 @@
     .cp:hover:not(.active) { background:var(--color-docente-suave); border-color:var(--color-docente); color:var(--color-docente); }
 
     .tendencia-num { font-size: 1.8rem; font-weight: 800; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.45); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
+    .modal-overlay.abierto { display: flex; }
+    .modal-caja { background: var(--bg-card); border-radius: var(--radio-lg); padding: 1.75rem; max-width: 420px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,.25); text-align: center; animation: modalIn .2s ease-out; }
+    @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+    .modal-icono { font-size: 2.5rem; margin-bottom: .5rem; }
+    .modal-caja h3 { margin: 0 0 .5rem; font-size: 1.25rem; font-weight: 800; color: var(--txt-primario); }
+    .modal-caja p { font-size: 14px; color: var(--txt-secundario); margin: 0 0 1rem; line-height: 1.5; }
+    .modal-error { color: var(--error); font-size: 13px; }
+    .modal-acciones { display: flex; gap: 10px; justify-content: center; }
+    .modal-btn { padding: 10px 18px; border-radius: var(--radio-md); font-size: 14px; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; font-family: var(--font-ui); }
+    .modal-btn:disabled { opacity: .6; cursor: wait; }
+    .modal-btn.secundario { background: transparent; border-color: var(--borde); color: var(--txt-secundario); }
+    .modal-btn.primario { background: var(--error); color: #fff; }
   </style>
 </head>
 <body>
@@ -78,12 +92,7 @@
         <p style="font-size:13px; color:#1e40af; margin:0;">Los datos se muestran de forma <strong>agregada y anónima</strong>. Los nombres individuales solo son visibles para la orientadora escolar cuando hay una alerta activa.</p>
       </div>
 
-      <div class="curso-pill-sel">
-        <button class="cp active" onclick="selCurso(this)">Ciencias 10°A</button>
-        <button class="cp" onclick="selCurso(this)">Ciencias 10°B</button>
-        <button class="cp" onclick="selCurso(this)">Física 11°A</button>
-        <button class="cp" onclick="selCurso(this)">Física 11°B</button>
-      </div>
+      <div class="curso-pill-sel" id="curso-pills"></div>
 
       <!-- Stats rápidos -->
       <div class="grid-4 mb-3">
@@ -91,32 +100,32 @@
           <div class="stat-icon" style="background:#d1fae5;">😊</div>
           <div>
             <div class="stat-label">Bienestar promedio</div>
-            <div class="tendencia-num" style="color:var(--verde);">3.8<span style="font-size:1rem;">/5</span></div>
-            <div class="stat-sub">Esta semana · Ciencias 10°A</div>
+            <div class="tendencia-num" id="kpi-promedio">—</div>
+            <div class="stat-sub" id="kpi-promedio-sub"></div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--exito-suave);">✅</div>
           <div>
             <div class="stat-label">Participación</div>
-            <div class="tendencia-num" style="color:var(--exito);">82%</div>
-            <div class="stat-sub">34 de 38 completaron</div>
+            <div class="tendencia-num" id="kpi-participacion">—</div>
+            <div class="stat-sub" id="kpi-participacion-sub"></div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--alerta-suave);">⚠️</div>
           <div>
             <div class="stat-label">Alertas activas</div>
-            <div class="tendencia-num" style="color:var(--alerta);">2</div>
-            <div class="stat-sub">Enviadas a orientación</div>
+            <div class="tendencia-num" id="kpi-alertas" style="color:var(--alerta);">—</div>
+            <div class="stat-sub">Requieren atención</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--error-suave);">📉</div>
           <div>
             <div class="stat-label">Tendencia</div>
-            <div class="tendencia-num" style="color:var(--verde);">↑</div>
-            <div class="stat-sub">Mejoró vs semana anterior</div>
+            <div class="tendencia-num" id="kpi-tendencia">—</div>
+            <div class="stat-sub" id="kpi-tendencia-sub"></div>
           </div>
         </div>
       </div>
@@ -131,62 +140,7 @@
           </div>
           <p class="text-sm text-muted mb-2">Promedio emocional del grupo por semana. No muestra datos individuales.</p>
 
-          <div class="heatmap-grid">
-            <!-- Headers -->
-            <div class="hm-header"></div>
-            <div class="hm-header">29 ene</div>
-            <div class="hm-header">5 feb</div>
-            <div class="hm-header">12 feb</div>
-            <div class="hm-header">19 feb</div>
-            <div class="hm-header">26 feb</div>
-            <div class="hm-header">5 mar</div>
-            <div class="hm-header">12 mar</div>
-            <div class="hm-header">19 mar</div>
-
-            <!-- Ciencias 10°A -->
-            <div class="hm-label">10°A</div>
-            <div class="hm-cell hm-4" title="Bien · semana 29 ene">😊</div>
-            <div class="hm-cell hm-4" title="Bien">😊</div>
-            <div class="hm-cell hm-5" title="Excelente">🤩</div>
-            <div class="hm-cell hm-3" title="Regular">😐</div>
-            <div class="hm-cell hm-3" title="Regular — carga de evaluaciones">😐</div>
-            <div class="hm-cell hm-4" title="Bien">😊</div>
-            <div class="hm-cell hm-4" title="Bien">😊</div>
-            <div class="hm-cell hm-4" title="Esta semana">😊</div>
-
-            <!-- Ciencias 10°B -->
-            <div class="hm-label">10°B</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-2">😔</div>
-            <div class="hm-cell hm-2">😔</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-3">😐</div>
-
-            <!-- Física 11°A -->
-            <div class="hm-label">11°A</div>
-            <div class="hm-cell hm-5">🤩</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-5">🤩</div>
-            <div class="hm-cell hm-4">😊</div>
-
-            <!-- Física 11°B -->
-            <div class="hm-label">11°B</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-4">😊</div>
-            <div class="hm-cell hm-1">😣</div>
-            <div class="hm-cell hm-2">😔</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-3">😐</div>
-            <div class="hm-cell hm-4">😊</div>
-          </div>
+          <div class="heatmap-grid" id="heatmap"></div>
 
           <div class="leyenda">
             <div class="leyenda-item"><div class="leyenda-color" style="background:#d1fae5;"></div>Excelente</div>
@@ -204,32 +158,13 @@
               <h3>Alertas enviadas a orientación</h3>
               <span class="badge badge-error">2 activas</span>
             </div>
-            <div class="alerta-card alerta-roja">
-              <div class="alerta-ico">🚨</div>
-              <div>
-                <div class="alerta-nombre">Estudiante anónimo — 11°B</div>
-                <div class="alerta-desc">Ha marcado "Muy mal" o "Mal" 3 semanas seguidas. Alertado a orientadora el 19 mar.</div>
-              </div>
-            </div>
-            <div class="alerta-card alerta-amarilla">
-              <div class="alerta-ico">⚠️</div>
-              <div>
-                <div class="alerta-nombre">Estudiante anónimo — 10°B</div>
-                <div class="alerta-desc">Ha marcado "Mal" 2 semanas seguidas. En seguimiento preventivo por orientación.</div>
-              </div>
-            </div>
+            <div id="alertas-container"></div>
             <p style="font-size:11px; color:var(--txt-muted); margin-top:10px;">Las alertas se generan automáticamente cuando un estudiante marca bienestar bajo 2+ semanas consecutivas. Solo orientación tiene acceso al nombre.</p>
           </div>
 
           <div class="card">
-            <h3 class="mb-3">Distribución esta semana — Ciencias 10°A</h3>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <div><div class="flex-between mb-1"><span class="text-sm fw-600">🤩 Excelente</span><span class="text-sm fw-600" style="color:#059669;">8 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:21%; background:#059669;"></div></div></div>
-              <div><div class="flex-between mb-1"><span class="text-sm fw-600">😊 Bien</span><span class="text-sm fw-600" style="color:var(--verde);">20 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:53%; background:var(--verde);"></div></div></div>
-              <div><div class="flex-between mb-1"><span class="text-sm fw-600">😐 Regular</span><span class="text-sm fw-600" style="color:var(--alerta);">6 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:16%; background:var(--alerta);"></div></div></div>
-              <div><div class="flex-between mb-1"><span class="text-sm fw-600">😔 Mal</span><span class="text-sm fw-600" style="color:var(--error);">0 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:0%; background:var(--error);"></div></div></div>
-              <div><div class="flex-between mb-1"><span class="text-sm fw-600" style="color:var(--txt-muted);">Sin respuesta</span><span class="text-sm" style="color:var(--txt-muted);">4 estudiantes</span></div><div class="progress-wrap"><div class="progress-bar" style="width:10%; background:var(--borde);"></div></div></div>
-            </div>
+            <h3 class="mb-3" id="distribucion-titulo">Distribución esta semana</h3>
+            <div id="distribucion" style="display:flex; flex-direction:column; gap:10px;"></div>
           </div>
         </div>
       </div>
@@ -237,16 +172,359 @@
     </div>
   </main>
 </div>
+
+<div id="modal-derivar" class="modal-overlay" onclick="if (event.target === this) cerrarModalDerivar()">
+  <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="modal-derivar-titulo">
+    <div class="modal-icono">🧠</div>
+    <h3 id="modal-derivar-titulo">Derivar a psicología</h3>
+    <p>Vas a derivar a <strong id="modal-derivar-nombre"></strong> al departamento de psicología. El caso quedará registrado y la alerta dejará de mostrarse en tu panel.</p>
+    <p class="modal-error" id="modal-derivar-error"></p>
+    <div class="modal-acciones">
+      <button class="modal-btn secundario" onclick="cerrarModalDerivar()">Cancelar</button>
+      <button class="modal-btn primario" id="modal-derivar-confirmar" onclick="confirmarDerivacion()">Sí, derivar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-docente.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script>
   const usuario = AUTH.proteger('docente');
   if (usuario) AUTH.pintarUsuario(usuario);
 
-  function selCurso(btn) {
-    document.querySelectorAll('.cp').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+  const animoMap = { muy_bien: 5, bien: 4, regular: 3, mal: 2, muy_mal: 1 };
+  const animoEmoji = { 5: '🤩', 4: '😊', 3: '😐', 2: '😔', 1: '😣', 0: '?' };
+  const animoNombre = { muy_bien: 'Excelente', bien: 'Bien', regular: 'Regular', mal: 'Mal', muy_mal: 'Muy mal' };
+
+  let gruposDocente = [];
+  let grupoSeleccionado = null;
+
+  async function cargarGrupos() {
+    if (!usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+      const { data: asig } = await client
+        .from('asignaciones')
+        .select('grupo_id')
+        .eq('docente_id', usuario.id);
+
+      if (!asig?.length) { console.warn('Sin grupos'); return; }
+
+      const grupoIds = [...new Set(asig.map(a => a.grupo_id))];
+      const { data: grupos } = await client
+        .from('grupos')
+        .select('id, grado, seccion')
+        .in('id', grupoIds)
+        .order('grado, seccion');
+
+      gruposDocente = grupos || [];
+      renderizarGrupos();
+      if (gruposDocente.length > 0) selGrupo(gruposDocente[0].id);
+    } catch (e) { console.error('Error cargando grupos:', e); }
   }
+
+  function renderizarGrupos() {
+    const container = document.getElementById('curso-pills');
+    container.innerHTML = '';
+    gruposDocente.forEach((g, idx) => {
+      const btn = document.createElement('button');
+      btn.className = `cp ${idx === 0 ? 'active' : ''}`;
+      btn.textContent = `${g.grado}°${g.seccion}`;
+      btn.onclick = () => selGrupo(g.id);
+      container.appendChild(btn);
+    });
+  }
+
+  async function selGrupo(grupoId) {
+    grupoSeleccionado = grupoId;
+    document.querySelectorAll('.cp').forEach(b => b.classList.remove('active'));
+    const grupo = gruposDocente.find(g => g.id === grupoId);
+    const btn = Array.from(document.querySelectorAll('.cp')).find(b => b.textContent === `${grupo.grado}°${grupo.seccion}`);
+    if (btn) btn.classList.add('active');
+    await cargarDatosGrupo(grupoId);
+  }
+
+  async function cargarDatosGrupo(grupoId) {
+    if (!usuario?.id) return;
+    try {
+      const client = AUTH.clienteSupabase();
+
+      // Obtener estudiantes del grupo
+      const { data: estudiantes } = await client
+        .from('estudiantes')
+        .select('id')
+        .eq('grupo_id', grupoId);
+      const estIds = (estudiantes || []).map(e => e.id);
+      if (!estIds.length) {
+        document.getElementById('kpi-promedio').textContent = '—';
+        document.getElementById('kpi-participacion').textContent = '—';
+        return;
+      }
+
+      // Obtener conteos anónimos por grupo (función RLS que valida acceso)
+      const { data: encuestasAg } = await client
+        .rpc('animo_grupo_semanal', { p_grupo_id: grupoId });
+
+      // Reconstruir datos de encuestas desde los conteos agregados
+      const encuestas = (encuestasAg || []).flatMap(agg => {
+        const arr = [];
+        for (let i = 0; i < agg.total; i++) {
+          arr.push({ semana: agg.semana, animo: agg.animo, estudiante_id: null });
+        }
+        return arr;
+      });
+
+      // Obtener estudiantes con requiere_atencion=true
+      const { data: conAlerta } = await client
+        .from('encuestas_animo')
+        .select('estudiante_id, semana')
+        .in('estudiante_id', estIds)
+        .eq('requiere_atencion', true);
+
+      // Obtener info de estudiantes con alerta
+      const { data: estAlerta } = await client
+        .from('estudiantes')
+        .select('id, seudonimo, nombre')
+        .in('id', [...new Set(conAlerta.map(a => a.estudiante_id))]);
+
+      calcularKPIs(estIds, encuestas || [], conAlerta || [], grupoId);
+      generarHeatmap(estIds, encuestas || []);
+      generarDistribucion(encuestas || [], estIds);
+      generarAlertas(estAlerta || [], conAlerta || []);
+    } catch (e) { console.error('Error cargando datos del grupo:', e); }
+  }
+
+  function calcularKPIs(estIds, encuestas, conAlerta, grupoId) {
+    const grupo = gruposDocente.find(g => g.id === grupoId);
+    const semanas = [...new Set(encuestas.map(e => e.semana))].sort().reverse().slice(0, 8);
+    const semanaActual = semanas[0];
+
+    // Promedio esta semana
+    const encSemana = encuestas.filter(e => e.semana === semanaActual);
+    const promedio = encSemana.length > 0
+      ? (encSemana.reduce((s, e) => s + animoMap[e.animo], 0) / encSemana.length).toFixed(1)
+      : '—';
+
+    // Participación
+    const participacion = estIds.length > 0
+      ? Math.round((encSemana.length / estIds.length) * 100)
+      : 0;
+
+    // Alertas: estudiantes con mal/muy_mal 2+ semanas consecutivas o requiere_atencion
+    const alertas = new Set(conAlerta.map(a => a.estudiante_id)).size;
+
+    // Tendencia
+    const semPasada = semanas[1];
+    const encPasada = encuestas.filter(e => e.semana === semPasada);
+    const promPasada = encPasada.length > 0
+      ? encPasada.reduce((s, e) => s + animoMap[e.animo], 0) / encPasada.length
+      : 0;
+    const tendencia = promedio !== '—' && promPasada > 0
+      ? parseFloat(promedio) > promPasada ? '↑' : parseFloat(promedio) < promPasada ? '↓' : '→'
+      : '—';
+
+    document.getElementById('kpi-promedio').textContent = promedio === '—' ? '—' : `${promedio}/5`;
+    document.getElementById('kpi-promedio-sub').textContent = semanaActual ? `Semana ${new Date(semanaActual).toLocaleDateString('es-CO')} · ${grupo.grado}°${grupo.seccion}` : '';
+    document.getElementById('kpi-participacion').textContent = `${participacion}%`;
+    document.getElementById('kpi-participacion-sub').textContent = `${encSemana.length} de ${estIds.length}`;
+    document.getElementById('kpi-alertas').textContent = alertas;
+    document.getElementById('kpi-tendencia').textContent = tendencia;
+    document.getElementById('kpi-tendencia-sub').textContent = tendencia === '→' ? 'Sin cambios' : tendencia === '↑' ? 'Mejoró' : 'Empeoró';
+  }
+
+  function generarHeatmap(estIds, encuestas) {
+    const semanas = [...new Set(encuestas.map(e => e.semana))].sort().reverse().slice(0, 8);
+    const container = document.getElementById('heatmap');
+    container.innerHTML = '';
+
+    // Headers
+    const headerEmpty = document.createElement('div');
+    headerEmpty.className = 'hm-header';
+    container.appendChild(headerEmpty);
+    semanas.forEach(s => {
+      const h = document.createElement('div');
+      h.className = 'hm-header';
+      h.textContent = new Date(s).toLocaleDateString('es-CO', { month: 'short', day: 'numeric' });
+      container.appendChild(h);
+    });
+
+    // Por grupo (solo mostramos 1 grupo, el seleccionado)
+    // Calculamos promedio por semana
+    semanas.forEach(s => {
+      const encSemana = encuestas.filter(e => e.semana === s);
+      const promedio = encSemana.length > 0
+        ? Math.round(encSemana.reduce((sum, e) => sum + animoMap[e.animo], 0) / encSemana.length)
+        : 0;
+      return { semana: s, promedio };
+    });
+
+    // Header de grupo
+    const lbl = document.createElement('div');
+    lbl.className = 'hm-label';
+    lbl.textContent = '📊';
+    container.appendChild(lbl);
+
+    // Celdas de heatmap
+    semanas.forEach(s => {
+      const encSemana = encuestas.filter(e => e.semana === s);
+      const promedio = encSemana.length > 0
+        ? Math.round(encSemana.reduce((sum, e) => sum + animoMap[e.animo], 0) / encSemana.length)
+        : 0;
+      const cell = document.createElement('div');
+      cell.className = `hm-cell hm-${promedio}`;
+      cell.textContent = animoEmoji[promedio];
+      cell.title = promedio > 0 ? `${animoNombre[Object.keys(animoMap).find(k => animoMap[k] === promedio)]} (${encSemana.length} respuestas)` : 'Sin datos';
+      container.appendChild(cell);
+    });
+
+    // Leyenda
+    const leyenda = document.createElement('div');
+    leyenda.className = 'leyenda';
+    const labels = [
+      { num: 5, nombre: 'Excelente' },
+      { num: 4, nombre: 'Bien' },
+      { num: 3, nombre: 'Regular' },
+      { num: 2, nombre: 'Mal' },
+      { num: 1, nombre: 'Muy mal' }
+    ];
+    labels.forEach(l => {
+      const item = document.createElement('div');
+      item.className = 'leyenda-item';
+      item.innerHTML = `<div class="leyenda-color hm-${l.num}"></div>${l.nombre}`;
+      leyenda.appendChild(item);
+    });
+    container.parentElement.appendChild(leyenda);
+  }
+
+  function generarDistribucion(encuestas, estIds) {
+    const semanaActual = [...new Set(encuestas.map(e => e.semana))].sort().reverse()[0];
+    const encSemana = encuestas.filter(e => e.semana === semanaActual);
+    const respondieron = [...new Set(encSemana.map(e => e.estudiante_id))];
+
+    const conteos = { muy_bien: 0, bien: 0, regular: 0, mal: 0, muy_mal: 0 };
+    encSemana.forEach(e => { conteos[e.animo]++; });
+
+    const grupo = gruposDocente.find(g => g.id === grupoSeleccionado);
+    document.getElementById('distribucion-titulo').textContent = `Distribución esta semana — ${grupo.grado}°${grupo.seccion}`;
+
+    const dist = document.getElementById('distribucion');
+    dist.innerHTML = '';
+
+    const items = [
+      { emoji: '🤩', nombre: 'Excelente', key: 'muy_bien', color: '#059669' },
+      { emoji: '😊', nombre: 'Bien', key: 'bien', color: 'var(--verde)' },
+      { emoji: '😐', nombre: 'Regular', key: 'regular', color: 'var(--alerta)' },
+      { emoji: '😔', nombre: 'Mal', key: 'mal', color: 'var(--error)' },
+      { emoji: '😣', nombre: 'Muy mal', key: 'muy_mal', color: '#dc2626' }
+    ];
+
+    const totalResp = respondieron.length;
+    items.forEach(item => {
+      const cant = conteos[item.key];
+      const pct = totalResp > 0 ? Math.round((cant / totalResp) * 100) : 0;
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="flex-between mb-1">
+          <span class="text-sm fw-600">${item.emoji} ${item.nombre}</span>
+          <span class="text-sm fw-600" style="color:${item.color};">${cant} estudiantes</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" style="width:${pct}%; background:${item.color};"></div>
+        </div>
+      `;
+      dist.appendChild(div);
+    });
+
+    // Sin respuesta
+    const sinResp = estIds.length - respondieron.length;
+    if (sinResp > 0) {
+      const pct = Math.round((sinResp / estIds.length) * 100);
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="flex-between mb-1">
+          <span class="text-sm fw-600" style="color:var(--txt-muted);">Sin respuesta</span>
+          <span class="text-sm" style="color:var(--txt-muted);">${sinResp} estudiantes</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar" style="width:${pct}%; background:var(--borde);"></div>
+        </div>
+      `;
+      dist.appendChild(div);
+    }
+  }
+
+  let alertasActuales = [];
+  let derivacionEnCurso = null;
+
+  function generarAlertas(estAlerta, conAlerta) {
+    const container = document.getElementById('alertas-container');
+    container.innerHTML = '';
+    alertasActuales = estAlerta || [];
+
+    if (!estAlerta?.length) {
+      container.innerHTML = '<p style="font-size:12px; color:var(--txt-muted);">Sin alertas activas en este grupo.</p>';
+      return;
+    }
+
+    estAlerta.forEach(est => {
+      const alertasEst = conAlerta.filter(a => a.estudiante_id === est.id);
+      const semanas = [...new Set(alertasEst.map(a => a.semana))].sort().reverse();
+      const ultimaSemana = semanas[0];
+
+      const div = document.createElement('div');
+      div.className = 'alerta-card alerta-roja';
+      div.innerHTML = `
+        <div class="alerta-ico">🚨</div>
+        <div style="flex:1;">
+          <div class="alerta-nombre">${est.seudonimo} (${est.nombre.split(' ')[0]})</div>
+          <div class="alerta-desc">Requiere atención desde ${new Date(ultimaSemana).toLocaleDateString('es-CO')}.</div>
+          <button onclick="derivarCaso(${est.id})" style="margin-top:8px; padding:6px 12px; background:var(--error); color:#fff; border:none; border-radius:4px; font-size:12px; cursor:pointer;">Derivar a psicología</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+
+    const badge = document.querySelector('.flex-between h3')?.parentElement?.querySelector('.badge');
+    if (badge) badge.textContent = estAlerta.length + ' activas';
+  }
+
+  function derivarCaso(estudianteId) {
+    derivacionEnCurso = estudianteId;
+    const est = alertasActuales.find(e => e.id === estudianteId);
+    document.getElementById('modal-derivar-nombre').textContent = est?.seudonimo || 'este estudiante';
+    document.getElementById('modal-derivar-error').textContent = '';
+    document.getElementById('modal-derivar').classList.add('abierto');
+  }
+
+  function cerrarModalDerivar() {
+    document.getElementById('modal-derivar').classList.remove('abierto');
+    derivacionEnCurso = null;
+  }
+
+  async function confirmarDerivacion() {
+    const btn = document.getElementById('modal-derivar-confirmar');
+    btn.disabled = true;
+    btn.textContent = 'Derivando...';
+    try {
+      const client = AUTH.clienteSupabase();
+      const { error } = await client.rpc('derivar_estudiante', { p_estudiante_id: derivacionEnCurso });
+      if (error) throw error;
+      cerrarModalDerivar();
+      cargarDatosGrupo(grupoSeleccionado);
+    } catch (e) {
+      console.error('Error derivando:', e);
+      document.getElementById('modal-derivar-error').textContent = 'No se pudo derivar: ' + e.message;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Sí, derivar';
+    }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModalDerivar(); });
+
+  document.addEventListener('DOMContentLoaded', () => cargarGrupos());
 </script>
 </body>
 </html>

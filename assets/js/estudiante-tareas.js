@@ -7,7 +7,10 @@ const ESTUDIANTE_TAREAS = {
 
   async init() {
     this.usuario = AUTH.proteger('estudiante');
-    if (!this.usuario) return;
+    if (!this.usuario) {
+      console.warn('⚠️ ESTUDIANTE_TAREAS: sin sesión — usuario redirigido a login');
+      return;
+    }
 
     this.supabase = AUTH.clienteSupabase();
     AUTH.pintarUsuario(this.usuario);
@@ -37,7 +40,7 @@ const ESTUDIANTE_TAREAS = {
 
     const { data: tareas, error } = await this.supabase
       .from('tareas')
-      .select('id, titulo, descripcion, fecha_entrega, usuarios(nombre)')
+      .select('id, titulo, descripcion, fecha_entrega, docente_id')
       .eq('grupo_id', this.grupoId)
       .order('fecha_entrega', { ascending: false });
 
@@ -64,7 +67,7 @@ const ESTUDIANTE_TAREAS = {
           <div style="display:flex; justify-content:space-between; align-items:start; gap:1rem;">
             <div>
               <h3 style="margin:0 0 8px 0;">${t.titulo}</h3>
-              <p style="color:var(--txt-muted); font-size:13px; margin:0 0 8px 0;">Por: ${t.usuarios.nombre}</p>
+              <p style="color:var(--txt-muted); font-size:13px; margin:0 0 8px 0;">Por: Docente</p>
               <p style="color:var(--txt-secundario); font-size:14px; margin:0 0 12px 0;">${t.descripcion || 'Sin descripción'}</p>
               <div style="display:flex; gap:12px;">
                 <button class="btn btn-primary btn-sm">📤 Enviar entrega</button>

@@ -3,15 +3,8 @@ function cargarSidebarEstudiante() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  let tareasNoLeidas = 0;
-  try {
-    const data = localStorage.getItem('memocampus_tareas');
-    if (data) tareasNoLeidas = JSON.parse(data).filter(t => !t.entregada).length;
-  } catch(e) {}
-
-  const badgeTareas = tareasNoLeidas > 0
-    ? `<span class="sidebar-badge">${tareasNoLeidas}</span>`
-    : `<span class="sidebar-badge">3</span>`;
+  // Sin badge hasta conectar con Supabase: el conteo vive en tareas.html (shortcut: badge vacío, conectar a tareas del grupo)
+  const badgeTareas = '';
 
   sidebar.innerHTML = `
     <div class="sidebar-logo">
