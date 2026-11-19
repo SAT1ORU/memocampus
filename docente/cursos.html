@@ -63,89 +63,11 @@
       <div class="tab-bar">
         <button class="tab-btn2 active" onclick="switchTab2(this,'cursos')">Mis cursos</button>
         <button class="tab-btn2" onclick="switchTab2(this,'materiales')">Materiales publicados</button>
-        <button class="tab-btn2" onclick="switchTab2(this,'tareas-activas')">Tareas activas</button>
       </div>
 
       <!-- CURSOS -->
       <div class="tab-panel2 active" id="tab2-cursos">
         <div class="grid-2" id="grid-cursos-docente">
-
-          <div class="curso-card">
-            <div class="curso-header" style="background:var(--mat-ciencias);">
-              <h4>🔬 Ciencias Naturales</h4>
-              <span>Grado 10°A · Período 1 — 2026</span>
-            </div>
-            <div class="curso-body">
-              <div class="curso-stats">
-                <div class="curso-stat"><div class="n">38</div><div class="l">Estudiantes</div></div>
-                <div class="curso-stat"><div class="n" style="color:var(--verde);">4.0</div><div class="l">Promedio</div></div>
-                <div class="curso-stat"><div class="n">12</div><div class="l">Materiales</div></div>
-              </div>
-              <div class="curso-actions">
-                <button class="btn btn-ghost btn-sm" onclick="abrirModalMaterial()">📎 Subir material</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='notas.html'">📊 Ver notas</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='tareas.html'">✅ Tareas</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="curso-card">
-            <div class="curso-header" style="background:var(--mat-ciencias);">
-              <h4>🔬 Ciencias Naturales</h4>
-              <span>Grado 10°B · Período 1 — 2026</span>
-            </div>
-            <div class="curso-body">
-              <div class="curso-stats">
-                <div class="curso-stat"><div class="n">36</div><div class="l">Estudiantes</div></div>
-                <div class="curso-stat"><div class="n" style="color:var(--verde);">3.8</div><div class="l">Promedio</div></div>
-                <div class="curso-stat"><div class="n">12</div><div class="l">Materiales</div></div>
-              </div>
-              <div class="curso-actions">
-                <button class="btn btn-ghost btn-sm" onclick="abrirModalMaterial()">📎 Subir material</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='notas.html'">📊 Ver notas</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='tareas.html'">✅ Tareas</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="curso-card">
-            <div class="curso-header" style="background:var(--mat-fisica);">
-              <h4>⚗️ Física</h4>
-              <span>Grado 11°A · Período 1 — 2026</span>
-            </div>
-            <div class="curso-body">
-              <div class="curso-stats">
-                <div class="curso-stat"><div class="n">35</div><div class="l">Estudiantes</div></div>
-                <div class="curso-stat"><div class="n" style="color:var(--alerta);">3.9</div><div class="l">Promedio</div></div>
-                <div class="curso-stat"><div class="n">9</div><div class="l">Materiales</div></div>
-              </div>
-              <div class="curso-actions">
-                <button class="btn btn-ghost btn-sm" onclick="abrirModalMaterial()">📎 Subir material</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='notas.html'">📊 Ver notas</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='tareas.html'">✅ Tareas</button>
-              </div>
-            </div>
-          </div>
-
-          <div class="curso-card">
-            <div class="curso-header" style="background:var(--mat-fisica);">
-              <h4>⚗️ Física</h4>
-              <span>Grado 11°B · Período 1 — 2026</span>
-            </div>
-            <div class="curso-body">
-              <div class="curso-stats">
-                <div class="curso-stat"><div class="n">34</div><div class="l">Estudiantes</div></div>
-                <div class="curso-stat"><div class="n" style="color:var(--verde);">4.1</div><div class="l">Promedio</div></div>
-                <div class="curso-stat"><div class="n">9</div><div class="l">Materiales</div></div>
-              </div>
-              <div class="curso-actions">
-                <button class="btn btn-ghost btn-sm" onclick="abrirModalMaterial()">📎 Subir material</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='notas.html'">📊 Ver notas</button>
-                <button class="btn btn-ghost btn-sm" onclick="window.location.href='tareas.html'">✅ Tareas</button>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
 
@@ -160,21 +82,6 @@
               <tr><td><strong>Simulador PhET — Enlace</strong></td><td><span class="badge badge-azul">Enlace</span></td><td>Ciencias 10°A · 10°B</td><td>16 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
               <tr><td><strong>Cinemática — Guía teórica</strong></td><td><span class="badge badge-verde">PDF</span></td><td>Física 11°A · 11°B</td><td>15 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
               <tr><td><strong>Video: Movimiento rectilíneo</strong></td><td><span class="badge badge-naranja">Video</span></td><td>Física 11°A · 11°B</td><td>12 mar</td><td><button class="btn btn-ghost btn-sm">Editar</button> <button class="btn btn-danger btn-sm">Eliminar</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- TAREAS ACTIVAS -->
-      <div class="tab-panel2" id="tab2-tareas-activas">
-        <div class="card">
-          <table class="tabla">
-            <thead><tr><th>Tarea</th><th>Curso</th><th>Fecha límite</th><th>Entregas</th><th>Estado</th></tr></thead>
-            <tbody>
-              <tr><td><strong>Informe práctica de laboratorio</strong></td><td>Ciencias 10°A</td><td style="color:var(--alerta);">27 mar 2026</td><td>12 / 38</td><td><span class="badge badge-alerta">Activa</span></td></tr>
-              <tr><td><strong>Cuestionario átomo</strong></td><td>Ciencias 10°B</td><td>28 mar 2026</td><td>8 / 36</td><td><span class="badge badge-alerta">Activa</span></td></tr>
-              <tr><td><strong>Ejercicios cinemática MRU</strong></td><td>Física 11°A</td><td>30 mar 2026</td><td>5 / 35</td><td><span class="badge badge-alerta">Activa</span></td></tr>
-              <tr><td><strong>Taller vectores</strong></td><td>Física 11°B</td><td>1 abr 2026</td><td>2 / 34</td><td><span class="badge badge-alerta">Activa</span></td></tr>
             </tbody>
           </table>
         </div>
