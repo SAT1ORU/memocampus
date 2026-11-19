@@ -64,7 +64,7 @@ const AUTH = {
     const client = this.clienteSupabase();
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/login.html' }
+      options: { redirectTo: new URL('login.html', window.location.href).href }
     });
     if (error) throw error;
   },
