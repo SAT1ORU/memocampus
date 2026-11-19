@@ -41,7 +41,7 @@
     <div class="app-content">
 
       <div class="tab-bar">
-        <button class="tbtn active" onclick="swt(this,'pendientes')">Sin revisar (8)</button>
+        <button class="tbtn active" onclick="swt(this,'pendientes')">Sin revisar</button>
         <button class="tbtn" onclick="swt(this,'revisadas')">Revisadas</button>
         <button class="tbtn" onclick="swt(this,'crear')">+ Crear nueva tarea</button>
       </div>
@@ -51,53 +51,9 @@
         <div class="card">
           <div class="flex-between mb-3">
             <h3>Entregas pendientes de revisión</h3>
-            <span class="badge badge-alerta">8 sin revisar</span>
+            <span class="badge badge-alerta" data-contar-pendientes></span>
           </div>
-          <div>
-            <div class="entrega-row">
-              <div class="avatar-mini" style="background:#3b6de8;">VG</div>
-              <div style="flex:1;">
-                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Valentina Gómez</div>
-                <div style="font-size:12px; color:var(--txt-muted);">Informe práctica de laboratorio · Ciencias 10°A</div>
-              </div>
-              <span style="font-size:11px; color:var(--txt-muted);">Hace 1h</span>
-              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
-              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
-              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
-            </div>
-            <div class="entrega-row">
-              <div class="avatar-mini" style="background:#e84c3d;">CM</div>
-              <div style="flex:1;">
-                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Carlos Martínez</div>
-                <div style="font-size:12px; color:var(--txt-muted);">Informe práctica de laboratorio · Ciencias 10°A</div>
-              </div>
-              <span style="font-size:11px; color:var(--txt-muted);">Hace 2h</span>
-              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
-              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
-              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
-            </div>
-            <div class="entrega-row">
-              <div class="avatar-mini" style="background:#1a9b6e;">LR</div>
-              <div style="flex:1;">
-                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Laura Rodríguez</div>
-                <div style="font-size:12px; color:var(--txt-muted);">Cuestionario átomo · Ciencias 10°B</div>
-              </div>
-              <span style="font-size:11px; color:var(--txt-muted);">Hace 3h</span>
-              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
-              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
-              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
-            </div>
-            <div class="entrega-row">
-              <div class="avatar-mini" style="background:#9b3de8;">JP</div>
-              <div style="flex:1;">
-                <div style="font-size:14px; font-weight:600; color:var(--txt-primario);">Juan Pérez</div>
-                <div style="font-size:12px; color:var(--txt-muted);">Ejercicios cinemática MRU · Física 11°A</div>
-              </div>
-              <span style="font-size:11px; color:var(--txt-muted);">Ayer</span>
-              <input class="calif-input" type="number" min="0" max="5" step="0.1" placeholder="0.0">
-              <button class="btn btn-ghost btn-sm">📄 Ver archivo</button>
-              <button class="btn btn-primary btn-sm" onclick="marcarRevisada(this)">✔ Calificar</button>
-            </div>
+          <div data-entregas-container>
           </div>
         </div>
       </div>
@@ -124,33 +80,27 @@
           <div class="nueva-tarea-form">
             <div class="form-group">
               <label class="form-label">Título de la tarea *</label>
-              <input type="text" class="form-control" placeholder="Ej: Informe práctica laboratorio">
+              <input type="text" class="form-control" data-titulo placeholder="Ej: Informe práctica laboratorio">
             </div>
             <div class="form-group">
               <label class="form-label">Curso(s) *</label>
-              <select class="form-control">
-                <option>Ciencias Naturales — 10°A</option>
-                <option>Ciencias Naturales — 10°B</option>
-                <option>Física — 11°A</option>
-                <option>Física — 11°B</option>
-                <option>Todos mis cursos</option>
-              </select>
+              <select class="form-control" data-grupos-select></select>
             </div>
             <div class="form-group">
               <label class="form-label">Fecha límite de entrega *</label>
-              <input type="date" class="form-control">
+              <input type="date" class="form-control" data-fecha-entrega>
             </div>
             <div class="form-group">
               <label class="form-label">Tipo de entrega</label>
-              <select class="form-control">
-                <option>Archivo adjunto (PDF, imagen)</option>
-                <option>Texto en línea</option>
-                <option>Enlace externo</option>
+              <select class="form-control" data-tipo-entrega>
+                <option value="archivo">Archivo adjunto (PDF, imagen)</option>
+                <option value="texto">Texto en línea</option>
+                <option value="enlace">Enlace externo</option>
               </select>
             </div>
             <div class="form-group" style="grid-column:span 2;">
               <label class="form-label">Descripción / Instrucciones *</label>
-              <textarea class="form-control" rows="4" placeholder="Describe las instrucciones de la tarea con detalle..."></textarea>
+              <textarea class="form-control" data-descripcion rows="4" placeholder="Describe las instrucciones de la tarea con detalle..."></textarea>
             </div>
             <div class="form-group">
               <label class="form-label">Material de apoyo (opcional)</label>
@@ -163,7 +113,7 @@
           </div>
           <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
             <button class="btn btn-ghost">Guardar borrador</button>
-            <button class="btn btn-primary" onclick="publicarTarea(this)">📢 Publicar tarea</button>
+            <button class="btn btn-primary" data-publicar-tarea>📢 Publicar tarea</button>
           </div>
         </div>
       </div>
@@ -172,34 +122,17 @@
   </main>
 </div>
 <script src="../assets/js/sidebar-docente.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script src="../assets/js/docente-tareas.js"></script>
 
 <script>
-  const usuario = AUTH.proteger('docente');
-  if (usuario) AUTH.pintarUsuario(usuario);
-
   function swt(btn, id) {
     document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('active'));
     document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tp-'+id).classList.add('active');
-  }
-
-  function marcarRevisada(btn) {
-    const row = btn.closest('.entrega-row');
-    const nota = row.querySelector('.calif-input').value;
-    if (!nota || isNaN(nota)) { alert('Ingresa una calificación primero'); return; }
-    btn.textContent = '✔ Calificada';
-    btn.style.background = 'var(--exito)';
-    btn.disabled = true;
-    row.style.opacity = '0.6';
-    row.style.pointerEvents = 'none';
-  }
-
-  function publicarTarea(btn) {
-    btn.textContent = '✔ Tarea publicada';
-    btn.style.background = 'var(--exito)';
-    setTimeout(()=>{ btn.textContent='📢 Publicar tarea'; btn.style.background=''; }, 3000);
   }
 </script>
 </body>

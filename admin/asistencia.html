@@ -138,6 +138,16 @@
           <div style="margin-top:1.25rem; padding:12px; background:var(--alerta-suave); border-radius:var(--radio-md); border:1px solid #fed7aa;">
             <p style="font-size:13px; color:#854d0e; font-weight:500;">💡 Recomendación: Los lunes concentran el 12% de las inasistencias. Se recomienda programar actividades motivadoras los lunes para aumentar la asistencia.</p>
           </div>
+        <div class="card" style="background:var(--bg-app); border:1px solid var(--borde);">
+          <div class="flex-between mb-2">
+            <h4 style="margin:0;">IA – Resumen agregado de asistencia</h4>
+            <span class="badge badge-verde">Solo datos</span>
+          </div>
+          <p class="text-sm text-muted">Resumen generado con reglas (no envía nombres ni comentarios). Puedes pegarlo en correos a coordinación.</p>
+          <div id="ia-resumen" style="font-size:13px; white-space:pre-wrap; background:#fff; border:1px solid var(--borde); padding:12px; border-radius:var(--radio-md); min-height:80px;">Cargando resumen…</div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button id="btn-ia-actualizar" class="btn btn-ghost btn-sm" onclick="regenerarIA()">Regenerar ahora</button>
+          </div>
         </div>
       </div>
 
@@ -204,8 +214,39 @@
         return { g: `Grado ${grado}°`, s: [porcentaje, porcentaje, porcentaje, porcentaje] };
       });
       if (reales.length) renderMapa(reales);
+      // Guardar datos agregados para IA local (no expone nombres)
+      window.__ASIST_DATA = {
+        filas: filas.length,
+        presentes,
+        grados: reales.map(g => ({ grado:g.g, porcentaje:g.s[0] }))
+      };
+      regenerarIA();
     } catch (error) { console.warn('No se pudo cargar asistencia institucional real.', error); }
   }
+
+  function regenerarIA() {
+    const box = document.getElementById('ia-resumen');
+    const d = window.__ASIST_DATA;
+    if (!d) { box.textContent = 'Sin datos todavía.'; return; }
+    const prom = Math.round(d.presentes / Math.max(1, d.filas) * 100);
+    const orden = [...d.grados].sort((a,b)=>a.porcentaje - b.porcentaje);
+    const peor = orden[0]?.grado || '—';
+    const mejor = orden[orden.length-1]?.grado || '—';
+    const lineas = [
+      `Asistencia institucional — ${new Date().toLocaleDateString('es-CO')}`,
+      `Promedio general: ${prom}% (${d.presentes}/${d.filas} registros)`,
+      `Grado con menor asistencia: ${peor} (${orden[0]?.porcentaje ?? '—'}%)`,
+      `Grado con mejor asistencia: ${mejor} (${orden[orden.length-1]?.porcentaje ?? '—'}%)`,
+      '',
+      'Puntos de atención:',
+      '• Revisar ausencias repetidas en la semana previa.',
+      '• Validar jornadas con ausentismo >10% para apoyo.',
+      '• Confirmar excusas y justificaciones pendientes.'
+    ];
+    // shortcut: sin ANTHROPIC_API_KEY, usa reglas. Si lo habilitas, reemplazar con POST a tu backend.
+    box.textContent = lineas.join('\n');
+  }
+
   cargarAsistenciaAdmin();
 </script>
 <script src="../assets/js/sidebar-admin.js"></script>

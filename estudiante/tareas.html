@@ -148,7 +148,7 @@
       <div class="tareas-layout">
 
         <!-- Lista de tareas -->
-        <div id="lista-tareas"></div>
+        <div data-tareas-lista></div>
 
         <!-- Panel lateral -->
         <div>
@@ -221,161 +221,9 @@
 </div>
 
 <script src="../assets/js/sidebar-estudiante.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+<script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/auth.js"></script>
-<script>
-const TAREAS = [
-  {
-    id:1, materia:'matematicas', color:'var(--mat-matematicas)', icono:'➗',
-    nombre:'Ejercicios de trigonometría',
-    desc:'Resuelve los ejercicios 1 al 15 del capítulo 8 del libro de texto y presenta el procedimiento completo.',
-    docente:'Prof. Ramírez', vence:'Hoy', fecha:'25 mar', estado:'pendiente',
-    urgencia:'error', chips:['Obligatoria','Individual']
-  },
-  {
-    id:2, materia:'ciencias', color:'var(--mat-ciencias)', icono:'🔬',
-    nombre:'Informe práctica de laboratorio',
-    desc:'Redacta el informe de la práctica realizada el jueves incluyendo objetivo, materiales, procedimiento y conclusiones.',
-    docente:'Prof. Morales', vence:'2 días', fecha:'27 mar', estado:'pendiente',
-    urgencia:'alerta', chips:['Obligatoria','Grupal']
-  },
-  {
-    id:3, materia:'ingles', color:'var(--mat-ingles)', icono:'🌍',
-    nombre:'Reading comprehension — Unit 3',
-    desc:'Lee el texto "The Future of Technology" y responde las 10 preguntas de comprensión en inglés.',
-    docente:'Prof. Torres', vence:'5 días', fecha:'30 mar', estado:'pendiente',
-    urgencia:'verde', chips:['Obligatoria','Individual']
-  },
-  {
-    id:4, materia:'matematicas', color:'var(--mat-matematicas)', icono:'➗',
-    nombre:'Taller álgebra — Período 1',
-    desc:'Taller completo de álgebra del período 1. Todos los ejercicios con procedimiento.',
-    docente:'Prof. Ramírez', vence:'Entregada', fecha:'18 mar', estado:'entregada',
-    urgencia:'verde', chips:['Obligatoria','Individual'], nota:'4.2'
-  },
-  {
-    id:5, materia:'español', color:'var(--mat-español)', icono:'📖',
-    nombre:'Ensayo literario — El amor en los tiempos del cólera',
-    desc:'Ensayo de 3 páginas sobre los temas principales de la novela. Incluye introducción, desarrollo y conclusión.',
-    docente:'Prof. Vargas', vence:'Entregada', fecha:'15 mar', estado:'entregada',
-    urgencia:'verde', chips:['Obligatoria','Individual'], nota:'4.5'
-  },
-  {
-    id:6, materia:'ciencias', color:'var(--mat-ciencias)', icono:'🔬',
-    nombre:'Mapa conceptual — Ecosistemas',
-    desc:'Elabora un mapa conceptual digital o físico sobre los ecosistemas terrestres y acuáticos.',
-    docente:'Prof. Morales', vence:'Entregada', fecha:'10 mar', estado:'entregada',
-    urgencia:'verde', chips:['Optativa','Individual'], nota:'3.8'
-  },
-];
-
-let filtroActual = 'todas';
-
-function renderTareas() {
-  const lista = document.getElementById('lista-tareas');
-  const data = filtroActual === 'todas'
-    ? TAREAS
-    : TAREAS.filter(t => t.estado === filtroActual || t.materia === filtroActual);
-
-  if (!data.length) {
-    lista.innerHTML = `<div class="card" style="text-align:center;padding:2.5rem;color:var(--txt-muted);">
-      <div style="font-size:2.5rem;margin-bottom:10px;">📭</div>
-      <div style="font-size:14px;font-weight:600;">No hay tareas en esta categoría</div>
-    </div>`;
-    return;
-  }
-
-  lista.innerHTML = data.map(t => {
-    const urgBg    = t.urgencia==='error' ? '#fee2e2' : t.urgencia==='alerta' ? '#fef3c7' : '#dcfce7';
-    const urgColor = t.urgencia==='error' ? '#dc2626' : t.urgencia==='alerta' ? '#d97706' : '#16a34a';
-    const entregada = t.estado === 'entregada';
-    return `<div class="tarea-card${entregada?' entregada':''}">
-      <div class="tarea-barra" style="background:${t.color};"></div>
-      <div style="flex:1;">
-        <div class="tarea-nombre">${t.icono} ${t.nombre}</div>
-        <div class="tarea-desc">${t.desc}</div>
-        <div class="tarea-chips">
-          ${t.chips.map(c => `<span class="tarea-chip" style="background:${t.color}18;color:${t.color};">${c}</span>`).join('')}
-          ${entregada && t.nota ? `<span class="tarea-chip" style="background:#dcfce7;color:#16a34a;">✅ Nota: ${t.nota}</span>` : ''}
-        </div>
-        <div class="tarea-footer">
-          <span class="tarea-docente">📚 ${t.materia.charAt(0).toUpperCase()+t.materia.slice(1)} · ${t.docente}</span>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span class="tarea-vence" style="color:${urgColor};">⏰ ${t.vence}</span>
-            <span style="font-size:11px;color:var(--txt-muted);">${t.fecha}</span>
-            ${!entregada
-              ? `<button class="btn-entregar" style="background:#eef2fd;color:#3b6de8;" onclick="abrirModal(${t.id})">Entregar →</button>`
-              : `<span style="font-size:12px;font-weight:700;color:#16a34a;">✅ Entregada</span>`
-            }
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function filtrar(btn, tipo) {
-  filtroActual = tipo;
-  document.querySelectorAll('.filtro-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTareas();
-}
-
-// Próximas fechas
-const proximas = TAREAS.filter(t => t.estado === 'pendiente');
-document.getElementById('proximas-fechas').innerHTML = proximas.map(t => {
-  const urgColor = t.urgencia==='error' ? '#dc2626' : t.urgencia==='alerta' ? '#d97706' : '#16a34a';
-  return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--borde);">
-    <div style="width:8px;height:8px;border-radius:50%;background:${t.color};flex-shrink:0;"></div>
-    <div style="flex:1;">
-      <div style="font-size:12.5px;font-weight:600;color:var(--txt-primario);">${t.nombre}</div>
-      <div style="font-size:11px;color:var(--txt-muted);">${t.materia.charAt(0).toUpperCase()+t.materia.slice(1)}</div>
-    </div>
-    <span style="font-size:11.5px;font-weight:700;color:${urgColor};">${t.vence}</span>
-  </div>`;
-}).join('');
-
-// Modal
-let tareaActualId = null;
-function abrirModal(id) {
-  const t = TAREAS.find(x => x.id === id);
-  tareaActualId = id;
-  document.getElementById('modal-tarea-nombre').value = t.nombre;
-  document.getElementById('archivo-sel').style.display = 'none';
-  document.getElementById('file-input').value = '';
-  document.getElementById('modal-entregar').classList.add('open');
-}
-function cerrarModal() {
-  document.getElementById('modal-entregar').classList.remove('open');
-}
-function mostrarArchivo(input) {
-  const el = document.getElementById('archivo-sel');
-  if (input.files[0]) {
-    el.style.display = 'block';
-    el.textContent = '📎 ' + input.files[0].name;
-  }
-}
-function confirmarEntrega() {
-  const t = TAREAS.find(x => x.id === tareaActualId);
-  if (t) { t.estado = 'entregada'; t.vence = 'Entregada'; t.nota = '—'; }
-  cerrarModal();
-  renderTareas();
-  actualizarKPIs();
-}
-function actualizarKPIs() {
-  document.getElementById('kpi-pendientes').textContent = TAREAS.filter(t => t.estado==='pendiente').length;
-  document.getElementById('kpi-entregadas').textContent = TAREAS.filter(t => t.estado==='entregada').length;
-  document.getElementById('total-prog').textContent = `${TAREAS.filter(t=>t.estado==='entregada').length} / ${TAREAS.length}`;
-}
-document.getElementById('modal-entregar').addEventListener('click', function(e){
-  if (e.target === this) cerrarModal();
-});
-
-renderTareas();
-
-document.addEventListener('DOMContentLoaded', () => {
-  const usuario = AUTH.proteger('estudiante');
-  if (usuario) AUTH.pintarUsuario(usuario);
-});
-</script>
+<script src="../assets/js/estudiante-tareas.js"></script>
 </body>
 </html>

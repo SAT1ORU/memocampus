@@ -102,128 +102,10 @@
       </div>
 
       <!-- Lista de alertas -->
-      <div class="card" style="padding:0 1.5rem;">
+      <div class="card" style="padding:1.5rem;">
 
-        <div id="alertas-reales"></div>
+        <div data-alertas-container></div>
 
-        <!-- TAREA VENCIDA HOY -->
-        <div class="alerta-item no-leida urgente" data-tipo="tareas">
-          <div class="alerta-ico-wrap" style="background:var(--error-suave);">⚠️</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Tarea vence HOY — Matemáticas</div>
-            <div class="alerta-desc">Valentina tiene pendiente entregar <strong>"Ejercicios de trigonometría — Unidad 3"</strong> del Prof. Ramírez. La fecha límite es hoy 25 de marzo a las 11:59 pm.</div>
-            <div class="alerta-meta">
-              <span>📚 Matemáticas</span>
-              <span>👤 Prof. Ramírez</span>
-              <span style="color:var(--error); font-weight:600;">⏰ Vence hoy</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-danger btn-sm" onclick="marcarLeida(this)">Entendido</button>
-          </div>
-        </div>
-
-        <!-- TAREA EN 2 DÍAS -->
-        <div class="alerta-item no-leida media" data-tipo="tareas">
-          <div class="alerta-ico-wrap" style="background:var(--alerta-suave);">📋</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Tarea pendiente — Ciencias Naturales</div>
-            <div class="alerta-desc">Valentina aún no ha entregado <strong>"Informe práctica de laboratorio"</strong>. Le quedan 2 días. Fecha límite: 27 de marzo.</div>
-            <div class="alerta-meta">
-              <span>🔬 Ciencias Nat.</span>
-              <span>👤 Prof. Morales</span>
-              <span style="color:var(--alerta); font-weight:600;">⏰ 2 días</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Entendido</button>
-          </div>
-        </div>
-
-        <!-- TAREA EN 5 DÍAS -->
-        <div class="alerta-item no-leida info" data-tipo="tareas">
-          <div class="alerta-ico-wrap" style="background:var(--color-estudiante-suave);">📖</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Tarea próxima — Inglés</div>
-            <div class="alerta-desc">Se acerca la fecha de entrega de <strong>"Reading comprehension — Unit 3"</strong> del Prof. Torres. Faltan 5 días: 30 de marzo.</div>
-            <div class="alerta-meta">
-              <span>🌍 Inglés</span>
-              <span>👤 Prof. Torres</span>
-              <span style="color:var(--verde); font-weight:600;">⏰ 5 días</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Entendido</button>
-          </div>
-        </div>
-
-        <!-- NOTA PUBLICADA -->
-        <div class="alerta-item no-leida ok" data-tipo="notas">
-          <div class="alerta-ico-wrap" style="background:var(--exito-suave);">📊</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Nueva nota publicada — Ciencias Naturales</div>
-            <div class="alerta-desc">El Prof. Morales publicó la nota del <strong>cuestionario átomo</strong>. Valentina obtuvo <strong style="color:var(--verde);">4.5 / 5.0</strong> — desempeño Alto.</div>
-            <div class="alerta-meta">
-              <span>🔬 Ciencias Nat.</span>
-              <span>Hoy, 9:30 am</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Ver nota</button>
-          </div>
-        </div>
-
-        <!-- COMUNICADO REUNIÓN -->
-        <div class="alerta-item no-leida info" data-tipo="comunicados">
-          <div class="alerta-ico-wrap" style="background:var(--color-estudiante-suave);">📢</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Reunión de padres — 4 de abril</div>
-            <div class="alerta-desc">La rectoría convoca a todos los padres de familia a la reunión del 1er período el sábado 4 de abril a las 8:00 am en el auditorio principal de la Sede Central.</div>
-            <div class="alerta-meta">
-              <span>🏫 Rectoría</span>
-              <span>22 mar 2026</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <div class="punto-no-leida"></div>
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Leído</button>
-          </div>
-        </div>
-
-        <!-- COMUNICADO ENTREGA BOLETINES -->
-        <div class="alerta-item no-leida info" data-tipo="comunicados">
-          <div class="alerta-ico-wrap" style="background:var(--color-estudiante-suave);">📋</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Entrega de boletines — Período 1</div>
-            <div class="alerta-desc">Los boletines del primer período estarán disponibles en MemoCampus a partir del 28 de marzo. También podrá reclamarlos físicamente en secretaría del 28 al 31 de marzo.</div>
-            <div class="alerta-meta">
-              <span>📋 Coordinación académica</span>
-              <span>24 mar 2026</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <button class="btn btn-ghost btn-sm" onclick="marcarLeida(this)">Leído</button>
-          </div>
-        </div>
-
-        <!-- ASISTENCIA OK -->
-        <div class="alerta-item ok" data-tipo="asistencia">
-          <div class="alerta-ico-wrap" style="background:var(--exito-suave);">✅</div>
-          <div style="flex:1;">
-            <div class="alerta-titulo">Asistencia confirmada esta semana</div>
-            <div class="alerta-desc">Valentina asistió los 5 días hábiles de la semana del 17 al 21 de marzo. Asistencia acumulada del mes: <strong style="color:var(--verde);">94%</strong>.</div>
-            <div class="alerta-meta">
-              <span>📅 Semana del 17 mar</span>
-            </div>
-          </div>
-          <div class="alerta-acciones">
-            <span class="badge badge-exito">Al día</span>
-          </div>
-        </div>
 
       </div><!-- /card -->
 
@@ -233,8 +115,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 <script src="../assets/js/supabase-config.js"></script>
 <script src="../assets/js/sidebar-padre.js"></script>
-<script src="../assets/js/comunicados.js"></script>
 <script src="../assets/js/auth.js"></script>
+<script src="../assets/js/padre-alertas.js"></script>
+<script>
+  function filtrar(btn, tipo) {
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Filtrado por tipo — próxima versión
+  }
+  function marcarTodasLeidas() {
+    alert('Marcadas como leídas');
+  }
+</script>
 <script>
   const usuario = AUTH.proteger('padre');
   if (usuario) { AUTH.pintarUsuario(usuario); cargarAlertasPadre(usuario); }
