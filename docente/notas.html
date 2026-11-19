@@ -71,12 +71,7 @@
         ⚠️ <strong>Importante:</strong> Las notas se calculan automáticamente con los pesos: Ser 30% · Saber 40% · Hacer 30%. Presiona "Guardar notas" para confirmar los cambios.
       </div>
 
-      <div class="curso-selector">
-        <button class="curso-pill active" onclick="selCurso(this)">Ciencias 10°A (38 est.)</button>
-        <button class="curso-pill" onclick="selCurso(this)">Ciencias 10°B (36 est.)</button>
-        <button class="curso-pill" onclick="selCurso(this)">Física 11°A (35 est.)</button>
-        <button class="curso-pill" onclick="selCurso(this)">Física 11°B (34 est.)</button>
-      </div>
+      <div class="curso-selector"></div>
 
       <div class="card" style="padding:0; overflow:hidden;">
         <div class="tabla-wrap">
@@ -97,7 +92,7 @@
         <div class="guardar-banner">
           <div>
             <span style="font-size:13px; color:var(--txt-muted);">Promedio del curso: </span>
-            <span id="promedio-curso" style="font-size:15px; font-weight:700; color:var(--verde);">4.0</span>
+            <span id="promedio-curso" style="font-size:15px; font-weight:700; color:var(--verde);">—</span>
           </div>
           <div style="display:flex; gap:10px;">
             <button class="btn btn-ghost">Exportar Excel</button>
@@ -139,6 +134,10 @@
   function renderTabla() {
     const tbody = document.getElementById('tbody-notas');
     tbody.innerHTML = '';
+    if (estudiantes.length === 0) {
+      document.getElementById('promedio-curso').textContent = '—';
+      return;
+    }
     let total = 0;
     estudiantes.forEach((e, i) => {
       const nota = calc(e);
