@@ -9,6 +9,7 @@ const AUTH = {
   /* Usuarios de demo por rol */
   USUARIOS_DEMO: {
     estudiante: {
+      id: 6,
       nombre: 'Valentina Gómez Valencia',
       correo: 'latricolorcol00@gmail.com',
       rol: 'estudiante',
