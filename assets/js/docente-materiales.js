@@ -66,8 +66,11 @@ const DOCENTE_MATERIALES = {
     tbody.innerHTML = '';
     (materiales || []).forEach(m => {
       const tr = document.createElement('tr');
+      const nombreConLink = m.archivo_url
+        ? `<a href="${m.archivo_url}" target="_blank" style="color:var(--color-docente); text-decoration:none;"><strong>${m.nombre}</strong> 📥</a>`
+        : `<strong>${m.nombre}</strong>`;
       tr.innerHTML = `
-        <td><strong>${m.nombre}</strong></td>
+        <td>${nombreConLink}</td>
         <td><span class="badge badge-verde">${m.tipo}</span></td>
         <td>${m.grupos.grado}°${m.grupos.seccion}</td>
         <td>${new Date(m.fecha_subida + 'T00:00:00').toLocaleDateString('es-CO')}</td>
@@ -165,6 +168,7 @@ const DOCENTE_MATERIALES = {
     const nombre = document.querySelector('[data-nombre]')?.value?.trim();
     const grupoId = document.querySelector('[data-grupos-select]')?.value;
     const tipo = document.querySelector('[data-tipo]')?.value || 'Otro';
+    const fileInput = document.querySelector('[data-archivo]');
     const btn = document.querySelector('[data-publicar-material]');
 
     console.log('Publicar: nombre=', nombre, 'grupoId=', grupoId, 'tipo=', tipo);
@@ -177,19 +181,70 @@ const DOCENTE_MATERIALES = {
     btn.disabled = true;
     btn.textContent = 'Publicando...';
 
-    const { error } = await this.supabase.from('materiales').insert([
+    let archivoUrl = null;
+
+    // Subir archivo si existe
+    if (fileInput && fileInput.files.length > 0) {
+      const archivo = fileInput.files[0];
+      btn.textContent = 'Subiendo archivo...';
+
+      // Validar tamaño (máx 20 MB)
+      if (archivo.size > 20 * 1024 * 1024) {
+        alert('El archivo es demasiado grande (máx 20 MB)');
+        btn.disabled = false;
+        btn.textContent = '📤 Publicar material';
+        return;
+      }
+
+      // Generar nombre único: docente_id/timestamp-nombre.ext
+      const timestamp = Date.now();
+      const ext = archivo.name.split('.').pop();
+      const nombreArchivo = `${this.usuario.id}/${timestamp}-${nombre.replace(/[^a-z0-9]/gi, '-')}.${ext}`;
+
+      try {
+        const { data, error: uploadError } = await this.supabase.storage
+          .from('materiales')
+          .upload(nombreArchivo, archivo);
+
+        if (uploadError) {
+          console.error('Error subiendo archivo:', uploadError);
+          alert('Error al subir archivo: ' + uploadError.message);
+          btn.disabled = false;
+          btn.textContent = '📤 Publicar material';
+          return;
+        }
+
+        // Obtener URL pública
+        const { data: urlData } = this.supabase.storage
+          .from('materiales')
+          .getPublicUrl(nombreArchivo);
+
+        archivoUrl = urlData.publicUrl;
+        console.log('Archivo subido:', archivoUrl);
+      } catch (e) {
+        console.error('Error en upload:', e);
+        alert('Error inesperado: ' + e.message);
+        btn.disabled = false;
+        btn.textContent = '📤 Publicar material';
+        return;
+      }
+    }
+
+    // Insertar material en BD
+    btn.textContent = 'Registrando...';
+    const { error: insertError } = await this.supabase.from('materiales').insert([
       {
         docente_id: this.usuario.id,
         grupo_id: parseInt(grupoId),
         nombre,
         tipo,
-        archivo_url: null
+        archivo_url: archivoUrl
       }
     ]);
 
-    if (error) {
-      console.error('Error publicando:', error);
-      alert('Error: ' + error.message);
+    if (insertError) {
+      console.error('Error registrando material:', insertError);
+      alert('Error: ' + insertError.message);
       btn.disabled = false;
       btn.textContent = '📤 Publicar material';
       return;
@@ -198,6 +253,9 @@ const DOCENTE_MATERIALES = {
     // Limpiar y recargar
     document.querySelector('[data-nombre]').value = '';
     document.querySelector('[data-descripcion]').value = '';
+    if (fileInput) fileInput.value = '';
+    document.querySelector('.material-upload-area p:first-of-type').textContent = 'Haz clic para seleccionar archivo';
+
     btn.textContent = '✔ Material publicado';
     btn.style.background = 'var(--exito)';
 
