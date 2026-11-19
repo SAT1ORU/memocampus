@@ -34212,12 +34212,12 @@ INSERT INTO casos_psicologicos (estudiante_id, origen, estado, notas) VALUES (67
 
 -- Tareas para grupo 10°A (grupo_id=1)
 INSERT INTO tareas (docente_id, grupo_id, titulo, descripcion, fecha_creada, fecha_entrega, tipo_entrega)
-  VALUES (1, 1, 'Ecuaciones cuadráticas', 'Resolver 20 problemas de ecuaciones cuadráticas', NOW(), '2026-11-15', 'archivo');
+  VALUES ((SELECT id FROM usuarios WHERE correo = 'docente.mat@ejemplo.test'), 1, 'Ecuaciones cuadráticas', 'Resolver 20 problemas de ecuaciones cuadráticas', NOW(), '2026-11-15', 'archivo');
 INSERT INTO tareas (docente_id, grupo_id, titulo, descripcion, fecha_creada, fecha_entrega, tipo_entrega)
-  VALUES (1, 1, 'Examen de Álgebra', 'Evaluación de polinomios y factorización', NOW(), '2026-11-25', 'texto');
+  VALUES ((SELECT id FROM usuarios WHERE correo = 'docente.mat@ejemplo.test'), 1, 'Examen de Álgebra', 'Evaluación de polinomios y factorización', NOW(), '2026-11-25', 'texto');
 INSERT INTO tareas (docente_id, grupo_id, titulo, descripcion, fecha_creada, fecha_entrega, tipo_entrega)
-  VALUES (2, 1, 'Redacción: "Mis metas"', 'Escribir un ensayo de 500 palabras sobre tus metas futuras', NOW(), '2026-11-19', 'archivo');
+  VALUES ((SELECT id FROM usuarios WHERE correo = 'docente.len@ejemplo.test'), 1, 'Redacción: "Mis metas"', 'Escribir un ensayo de 500 palabras sobre tus metas futuras', NOW(), '2026-11-19', 'archivo');
 INSERT INTO tareas (docente_id, grupo_id, titulo, descripcion, fecha_creada, fecha_entrega, tipo_entrega)
-  VALUES (3, 1, 'Informe sobre el ciclo del carbono', 'Crear un informe ilustrado sobre el ciclo biogeoquímico', NOW(), '2026-11-22', 'archivo');
+  VALUES ((SELECT id FROM usuarios WHERE correo = 'docente.cie@ejemplo.test'), 1, 'Informe sobre el ciclo del carbono', 'Crear un informe ilustrado sobre el ciclo biogeoquímico', NOW(), '2026-11-22', 'archivo');
 
 COMMIT;
