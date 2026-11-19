@@ -6,42 +6,81 @@
   <title>Encuesta de Bienestar — MemoCampus</title>
   <link rel="stylesheet" href="../assets/css/variables.css">
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
   <style>
-    .encuesta-card {
+    .bienestar-wrap { max-width: 720px; margin: 0 auto; }
+
+    .bienestar-hero {
+      background: linear-gradient(135deg, #3b6de8 0%, #2454c7 100%);
+      border-radius: var(--radio-xl); padding: 1.75rem 2rem; margin-bottom: 1.5rem;
+      position: relative; overflow: hidden; color: #fff;
+    }
+    .bienestar-hero::before { content:''; position:absolute; right:-30px; top:-30px; width:160px; height:160px; border-radius:50%; background:rgba(255,255,255,0.07); }
+    .bienestar-hero h1 { font-size: 1.4rem; font-weight: 800; margin: 0 0 6px; color: #fff; position: relative; }
+    .bienestar-hero p  { font-size: 13px; color: rgba(255,255,255,0.8); margin: 0; position: relative; }
+
+    .bienestar-card {
       background: var(--bg-card); border: 1px solid var(--borde);
-      border-radius: var(--radio-lg); padding: 2.5rem 2rem;
-      max-width: 600px; margin: 2rem auto;
+      border-radius: var(--radio-xl); padding: 1.75rem; margin-bottom: 1rem;
     }
-    .encuesta-header { text-align: center; margin-bottom: 2rem; }
-    .encuesta-header h1 { font-size: 1.8rem; font-weight: 800; margin: 0 0 0.5rem; color: var(--txt-primario); }
-    .encuesta-header p { font-size: 13px; color: var(--txt-muted); margin: 0; }
-    .pregunta-titulo { font-size: 1.2rem; font-weight: 700; margin-bottom: 1.75rem; color: var(--txt-primario); }
-    .opciones { display: flex; flex-direction: column; gap: 12px; }
+    .bienestar-card h2 { font-size: 1rem; font-weight: 700; margin: 0 0 4px; color: var(--txt-primario); }
+    .bienestar-card .sub { font-size: 12.5px; color: var(--txt-muted); margin: 0 0 1.25rem; }
+
+    .opciones { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
     .opcion {
-      padding: 1.25rem; border: 2px solid var(--borde); border-radius: var(--radio-md);
-      cursor: pointer; transition: all 0.2s; text-align: center; background: var(--bg-app);
+      --c: #3b6de8; --c-suave: #eef2fd;
+      padding: 1rem 0.5rem; border: 1.5px solid var(--borde); border-radius: var(--radio-lg);
+      cursor: pointer; transition: var(--trans); text-align: center; background: var(--bg-card);
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
     }
-    .opcion:hover { border-color: var(--color-estudiante); background: var(--color-estudiante-suave); transform: translateY(-2px); }
-    .opcion.selected { background: var(--color-estudiante); color: #fff; border-color: var(--color-estudiante); }
-    .emoji { font-size: 2.5rem; display: block; margin-bottom: 10px; }
-    .opcion-nombre { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
-    .opcion-desc { font-size: 12px; opacity: 0.8; }
-    .opciones-group { margin-bottom: 2rem; }
-    .btn-enviar { width: 100%; padding: 14px; margin-top: 1.5rem; background: var(--color-estudiante); color: #fff; border: none; border-radius: var(--radio-md); font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-enviar:hover { background: var(--verde); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .btn-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
-    .comentario-box { margin-top: 1.5rem; }
-    .comentario-box label { display: block; font-size: 12px; color: var(--txt-muted); font-weight: 600; margin-bottom: 6px; }
-    .comentario-box textarea { width: 100%; padding: 10px; border: 1px solid var(--borde); border-radius: var(--radio-md); font-family: var(--font-ui); font-size: 13px; resize: vertical; min-height: 80px; }
-    .anonimo-toggle { margin: 1.5rem 0; padding: 1rem; background: var(--bg-app); border-radius: var(--radio-md); display: flex; align-items: center; gap: 10px; }
-    .toggle-switch { position: relative; width: 44px; height: 24px; background: var(--borde); border-radius: 12px; cursor: pointer; transition: all 0.3s; }
-    .toggle-switch.active { background: var(--color-estudiante); }
-    .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: left 0.3s; }
+    .opcion:hover { border-color: var(--c); background: var(--c-suave); transform: translateY(-2px); box-shadow: var(--sombra-md); }
+    .opcion.selected { border-color: var(--c); background: var(--c-suave); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
+    .opcion .emoji { font-size: 2rem; line-height: 1; margin-bottom: 4px; }
+    .opcion strong { font-size: 13px; font-weight: 700; color: var(--txt-primario); }
+    .opcion small  { font-size: 11px; color: var(--txt-muted); line-height: 1.3; }
+    .opcion[data-animo="muy_bien"] { --c: #1a6b3c; --c-suave: #e7f5ec; }
+    .opcion[data-animo="bien"]     { --c: #2d9e5a; --c-suave: #eef9f2; }
+    .opcion[data-animo="regular"]  { --c: #d69e2e; --c-suave: #fdf6e3; }
+    .opcion[data-animo="mal"]      { --c: #e87d1e; --c-suave: #fdf0e4; }
+    .opcion[data-animo="muy_mal"]  { --c: #dc2626; --c-suave: #fdeaea; }
+
+    .comentario-box label { display: block; font-size: 12px; color: var(--txt-secundario); font-weight: 600; margin-bottom: 6px; }
+    .comentario-box textarea {
+      width: 100%; padding: 12px; border: 1.5px solid var(--borde); border-radius: var(--radio-md);
+      font-family: var(--font-ui); font-size: 13px; resize: vertical; min-height: 90px;
+      background: var(--bg-app); color: var(--txt-primario); outline: none; box-sizing: border-box;
+    }
+    .comentario-box textarea:focus { border-color: #3b6de8; box-shadow: 0 0 0 3px rgba(59,109,232,.1); background: var(--bg-card); }
+
+    .anonimo-toggle {
+      padding: 1rem 1.1rem; background: var(--bg-app); border-radius: var(--radio-md);
+      display: flex; align-items: center; gap: 12px; margin-top: 1.25rem;
+    }
+    .toggle-switch { position: relative; width: 44px; height: 24px; background: var(--borde); border-radius: 12px; cursor: pointer; transition: all 0.3s; flex-shrink: 0; }
+    .toggle-switch.active { background: #3b6de8; }
+    .toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 2px; left: 2px; transition: left 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
     .toggle-switch.active::after { left: 22px; }
-    .toggle-label { font-size: 13px; color: var(--txt-primario); font-weight: 500; }
-    .mensaje { padding: 1rem; border-radius: var(--radio-md); margin-bottom: 1rem; }
+    .toggle-label { font-size: 13px; color: var(--txt-primario); font-weight: 600; }
+    .toggle-help  { font-size: 11px; color: var(--txt-muted); margin-top: 2px; }
+
+    .btn-enviar {
+      width: 100%; padding: 14px; margin-top: 1.25rem; background: #3b6de8; color: #fff; border: none;
+      border-radius: var(--radio-md); font-size: 15px; font-weight: 700; cursor: pointer; transition: var(--trans);
+      font-family: var(--font-ui);
+    }
+    .btn-enviar:hover:not(:disabled) { background: #2454c7; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59,109,232,.25); }
+    .btn-enviar:disabled { background: var(--borde); color: var(--txt-muted); cursor: not-allowed; }
+
+    .mensaje { padding: 0.9rem 1rem; border-radius: var(--radio-md); margin-bottom: 1rem; font-size: 13px; font-weight: 500; }
+    .mensaje:empty { display: none; }
     .mensaje-exito { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
     .mensaje-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+    @media (max-width: 600px) {
+      .opciones { grid-template-columns: repeat(2, 1fr); }
+      .opcion:last-child { grid-column: span 2; }
+      .bienestar-hero { padding: 1.4rem; }
+    }
   </style>
 </head>
 <body>
@@ -53,7 +92,7 @@
     <header class="app-topbar">
       <div class="topbar-left">
         <button class="hamburger-btn">☰</button>
-        <span class="topbar-title">Encuesta de Bienestar</span>
+        <span class="topbar-title">Bienestar</span>
       </div>
       <div class="topbar-right">
         <div class="topbar-avatar" data-user-avatar style="background:var(--color-estudiante);">ES</div>
@@ -61,57 +100,64 @@
     </header>
 
     <div class="app-content">
-      <div class="encuesta-card">
-        <div class="encuesta-header">
-          <h1>¿Cómo te sientes?</h1>
-          <p>Tu respuesta ayuda a mejorar el ambiente escolar</p>
+      <div class="bienestar-wrap">
+
+        <div class="bienestar-hero">
+          <h1>¿Cómo te sientes esta semana? 💙</h1>
+          <p>Tu respuesta ayuda a mejorar el ambiente escolar. Solo toma un minuto.</p>
         </div>
 
-        <div id="mensaje"></div>
+        <div id="mensaje" class="mensaje"></div>
 
-        <div class="pregunta-titulo">Selecciona tu estado de ánimo esta semana</div>
-        <div class="opciones">
-          <div class="opcion" onclick="selAnimo(this, 'muy_bien')">
-            <span class="emoji">🤩</span>
-            <strong>Excelente</strong>
-            <span style="font-size:12px; color:var(--txt-muted);">Me siento muy bien</span>
-          </div>
-          <div class="opcion" onclick="selAnimo(this, 'bien')">
-            <span class="emoji">😊</span>
-            <strong>Bien</strong>
-            <span style="font-size:12px; color:var(--txt-muted);">Las cosas van bien</span>
-          </div>
-          <div class="opcion" onclick="selAnimo(this, 'regular')">
-            <span class="emoji">😐</span>
-            <strong>Regular</strong>
-            <span style="font-size:12px; color:var(--txt-muted);">Más o menos</span>
-          </div>
-          <div class="opcion" onclick="selAnimo(this, 'mal')">
-            <span class="emoji">😔</span>
-            <strong>Mal</strong>
-            <span style="font-size:12px; color:var(--txt-muted);">Algo me preocupa</span>
-          </div>
-          <div class="opcion" onclick="selAnimo(this, 'muy_mal')">
-            <span class="emoji">😣</span>
-            <strong>Muy mal</strong>
-            <span style="font-size:12px; color:var(--txt-muted);">Necesito ayuda</span>
-          </div>
-        </div>
-
-        <div class="comentario-box">
-          <label for="comentario">¿Quieres contarnos algo más? (opcional)</label>
-          <textarea id="comentario" placeholder="Escribe aquí lo que quieras compartir..."></textarea>
-        </div>
-
-        <div class="anonimo-toggle">
-          <div class="toggle-switch active" id="toggle-anonimo" onclick="toggleAnonimo()"></div>
-          <div>
-            <div class="toggle-label" id="anonimo-label">Responder de forma anónima</div>
-            <div style="font-size:11px; color:var(--txt-muted);">Si la desactivas, orientación podrá contactarte directamente si lo necesitas.</div>
+        <div class="bienestar-card">
+          <h2>Estado de ánimo</h2>
+          <p class="sub">Elige la opción que mejor describa tu semana.</p>
+          <div class="opciones">
+            <div class="opcion" data-animo="muy_bien" onclick="selAnimo(this, 'muy_bien')">
+              <span class="emoji">🤩</span>
+              <strong>Excelente</strong>
+              <small>Me siento muy bien</small>
+            </div>
+            <div class="opcion" data-animo="bien" onclick="selAnimo(this, 'bien')">
+              <span class="emoji">😊</span>
+              <strong>Bien</strong>
+              <small>Las cosas van bien</small>
+            </div>
+            <div class="opcion" data-animo="regular" onclick="selAnimo(this, 'regular')">
+              <span class="emoji">😐</span>
+              <strong>Regular</strong>
+              <small>Más o menos</small>
+            </div>
+            <div class="opcion" data-animo="mal" onclick="selAnimo(this, 'mal')">
+              <span class="emoji">😔</span>
+              <strong>Mal</strong>
+              <small>Algo me preocupa</small>
+            </div>
+            <div class="opcion" data-animo="muy_mal" onclick="selAnimo(this, 'muy_mal')">
+              <span class="emoji">😣</span>
+              <strong>Muy mal</strong>
+              <small>Necesito ayuda</small>
+            </div>
           </div>
         </div>
 
-        <button class="btn-enviar" id="btn-enviar" onclick="enviarEncuesta()" disabled>Enviar respuesta</button>
+        <div class="bienestar-card">
+          <div class="comentario-box">
+            <label for="comentario">¿Quieres contarnos algo más? (opcional)</label>
+            <textarea id="comentario" placeholder="Escribe aquí lo que quieras compartir..."></textarea>
+          </div>
+
+          <div class="anonimo-toggle">
+            <div class="toggle-switch active" id="toggle-anonimo" onclick="toggleAnonimo()"></div>
+            <div>
+              <div class="toggle-label" id="anonimo-label">Responder de forma anónima</div>
+              <div class="toggle-help">Si la desactivas, orientación podrá contactarte directamente si lo necesitas.</div>
+            </div>
+          </div>
+
+          <button class="btn-enviar" id="btn-enviar" onclick="enviarEncuesta()" disabled>Enviar respuesta</button>
+        </div>
+
       </div>
     </div>
   </main>
