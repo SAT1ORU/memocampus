@@ -148,7 +148,9 @@ const AUTH = {
       admin:      '/admin/dashboard.html'
     };
     const ruta = rutas[rol];
-    if (ruta) window.location.href = ruta;
+    // Si la página actual está dentro de una carpeta de rol, subir un nivel
+    const enCarpetaRol = /\/(admin|docente|padre|estudiante)\//.test(window.location.pathname);
+    if (ruta) window.location.href = (enCarpetaRol ? '../' : '') + ruta;
   },
 
   /* Proteger página — redirige si no hay sesión o rol incorrecto */

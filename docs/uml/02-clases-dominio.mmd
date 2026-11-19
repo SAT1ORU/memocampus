@@ -1,0 +1,116 @@
+classDiagram
+  %% Modelo de dominio derivado de db/schema.sql
+  class Usuario {
+    +int id
+    +string correo
+    +string nombre
+    +Rol rol
+    +bool activo
+  }
+  class Grupo {
+    +int id
+    +smallint grado
+    +char seccion
+    +smallint anio
+  }
+  class Materia {
+    +int id
+    +string nombre
+  }
+  class Asignacion {
+    +int id
+  }
+  class Estudiante {
+    +int id
+    +string seudonimo
+    +string nombre
+  }
+  class Asistencia {
+    +date fecha
+    +EstadoAsistencia estado
+  }
+  class Nota {
+    +smallint periodo
+    +decimal ser
+    +decimal saber
+    +decimal hacer
+    +decimal final
+    +calcularFinal()
+  }
+  class EncuestaAnimo {
+    +date semana
+    +NivelAnimo animo
+    +string comentario
+    +bool requiereAtencion
+  }
+  class CasoPsicologico {
+    +int id
+    +string origen
+    +EstadoCaso estado
+    +string notas
+  }
+  class Alerta {
+    +int id
+    +TipoAlerta tipo
+    +string detalle
+    +bool enviadaAPadres
+    +generar(periodo)
+  }
+  class AccesoLog {
+    +bigint id
+    +string recurso
+    +string accion
+  }
+  class Parametro {
+    +string clave
+    +decimal valor
+  }
+  Usuario "1" --> "0..*" Asignacion : dicta
+  Grupo "1" --> "0..*" Asignacion
+  Materia "1" --> "0..*" Asignacion
+  Grupo "1" --> "0..*" Estudiante : agrupa
+  Usuario "0..*" -- "0..*" Estudiante : padre de
+  Estudiante "1" --> "0..*" Asistencia
+  Estudiante "1" --> "0..*" Nota
+  Materia "1" --> "0..*" Asistencia
+  Materia "1" --> "0..*" Nota
+  Estudiante "1" --> "0..*" EncuestaAnimo
+  Estudiante "1" --> "0..*" CasoPsicologico
+  Estudiante "1" --> "0..*" Alerta
+  Usuario "1" --> "0..*" AccesoLog : registra
+  Usuario "0..1" --> "0..1" Estudiante : cuenta propia
+  class Rol {
+    <<enumeration>>
+    estudiante
+    padre
+    docente
+    coordinacion
+    rectoria
+  }
+  class EstadoAsistencia {
+    <<enumeration>>
+    presente
+    ausente
+    tardanza
+    excusa
+  }
+  class NivelAnimo {
+    <<enumeration>>
+    muy_bien
+    bien
+    regular
+    mal
+    muy_mal
+  }
+  class EstadoCaso {
+    <<enumeration>>
+    abierto
+    en_seguimiento
+    remitido
+    cerrado
+  }
+  class TipoAlerta {
+    <<enumeration>>
+    nota_baja
+    inasistencias
+  }

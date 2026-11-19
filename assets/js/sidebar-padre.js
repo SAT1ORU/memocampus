@@ -45,7 +45,7 @@ async function cargarSidebarPadre() {
     <nav class="sidebar-nav">
       <a href="mensajes.html"    data-page="mensajes">    <span class="nav-ico">💬</span> Mensajes al docente ${badgeMsg}</a>
       <a href="comunicados.html" data-page="comunicados"> <span class="nav-ico">📢</span> Comunicados ${badgeCom}</a>
-      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank">
+      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank" rel="noopener">
         <span class="nav-ico">🌐</span> Portal del colegio
       </a>
     </nav>

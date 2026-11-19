@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de usuario MemoCampus</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  :root { --verde:#1a6b3c; --verde-osc:#0f2a1d; --verde-suave:#e8f5ee; --amarillo:#fbbf24;
+          --txt:#1f2937; --muted:#6b7280; --borde:#e5e7eb; --azul:#2563eb; --morado:#7c3aed;
+          --naranja:#ea580c; --teal:#0f766e; --alerta-suave:#fef9e7; --error-suave:#fdecec; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI","DejaVu Sans",Arial,sans-serif; color:var(--txt); font-size:10.5pt; line-height:1.5; background:#fff; }
+  .seccion { page-break-before: always; padding-top: 4px; }
+  .seccion:first-of-type { page-break-before: auto; }
+  .eyebrow { font-size:8.5pt; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); font-weight:700; }
+  h1 { font-size:24pt; color:var(--verde); margin:4px 0 12px; }
+  h2 { font-size:13pt; margin:18px 0 8px; color:#111827; page-break-after: avoid; }
+  h3 { font-size:11pt; color:var(--verde); margin:0 0 6px; }
+  p { margin:6px 0; }
+  .intro { background:#f5f7fb; border-left:4px solid var(--verde); padding:10px 14px; border-radius:6px; margin:10px 0 14px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
+  .card { border:1px solid var(--borde); border-radius:10px; padding:12px 14px; page-break-inside: avoid; }
+  .banner { border-radius:12px; color:#fff; padding:14px 18px; margin:6px 0 14px; }
+  .banner b { font-size:15pt; display:block; }
+  .banner span { font-size:9.5pt; opacity:.9; }
+  .b-est { background:var(--azul); } .b-pad { background:var(--morado); } .b-doc { background:var(--naranja); } .b-adm { background:var(--teal); }
+  .pasos { list-style:none; padding:0; margin:8px 0; counter-reset:paso; }
+  .pasos li { position:relative; padding:0 0 10px 38px; page-break-inside: avoid; }
+  .pasos li::before { counter-increment:paso; content:counter(paso); position:absolute; left:0; top:0; width:24px; height:24px; border-radius:50%; background:var(--verde); color:#fff; font-weight:700; text-align:center; line-height:24px; font-size:10pt; }
+  table { width:100%; border-collapse:collapse; font-size:9.5pt; margin:8px 0 12px; }
+  th { background:var(--verde-osc); color:#fff; text-align:left; padding:6px 8px; }
+  td { border-bottom:1px solid var(--borde); padding:6px 8px; vertical-align:top; }
+  .tag { display:inline-block; background:var(--verde-suave); color:var(--verde); padding:1px 8px; border-radius:999px; font-weight:600; font-size:9pt; }
+  .tag-prox { background:#fde68a; color:#78350f; }
+  .nota { border-radius:8px; padding:9px 12px; margin:10px 0; font-size:9.8pt; }
+  .n-ok { background:var(--alerta-suave); border:1px solid #f5e08a; }
+  .n-warn { background:var(--error-suave); border-left:4px solid #dc2626; }
+  .n-prox { background:#f3f4f6; border-left:4px solid #9ca3af; }
+  ul { margin:6px 0; padding-left:20px; } li { margin:3px 0; }
+  .pie { position:fixed; bottom:0; left:0; right:0; font-size:8pt; color:#9ca3af; text-align:center; }
+  /* Portada */
+  .portada { height: 262mm; border-radius:16px; background: linear-gradient(160deg,#0f1f18 0%,#1a6b3c 100%); color:#fff; padding:40px 42px; position:relative; page-break-after: always; }
+  .logo { display:flex; align-items:center; gap:12px; }
+  .logo .m { width:44px; height:44px; border-radius:10px; background:var(--amarillo); color:#111; font-weight:900; font-size:22pt; text-align:center; line-height:44px; }
+  .logo b { font-size:17pt; } .logo small { display:block; opacity:.75; font-size:9pt; }
+  .portada .eyebrow { color:var(--amarillo); margin-top:200px; }
+  .portada h1 { color:#fff; font-size:38pt; margin:6px 0 12px; }
+  .portada .sub { font-size:14pt; opacity:.92; max-width:150mm; }
+  .portada .pie-p { position:absolute; bottom:40px; left:42px; right:42px; border-top:1px solid rgba(255,255,255,.3); padding-top:10px; font-size:9pt; opacity:.85; }
+  .indice .it { display:grid; grid-template-columns: 34px 1fr; gap:4px; padding:8px 0; border-bottom:1px solid var(--borde); }
+  .indice .it b { color:var(--verde); } .indice .it span { color:var(--muted); font-size:9pt; display:block; }
+  @media screen { body { max-width: 820px; margin: 0 auto; padding: 16px; } .portada { height:auto; min-height: 560px; } }
+</style>
+</head>
+<body>
+
+<section class="portada">
+  <div class="logo"><div class="m">M</div><div><b>MemoCampus</b><small>IE La Armonía · Mosquera, Cundinamarca</small></div></div>
+  <div class="eyebrow">Guía oficial de uso</div>
+  <h1>Manual de usuario</h1>
+  <div class="sub">Una guía práctica para ingresar, consultar información académica, gestionar tareas y mantener la comunicación de la comunidad educativa.</div>
+  <div class="pie-p">Versión 1.1 · 2026 — Documento preparado para estudiantes, padres o acudientes, docentes y administración.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">Cómo usar esta guía</div>
+  <h1>Contenido</h1>
+  <div class="intro">MemoCampus organiza la experiencia de IE La Armonía en cuatro perfiles. Empieza por el perfil que corresponde a tu cuenta y consulta las secciones comunes cuando lo necesites.</div>
+  <div class="grid indice">
+    <div class="it"><b>01</b><div>Antes de comenzar<span>Acceso, perfiles y modo demo</span></div></div>
+    <div class="it"><b>02</b><div>Ingreso a la plataforma<span>Selección de perfil y autenticación</span></div></div>
+    <div class="it"><b>03</b><div>Estudiante<span>Materias, tareas, notas, calendario y mensajes</span></div></div>
+    <div class="it"><b>04</b><div>Padre o acudiente<span>Seguimiento, asistencia y excusas</span></div></div>
+    <div class="it"><b>05</b><div>Docente<span>Cursos, tareas, notas y comunicación</span></div></div>
+    <div class="it"><b>06</b><div>Administración<span>Usuarios, asistencia y reportes</span></div></div>
+    <div class="it"><b>07</b><div>Archivos y boletines<span>Formatos, carga y descarga</span></div></div>
+    <div class="it"><b>08</b><div>Ayuda rápida y estado de funciones<span>Problemas frecuentes y funciones en desarrollo</span></div></div>
+  </div>
+  <div class="nota n-prox">Esta versión describe el prototipo disponible en el repositorio SAT1ORU/memocampus. Algunas acciones de demostración muestran datos de ejemplo y no representan una conexión productiva con servicios externos. Las funciones marcadas como <span class="tag tag-prox">En desarrollo</span> aún no están disponibles.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">01 · Preparación</div>
+  <h1>Antes de comenzar</h1>
+  <div class="intro"><b>MemoCampus</b> es una plataforma educativa web para reunir materiales, tareas, notas, asistencia, comunicados y reportes de IE La Armonía en un solo lugar.</div>
+  <div class="grid">
+    <div class="card">
+      <h3>Qué necesitas</h3>
+      <ul>
+        <li>Un dispositivo con navegador web actualizado.</li>
+        <li>Conexión a internet para acceder a la plataforma.</li>
+        <li>La cuenta institucional o personal asignada según tu perfil.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Perfiles disponibles</h3>
+      <ul>
+        <li><b>Estudiante:</b> correo institucional.</li>
+        <li><b>Docente:</b> correo institucional.</li>
+        <li><b>Rectoría:</b> correo institucional.</li>
+        <li><b>Padre/acudiente:</b> correo personal.</li>
+      </ul>
+    </div>
+  </div>
+  <h2>La navegación principal</h2>
+  <p>Después de ingresar encontrarás una barra lateral con los módulos disponibles para tu perfil. El elemento resaltado indica la página actual. En pantallas pequeñas, usa el botón de menú ☰ para mostrar u ocultar la barra lateral.</p>
+  <div class="nota n-ok"><b>Elementos comunes:</b> <span class="tag">Inicio</span> resumen del perfil · <span class="tag">Notificaciones</span> novedades · <span class="tag">Avatar</span> datos de la sesión · botón de cerrar sesión en el bloque de usuario.</div>
+  <div class="nota n-ok"><b>Datos del prototipo:</b> el proyecto incluye un modo demo con perfiles de ejemplo para recorrer las pantallas sin una cuenta real.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">02 · Acceso</div>
+  <h1>Ingresar a MemoCampus</h1>
+  <ol class="pasos">
+    <li><b>Abre la página de inicio.</b><br>Selecciona <i>Iniciar sesión</i> o <i>Entrar a MemoCampus</i>.</li>
+    <li><b>Elige tu perfil.</b><br>Selecciona Estudiante, Padre / Acudiente, Docente o Rectoría.</li>
+    <li><b>Elige cómo entrar.</b><br>El botón de Google muestra el acceso institucional previsto, pero <b>en el prototipo no inicia sesión real</b>: el acceso con cuenta de Google se activa en la versión conectada. Para recorrer el sistema, selecciona <i>Entrar en modo demo</i>.</li>
+    <li><b>Confirma el panel.</b><br>La plataforma redirige al dashboard del perfil seleccionado.</li>
+  </ol>
+  <h2>Información de dominio</h2>
+  <table>
+    <tr><th>Perfil</th><th>Tipo de cuenta indicado</th><th>Destino</th></tr>
+    <tr><td>Estudiante</td><td>Correo institucional (@iearmonia.edu.co, por confirmar para Mosquera)</td><td>estudiante/dashboard.html</td></tr>
+    <tr><td>Docente</td><td>Correo institucional</td><td>docente/dashboard.html</td></tr>
+    <tr><td>Rectoría</td><td>Correo institucional</td><td>admin/dashboard.html</td></tr>
+    <tr><td>Padre / acudiente</td><td>Correo personal</td><td>padre/dashboard.html</td></tr>
+  </table>
+  <div class="nota n-warn"><b>Si elegiste el perfil equivocado:</b> cierra sesión y vuelve a ingresar seleccionando el perfil correcto. El prototipo protege las páginas según el rol de la sesión.</div>
+</section>
+
+<section class="seccion">
+  <div class="banner b-est"><b>Estudiante</b><span>Consulta tu avance y cumple tus actividades.</span></div>
+  <h2>Mi inicio</h2>
+  <p>El dashboard muestra materias del periodo, tareas pendientes, promedio general y porcentaje de asistencia. Las tarjetas de materias permiten ir directamente a <i>Mis materias</i>.</p>
+  <div class="grid">
+    <div class="card"><h3>Mis materias</h3><p>Consulta las asignaturas, docente, calificación y desempeño. Usa <i>Ver todas</i> para abrir el listado completo.</p></div>
+    <div class="card"><h3>Tareas</h3><p>Revisa actividades pendientes, fecha de entrega y materia. El contador de la barra lateral ayuda a identificar tareas sin entregar.</p></div>
+    <div class="card"><h3>Calendario</h3><p>Consulta fechas académicas y organiza tus entregas según la agenda del periodo.</p></div>
+    <div class="card"><h3>Mensajes y notificaciones</h3><p>Lee novedades de docentes y coordinación. El punto o contador indica información nueva.</p></div>
+  </div>
+  <h2>Entregar una tarea</h2>
+  <ol class="pasos">
+    <li><b>Abre Tareas</b> desde la barra lateral.</li>
+    <li><b>Selecciona la actividad</b> y revisa instrucciones, materia y fecha límite.</li>
+    <li><b>Adjunta el archivo</b> usando el selector. El prototipo acepta <b>PDF, DOC, DOCX, JPG y PNG</b>, con un máximo de <b>10 MB</b>.</li>
+    <li><b>Verifica el nombre</b> del archivo y confirma la entrega.</li>
+  </ol>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">03 · Perfil estudiante</div>
+  <div class="banner b-est"><b>Notas y boletín</b><span>Revisa el periodo y conserva una copia del resumen.</span></div>
+  <h2>Consultar calificaciones</h2>
+  <p>En <i>Mis notas</i> puedes cambiar entre periodos, revisar el promedio general, el desempeño, la asistencia y el detalle por materia.</p>
+  <div class="nota n-ok"><b>Resumen del boletín:</b> estudiante · grado · año · promedio general · desempeño · asistencia · detalle de materias y observaciones.</div>
+  <h2>Descargar el boletín</h2>
+  <ol class="pasos">
+    <li><b>Abre Mis notas.</b></li>
+    <li><b>Selecciona el periodo</b> que deseas consultar.</li>
+    <li><b>Haz clic en Descargar boletín.</b> El prototipo abre la función de impresión del navegador.</li>
+    <li><b>En la ventana del navegador, elige “Guardar como PDF”</b> y confirma la carpeta de destino.</li>
+  </ol>
+  <div class="nota n-ok"><b>Consejo:</b> antes de guardar, revisa la vista previa, el tamaño de papel y que esté seleccionada la opción de imprimir fondos si deseas conservar los colores del boletín.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">04 · Perfil padre o acudiente</div>
+  <div class="banner b-pad"><b>Padre / acudiente</b><span>Acompaña el proceso académico desde casa.</span></div>
+  <h2>Panel de seguimiento</h2>
+  <p>El inicio resume la información del hijo o hija: promedio, grado, tareas próximas y comunicados. Usa las tarjetas y la barra lateral para consultar el detalle.</p>
+  <div class="grid">
+    <div class="card"><h3>Notas</h3><p>Consulta el rendimiento por periodo y revisa el boletín disponible.</p></div>
+    <div class="card"><h3>Asistencia</h3><p>Revisa el registro de asistencia y las novedades del periodo.</p></div>
+    <div class="card"><h3>Comunicados</h3><p>Lee información institucional. Los comunicados no leídos pueden mostrar un contador.</p></div>
+    <div class="card"><h3>Mensajes al docente</h3><p>Utiliza el módulo para mantener la comunicación relacionada con el proceso académico.</p></div>
+  </div>
+  <h2>Adjuntar una excusa</h2>
+  <ol class="pasos">
+    <li><b>Entra en Adjuntar excusa.</b></li>
+    <li><b>Selecciona el motivo y la fecha</b> de la inasistencia.</li>
+    <li><b>Adjunta el soporte</b> en PDF, JPG o PNG. El prototipo indica un máximo de <b>5 MB</b>.</li>
+    <li><b>Revisa la vista previa</b> y envía la solicitud para revisión.</li>
+  </ol>
+  <div class="nota n-prox"><b>En desarrollo:</b> alertas automáticas por correo cuando un hijo tenga notas bajas o faltas repetidas. Las situaciones de bienestar emocional no se envían por correo: las gestiona directamente el colegio.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">05 · Perfil docente</div>
+  <div class="banner b-doc"><b>Docente</b><span>Organiza cursos, actividades, notas y comunicación.</span></div>
+  <h2>Mi inicio y Mis cursos</h2>
+  <p>El dashboard muestra estudiantes, tareas activas, mensajes y accesos a los cursos. En <i>Mis cursos</i> puedes seleccionar una asignatura, revisar materiales y administrar recursos.</p>
+  <div class="grid">
+    <div class="card"><h3>Publicar materiales</h3><p>Usa el formulario de material para definir título, tipo, curso y archivo. El prototipo acepta <b>PDF, DOCX, PPTX, MP4 y JPG</b>, con un máximo de <b>20 MB</b>.</p></div>
+    <div class="card"><h3>Gestionar tareas</h3><p>Crea actividades, indica instrucciones, fecha de entrega y archivo adjunto si aplica.</p></div>
+    <div class="card"><h3>Revisar entregas</h3><p>Consulta quién entregó, abre los soportes y registra la retroalimentación correspondiente.</p></div>
+    <div class="card"><h3>Notas</h3><p>Selecciona el curso y el periodo, registra calificaciones y revisa el resumen antes de guardarlo o exportarlo.</p></div>
+  </div>
+  <div class="nota n-prox"><b>Estado del prototipo:</b> el botón de guardar notas muestra confirmación visual; la persistencia de notas se conecta en la versión con base de datos.</div>
+  <h2>Comunicación y seguimiento del estudiante</h2>
+  <p>El módulo de mensajes permite atender consultas de familias. En <i>Bienestar</i> el docente ve <b>resultados agregados del grupo</b> (cuántos estudiantes responden cada estado de ánimo), sin nombres ni respuestas individuales.</p>
+  <div class="nota n-warn"><b>Importante:</b> los casos individuales de bienestar emocional son responsabilidad de rectoría y del equipo de orientación. Si observas una situación de riesgo en un estudiante, repórtala a rectoría; no la gestiones por mensajes ni por correo.</div>
+  <div class="nota n-prox"><b>En desarrollo:</b> registro de asistencia diaria por el docente y encuesta semanal de ánimo para estudiantes.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">06 · Perfil administrativo</div>
+  <div class="banner b-adm"><b>Rectoría / Administración</b><span>Gestiona la operación institucional y los reportes.</span></div>
+  <h2>Panel de control</h2>
+  <p>El dashboard institucional reúne accesos a asistencia, comunicados, reportes y usuarios. También muestra indicadores generales, usuarios recientes y actividad.</p>
+  <table>
+    <tr><th>Módulo</th><th>Uso principal</th></tr>
+    <tr><td>Usuarios</td><td>Gestionar estudiantes, docentes y padres.</td></tr>
+    <tr><td>Cursos</td><td>Consultar y organizar cursos de la institución.</td></tr>
+    <tr><td>Asistencia</td><td>Monitorear asistencia por grado y docente.</td></tr>
+    <tr><td>Comunicados</td><td>Publicar y administrar información institucional.</td></tr>
+    <tr><td>Reportes</td><td>Consultar indicadores académicos, asistencia y tareas.</td></tr>
+  </table>
+  <h2>Reportes institucionales</h2>
+  <p>La pantalla de reportes permite consultar promedio institucional, asistencia, estudiantes en riesgo (desempeño Bajo) y porcentaje de tareas entregadas.</p>
+  <div class="grid">
+    <div class="card"><h3>Reportes disponibles</h3><ul><li>Boletines por grado</li><li>Estadísticas académicas</li><li>Estudiantes en riesgo</li></ul></div>
+    <div class="card"><h3>Más informes</h3><ul><li>Reporte de asistencia</li><li>Entrega de tareas</li><li>Informe institucional</li></ul></div>
+  </div>
+  <div class="nota n-ok"><b>Estado actual del prototipo:</b> el botón “Exportar” y algunas tarjetas de reporte son visuales. La generación de archivos se conecta en la versión con base de datos.</div>
+  <h2>Bienestar y apartado psicológico</h2>
+  <div class="nota n-prox"><b>En desarrollo:</b> el apartado psicológico será exclusivo del perfil de rectoría. Incluirá casos de seguimiento, remisiones y la vista individual de la encuesta de ánimo, con registro de cada consulta. Ningún otro perfil accederá a esta información.</div>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">07 · Archivos</div>
+  <h1>Archivos, impresión y PDF</h1>
+  <h2>Formatos contemplados</h2>
+  <table>
+    <tr><th>Función</th><th>Formatos</th><th>Límite indicado</th></tr>
+    <tr><td>Entrega de tarea</td><td>PDF, DOC, DOCX, JPG, PNG</td><td>10 MB</td></tr>
+    <tr><td>Excusa</td><td>PDF, JPG, JPEG, PNG</td><td>5 MB</td></tr>
+    <tr><td>Material docente</td><td>PDF, DOCX, PPTX, MP4, JPG</td><td>20 MB</td></tr>
+    <tr><td>Comunicado</td><td>PDF, DOC, DOCX, JPG, PNG</td><td>Según formulario</td></tr>
+  </table>
+  <h2>Guardar una pantalla como PDF</h2>
+  <p>Cuando una pantalla ofrece <i>Descargar boletín</i>, el prototipo utiliza la impresión del navegador. En el cuadro de impresión selecciona el destino <b>Guardar como PDF</b>. Esta acción crea el archivo en tu equipo; no lo envía automáticamente a la plataforma.</p>
+  <h2>Buenas prácticas para archivos</h2>
+  <ul>
+    <li>Usa nombres claros, por ejemplo <b>Apellido_Nombre_Tarea1.pdf</b>.</li>
+    <li>Comprueba que el documento abra antes de cargarlo.</li>
+    <li>Evita caracteres especiales y nombres excesivamente largos.</li>
+    <li>Respeta el formato y tamaño máximo que muestra cada formulario.</li>
+    <li>No compartas contraseñas ni documentos de otros estudiantes.</li>
+  </ul>
+</section>
+
+<section class="seccion">
+  <div class="eyebrow">08 · Soporte</div>
+  <h1>Ayuda rápida</h1>
+  <table>
+    <tr><th>Situación</th><th>Qué hacer</th></tr>
+    <tr><td>No aparece mi panel</td><td>Verifica que seleccionaste el perfil correcto. Cierra sesión e ingresa de nuevo.</td></tr>
+    <tr><td>No puedo cargar un archivo</td><td>Revisa extensión, tamaño y que el archivo no esté dañado. Intenta con otro navegador actualizado.</td></tr>
+    <tr><td>No veo una tarea</td><td>Actualiza la página y revisa el módulo Tareas del perfil correspondiente.</td></tr>
+    <tr><td>El boletín sale cortado</td><td>En impresión selecciona A4, escala predeterminada y márgenes normales o mínimos.</td></tr>
+    <tr><td>La barra lateral no se ve en celular</td><td>Presiona ☰ para abrir el menú lateral.</td></tr>
+    <tr><td>Necesito salir</td><td>Usa el botón de cerrar sesión en el bloque de usuario de la barra lateral.</td></tr>
+  </table>
+  <h2>Recomendaciones de seguridad</h2>
+  <ul>
+    <li>Usa únicamente tu cuenta y no compartas la sesión.</li>
+    <li>Cierra sesión en dispositivos compartidos.</li>
+    <li>Verifica la dirección del sitio antes de ingresar datos.</li>
+    <li>Reporta accesos no reconocidos al responsable institucional.</li>
+  </ul>
+  <h2>Estado de funciones</h2>
+  <table>
+    <tr><th>Función</th><th>Estado</th></tr>
+    <tr><td>Navegación por perfil, tareas, boletín en PDF, carga de excusas y materiales</td><td><span class="tag">Disponible en el prototipo</span></td></tr>
+    <tr><td>Inicio de sesión real con cuenta de Google institucional</td><td><span class="tag tag-prox">En desarrollo</span></td></tr>
+    <tr><td>Registro de asistencia por docentes</td><td><span class="tag tag-prox">En desarrollo</span></td></tr>
+    <tr><td>Alertas automáticas por correo a padres</td><td><span class="tag tag-prox">En desarrollo</span></td></tr>
+    <tr><td>Encuesta semanal de ánimo y apartado psicológico de rectoría</td><td><span class="tag tag-prox">En desarrollo</span></td></tr>
+    <tr><td>Exportación de reportes institucionales</td><td><span class="tag tag-prox">En desarrollo</span></td></tr>
+  </table>
+  <div class="nota n-ok"><b>Soporte institucional:</b> si el problema persiste, registra el perfil, la pantalla donde ocurre, el navegador y una descripción breve del mensaje observado. No envíes contraseñas ni tokens.</div>
+  <p style="text-align:center;color:var(--muted);font-size:9pt;margin-top:24px;">Fin del manual · MemoCampus · IE La Armonía · Versión 1.1 · 2026</p>
+</section>
+
+</body>
+</html>

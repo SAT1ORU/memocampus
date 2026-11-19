@@ -70,12 +70,12 @@ p  { color: var(--txt-secundario); font-weight: 400; }
 }
 .sidebar-logo-text { line-height: 1.2; }
 .sidebar-logo-name { font-size: 14px; font-weight: 700; color: #fff; }
-.sidebar-logo-sub  { font-size: 10px; color: rgba(255,255,255,0.4); }
+.sidebar-logo-sub  { font-size: 10px; color: rgba(255,255,255,0.6); }
 
 .sidebar-section-title {
   font-size: 10px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 1.5px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.6);
   padding: 1rem 1.25rem 0.4rem;
 }
 .sidebar-nav a {
@@ -117,7 +117,7 @@ p  { color: var(--txt-secundario); font-weight: 400; }
 }
 .sidebar-user-info { flex: 1; overflow: hidden; }
 .sidebar-user-name { font-size: 13px; font-weight: 500; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sidebar-user-rol  { font-size: 11px; color: rgba(255,255,255,0.4); }
+.sidebar-user-rol  { font-size: 11px; color: rgba(255,255,255,0.6); }
 .sidebar-logout { color: rgba(255,255,255,0.35); font-size: 16px; transition: var(--trans); }
 .sidebar-logout:hover { color: var(--error); }
 
@@ -183,9 +183,9 @@ p  { color: var(--txt-secundario); font-weight: 400; }
 .badge-azul    { background: var(--color-estudiante-suave);color: var(--color-estudiante); }
 .badge-morado  { background: var(--color-padre-suave);     color: var(--color-padre); }
 .badge-naranja { background: var(--color-docente-suave);   color: var(--color-docente); }
-.badge-exito   { background: var(--exito-suave);           color: #16a34a; }
-.badge-alerta  { background: var(--alerta-suave);          color: #d97706; }
-.badge-error   { background: var(--error-suave);           color: #dc2626; }
+.badge-exito   { background: var(--exito-suave);           color: #15803d; }
+.badge-alerta  { background: var(--alerta-suave);          color: #b45309; }
+.badge-error   { background: var(--error-suave);           color: #b91c1c; }
 
 /* --- Progress bar --- */
 .progress-wrap { background: var(--bg-app); border-radius: var(--radio-full); height: 8px; overflow: hidden; }

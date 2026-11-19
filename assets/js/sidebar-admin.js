@@ -33,7 +33,7 @@ function cargarSidebarAdmin() {
 
     <div class="sidebar-section-title">Sistema</div>
     <nav class="sidebar-nav">
-      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank">
+      <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank" rel="noopener">
         <span class="nav-ico">🌐</span> Portal del colegio
       </a>
     </nav>
