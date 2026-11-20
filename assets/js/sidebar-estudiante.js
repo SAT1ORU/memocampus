@@ -36,6 +36,7 @@ function cargarSidebarEstudiante() {
       <a href="calendario.html"     data-page="calendario">     <span class="nav-ico">📅</span> Calendario</a>
       <a href="mensajes.html"       data-page="mensajes">       <span class="nav-ico">💬</span> Mensajes</a>
       <a href="notificaciones.html" data-page="notificaciones"> <span class="nav-ico">🔔</span> Notificaciones</a>
+      <a href="bienestar.html"      data-page="bienestar">      <span class="nav-ico">💙</span> Bienestar</a>
       <a href="https://sat1oru.github.io/ie-laarmonia/" target="_blank">
         <span class="nav-ico">🌐</span> Portal del colegio
       </a>
