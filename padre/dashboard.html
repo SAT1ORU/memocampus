@@ -228,31 +228,9 @@
       <div class="notif-dropdown" id="notifDropdown">
         <div class="notif-header">
           <span class="fw-700">Notificaciones</span>
-          <span class="text-xs text-muted" id="notifCount">2 nuevas</span>
+          <span class="text-xs text-muted" id="notifCount">—</span>
         </div>
-        <div class="notif-list">
-          <div class="notif-item notif-unread">
-            <div class="notif-ico" style="background:var(--error-suave);">⚠️</div>
-            <div>
-              <div class="notif-titulo">Tarea vencida — Andrés</div>
-              <div class="notif-fecha">Matemáticas · Hoy</div>
-            </div>
-          </div>
-          <div class="notif-item notif-unread">
-            <div class="notif-ico" style="background:var(--alerta-suave);">📅</div>
-            <div>
-              <div class="notif-titulo">Inasistencia registrada</div>
-              <div class="notif-fecha">Andrés · 22 mar</div>
-            </div>
-          </div>
-          <div class="notif-item">
-            <div class="notif-ico" style="background:var(--verde-suave);">📢</div>
-            <div>
-              <div class="notif-titulo">Semana de recuperación</div>
-              <div class="notif-fecha">Coordinación · 24 mar</div>
-            </div>
-          </div>
-        </div>
+        <div class="notif-list" id="padre-notif-lista"></div>
         <a href="alertas.html" class="notif-footer">Ver todas las alertas →</a>
       </div>
     </div>
@@ -281,7 +259,7 @@
           <div class="stat-icon" style="background:var(--color-estudiante-suave);">👧</div>
           <div>
             <div class="stat-label">Hijos registrados</div>
-            <div class="stat-value" id="padre-hijos-total">2</div>
+            <div class="stat-value" id="padre-hijos-total">—</div>
             <div class="stat-sub">Activos este año</div>
           </div>
         </div>
@@ -289,14 +267,14 @@
           <div class="stat-icon" style="background:#fef3c7;">✅</div>
           <div>
             <div class="stat-label">Tareas pendientes</div>
-            <div class="stat-value" style="color:var(--alerta);">5</div>
-            <div class="stat-sub">Entre los 2 hijos</div>
+            <div class="stat-value" style="color:var(--alerta);" id="padre-tareas-total">—</div>
+            <div class="stat-sub">Entre los hijos</div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon" style="background:var(--verde-suave);">📊</div>
           <div>
-            <div class="stat-label">Promedio Valentina</div>
+            <div class="stat-label" id="padre-label-promedio">Promedio</div>
             <div class="stat-value" id="padre-promedio" style="color:var(--verde);">—</div>
             <div class="stat-sub">Período 1</div>
           </div>
@@ -305,7 +283,7 @@
           <div class="stat-icon" style="background:var(--error-suave);">🔔</div>
           <div>
             <div class="stat-label">Alertas nuevas</div>
-            <div class="stat-value" style="color:var(--error);">2</div>
+            <div class="stat-value" style="color:var(--error);" id="padre-alertas-total">—</div>
             <div class="stat-sub">Sin leer</div>
           </div>
         </div>
@@ -320,47 +298,10 @@
             <h3>Mis hijos</h3>
             <a href="notas.html" class="btn btn-ghost btn-sm">Ver notas →</a>
           </div>
-          <div class="grid-2" id="padre-hijos-lista" style="grid-template-columns: 1fr 1fr; gap:10px;">
-
-            <div class="hijo-card" onclick="window.location.href='notas.html'">
-              <div class="hijo-header" style="background:var(--color-estudiante);"></div>
-              <div class="hijo-body">
-                <div class="hijo-avatar-wrap" style="background:var(--color-estudiante);">VG</div>
-                <div class="hijo-nombre">Valentina Gómez</div>
-                <div class="hijo-grado">Grado 10°A</div>
-                <div class="hijo-nota">
-                  <span class="nota-num" style="color:var(--color-estudiante);">4.1</span>
-                  <div class="nota-label">Período 1<br><span class="badge badge-exito" style="font-size:9px;">Alto</span></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="hijo-card" onclick="window.location.href='notas.html'">
-              <div class="hijo-header" style="background:#0e7490;"></div>
-              <div class="hijo-body">
-                <div class="hijo-avatar-wrap" style="background:#0e7490;">AG</div>
-                <div class="hijo-nombre">Andrés Gómez</div>
-                <div class="hijo-grado">Grado 7°B</div>
-                <div class="hijo-nota">
-                  <span class="nota-num" style="color:#0891b2;">3.6</span>
-                  <div class="nota-label">Período 1<br><span class="badge badge-alerta" style="font-size:9px;">Básico</span></div>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          <div class="grid-2" id="padre-hijos-lista" style="grid-template-columns: 1fr 1fr; gap:10px;"></div>
 
           <!-- Asistencia -->
-          <div style="margin-top:1rem; display:flex; flex-direction:column; gap:10px;">
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Asistencia Valentina</span><span class="text-sm" style="color:var(--verde); font-weight:700;">94%</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:94%; background:var(--verde);"></div></div>
-            </div>
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Asistencia Andrés</span><span class="text-sm" style="color:var(--alerta); font-weight:700;">88%</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:88%; background:var(--alerta);"></div></div>
-            </div>
-          </div>
+          <div id="padre-asistencia" style="margin-top:1rem; display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
         <!-- Tareas pendientes -->
@@ -369,89 +310,23 @@
             <h3>Tareas pendientes</h3>
             <a href="alertas.html" class="btn btn-ghost btn-sm">Ver alertas →</a>
           </div>
-          <div>
-            <div class="tarea-item">
-              <div class="tarea-color" style="background:var(--color-estudiante);"></div>
-              <div style="flex:1;">
-                <div class="tarea-nombre">Ejercicios de trigonometría</div>
-                <div class="tarea-meta"><span>Valentina</span><span>Matemáticas</span></div>
-              </div>
-              <div class="tarea-fecha">
-                <div class="dias" style="color:var(--error);">Hoy</div>
-                <div class="fecha-str">25 mar</div>
-              </div>
-            </div>
-            <div class="tarea-item">
-              <div class="tarea-color" style="background:var(--color-estudiante);"></div>
-              <div style="flex:1;">
-                <div class="tarea-nombre">Informe práctica laboratorio</div>
-                <div class="tarea-meta"><span>Valentina</span><span>Ciencias</span></div>
-              </div>
-              <div class="tarea-fecha">
-                <div class="dias" style="color:var(--alerta);">2 días</div>
-                <div class="fecha-str">27 mar</div>
-              </div>
-            </div>
-            <div class="tarea-item">
-              <div class="tarea-color" style="background:#0e7490;"></div>
-              <div style="flex:1;">
-                <div class="tarea-nombre">Taller de fracciones</div>
-                <div class="tarea-meta"><span>Andrés</span><span>Matemáticas</span></div>
-              </div>
-              <div class="tarea-fecha">
-                <div class="dias" style="color:var(--error);">Vencida</div>
-                <div class="fecha-str">20 mar</div>
-              </div>
-            </div>
-            <div class="tarea-item">
-              <div class="tarea-color" style="background:#0e7490;"></div>
-              <div style="flex:1;">
-                <div class="tarea-nombre">Mapa conceptual historia</div>
-                <div class="tarea-meta"><span>Andrés</span><span>Sociales</span></div>
-              </div>
-              <div class="tarea-fecha">
-                <div class="dias" style="color:var(--verde);">4 días</div>
-                <div class="fecha-str">29 mar</div>
-              </div>
-            </div>
-          </div>
+          <div id="padre-tareas-lista"></div>
         </div>
       </div>
 
-      <!-- Notas Valentina + Comunicados -->
+      <!-- Notas del primer hijo + Comunicados -->
       <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
 
         <!-- Notas -->
         <div class="card">
           <div class="flex-between mb-3">
-            <h3>Notas Valentina — P1</h3>
+            <h3 id="padre-notas-titulo">Notas — P1</h3>
             <a href="notas.html" class="btn btn-ghost btn-sm">Ver boletín →</a>
           </div>
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Matemáticas</span><span class="text-sm" style="color:var(--color-estudiante); font-weight:700;">4.2</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:84%; background:var(--color-estudiante);"></div></div>
-            </div>
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Ciencias Naturales</span><span class="text-sm" style="color:#059669; font-weight:700;">4.5</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:90%; background:#059669;"></div></div>
-            </div>
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Inglés</span><span class="text-sm" style="color:var(--alerta); font-weight:700;">3.8</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:76%; background:var(--alerta);"></div></div>
-            </div>
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Español</span><span class="text-sm" style="color:#7c3aed; font-weight:700;">4.0</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:80%; background:#7c3aed;"></div></div>
-            </div>
-            <div>
-              <div class="flex-between mb-1"><span class="text-sm fw-600">Sociales</span><span class="text-sm" style="color:#0891b2; font-weight:700;">4.3</span></div>
-              <div class="progress-wrap"><div class="progress-bar" style="width:86%; background:#0e7490;"></div></div>
-            </div>
-          </div>
+          <div id="padre-notas-lista" style="display:flex; flex-direction:column; gap:12px;"></div>
           <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--borde); display:flex; justify-content:space-between; align-items:center;">
             <span class="text-sm text-muted">Promedio general</span>
-            <span style="font-size:1.4rem; font-weight:800; color:var(--color-padre);">4.1</span>
+            <span id="padre-notas-prom" style="font-size:1.4rem; font-weight:800; color:var(--color-padre);">—</span>
           </div>
         </div>
 
@@ -459,38 +334,9 @@
         <div class="card">
           <div class="flex-between mb-2">
             <h3>Comunicados</h3>
-            <span class="badge badge-morado">2 nuevos</span>
+            <span class="badge badge-morado" id="padre-com-badge">—</span>
           </div>
-          <div>
-            <div class="comunicado-item">
-              <div class="com-ico" style="background:var(--error-suave);">⚠️</div>
-              <div>
-                <div class="com-titulo">Andrés: tarea vencida en Matemáticas</div>
-                <div class="com-fecha">Sistema · 25 mar 2026</div>
-              </div>
-            </div>
-            <div class="comunicado-item">
-              <div class="com-ico" style="background:var(--alerta-suave);">📅</div>
-              <div>
-                <div class="com-titulo">Inasistencia registrada — Andrés</div>
-                <div class="com-fecha">Coordinación · 22 mar 2026</div>
-              </div>
-            </div>
-            <div class="comunicado-item">
-              <div class="com-ico" style="background:var(--verde-suave);">📢</div>
-              <div>
-                <div class="com-titulo">Semana de recuperación — Período 1</div>
-                <div class="com-fecha">Coordinación Académica · 24 mar 2026</div>
-              </div>
-            </div>
-            <div class="comunicado-item">
-              <div class="com-ico" style="background:var(--color-estudiante-suave);">🎉</div>
-              <div>
-                <div class="com-titulo">Feria de Ciencias — Inscripciones</div>
-                <div class="com-fecha">Rectoría · 20 mar 2026</div>
-              </div>
-            </div>
-          </div>
+          <div id="padre-comunicados-lista"></div>
         </div>
 
       </div>
@@ -507,15 +353,17 @@ async function cargarDashboardPadre(usuario) {
   if (!usuario?.id || !window.supabase || !window.MEMOCAMPUS_CONFIG?.SUPABASE_URL) return;
   try {
     const client = window.supabase.createClient(window.MEMOCAMPUS_CONFIG.SUPABASE_URL, window.MEMOCAMPUS_CONFIG.SUPABASE_ANON_KEY);
-    const { data: vinculos, error } = await client.from('padres_estudiantes').select('estudiantes(id,nombre,grupo_id,grupos(grado,seccion),notas(periodo,final))').eq('padre_id', usuario.id);
+    const { data: vinculos, error } = await client.from('padres_estudiantes').select('estudiante_id, estudiantes(id,nombre,grupo_id,grupos(grado,seccion),notas(periodo,final,materias(nombre)))').eq('padre_id', usuario.id);
     if (error) throw error;
     const hijos = (vinculos || []).map(v => v.estudiantes).filter(Boolean);
     document.getElementById('padre-hijos-total').textContent = hijos.length;
     const colores = ['var(--color-estudiante)', '#0891b2', '#7c3aed', '#ea580c'];
+
+    // Hijos cards
     const lista = document.getElementById('padre-hijos-lista');
-    if (lista && hijos.length) {
+    if (lista) {
       lista.innerHTML = hijos.map((hijo, i) => {
-        const valores = (hijo.notas || []).filter(n => Number(n.periodo) === 1).map(n => Number(n.final)).filter(Number.isFinite);
+        const valores = (hijo.notas || []).filter(n => Number(n.periodo) === 1 && n.final != null).map(n => Number(n.final));
         const promedioHijo = valores.length ? valores.reduce((a, b) => a + b, 0) / valores.length : null;
         const nombre = hijo.nombre || 'Estudiante';
         const iniciales = nombre.split(/\\s+/).map(p => p[0]).join('').slice(0, 2).toUpperCase();
@@ -524,8 +372,86 @@ async function cargarDashboardPadre(usuario) {
         return `<div class="hijo-card" onclick="window.location.href='notas.html'"><div class="hijo-header" style="background:${color};"></div><div class="hijo-body"><div class="hijo-avatar-wrap" style="background:${color};">${iniciales}</div><div class="hijo-nombre">${nombre}</div><div class="hijo-grado">${grupo}</div><div class="hijo-nota"><span class="nota-num" style="color:${color};">${promedioHijo === null ? '—' : promedioHijo.toFixed(1)}</span><div class="nota-label">Período 1<br><span class="badge ${promedioHijo === null ? '' : promedioHijo >= 4 ? 'badge-exito' : promedioHijo >= 3 ? 'badge-alerta' : 'badge-error'}" style="font-size:9px;">${promedioHijo === null ? 'Sin nota' : promedioHijo >= 4 ? 'Alto' : promedioHijo >= 3 ? 'Básico' : 'Bajo'}</span></div></div></div></div>`;
       }).join('');
     }
-    const notas = hijos.flatMap(h => (h.notas || []).filter(n => Number(n.periodo) === 1).map(n => Number(n.final))).filter(Number.isFinite);
+
+    // Promedio general
+    const notas = hijos.flatMap(h => (h.notas || []).filter(n => Number(n.periodo) === 1 && n.final != null).map(n => Number(n.final)));
     if (notas.length) document.getElementById('padre-promedio').textContent = (notas.reduce((a,b) => a + b, 0) / notas.length).toFixed(1);
+    if (!hijos.length) return;
+    const ids = hijos.map(h => h.id);
+    const primer = n => (n || 'Estudiante').split(' ')[0];
+
+    // Notas P1 del primer hijo, por materia
+    const primero = hijos[0];
+    const notasP1 = (primero.notas || []).filter(n => Number(n.periodo) === 1 && n.final != null);
+    document.getElementById('padre-notas-titulo').textContent = `Notas ${primer(primero.nombre)} — P1`;
+    document.getElementById('padre-label-promedio').textContent = `Promedio ${primer(primero.nombre)}`;
+    const coloresMat = ['var(--color-estudiante)', '#059669', 'var(--alerta)', '#7c3aed', '#0891b2', '#ea580c'];
+    document.getElementById('padre-notas-lista').innerHTML = notasP1.length ? notasP1.map((n, i) => {
+      const v = Number(n.final), c = coloresMat[i % coloresMat.length];
+      return `<div><div class="flex-between mb-1"><span class="text-sm fw-600">${n.materias?.nombre || 'Materia'}</span><span class="text-sm" style="color:${c}; font-weight:700;">${v.toFixed(1)}</span></div><div class="progress-wrap"><div class="progress-bar" style="width:${Math.min(100, v / 5 * 100)}%; background:${c};"></div></div></div>`;
+    }).join('') : '<p style="text-align:center;color:var(--txt-muted);">Sin notas registradas</p>';
+    const promP = notasP1.length ? notasP1.reduce((a, n) => a + Number(n.final), 0) / notasP1.length : null;
+    document.getElementById('padre-notas-prom').textContent = promP === null ? '—' : promP.toFixed(1);
+
+    // Asistencia (presente o excusa cuenta como asistió)
+    const { data: asist } = await client.from('asistencia').select('estudiante_id,estado').in('estudiante_id', ids);
+    const conteo = {};
+    (asist || []).forEach(a => {
+      const c = conteo[a.estudiante_id] || (conteo[a.estudiante_id] = { ok: 0, total: 0 });
+      c.total++;
+      if (a.estado === 'presente' || a.estado === 'excusa') c.ok++;
+    });
+    document.getElementById('padre-asistencia').innerHTML = hijos.map(h => {
+      const c = conteo[h.id];
+      if (!c) return `<div><div class="flex-between mb-1"><span class="text-sm fw-600">Asistencia ${primer(h.nombre)}</span><span class="text-sm text-muted">Sin registros</span></div></div>`;
+      const pct = Math.round(c.ok / c.total * 100);
+      const col = pct >= 90 ? 'var(--verde)' : 'var(--alerta)';
+      return `<div><div class="flex-between mb-1"><span class="text-sm fw-600">Asistencia ${primer(h.nombre)}</span><span class="text-sm" style="color:${col}; font-weight:700;">${pct}%</span></div><div class="progress-wrap"><div class="progress-bar" style="width:${pct}%; background:${col};"></div></div></div>`;
+    }).join('');
+
+    // Tareas pendientes
+    const idsGrupos = [...new Set(hijos.map(h => h.grupo_id).filter(Boolean))];
+    const { data: tareas } = await client.from('tareas').select('id,titulo,fecha_entrega').in('grupo_id', idsGrupos).order('fecha_entrega', { ascending: true });
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+    const pendientes = (tareas || []).filter(t => new Date(t.fecha_entrega + 'T00:00:00') >= hoy);
+    const tareasProx = pendientes.slice(0, 4);
+    document.getElementById('padre-tareas-total').textContent = pendientes.length;
+
+    const listaTareas = document.getElementById('padre-tareas-lista');
+    if (listaTareas) {
+      if (!tareasProx.length) {
+        listaTareas.innerHTML = '<p style="text-align:center;color:var(--txt-muted);padding:1rem;">Sin tareas pendientes</p>';
+      } else {
+        listaTareas.innerHTML = tareasProx.map(t => {
+          const fecha = new Date(t.fecha_entrega + 'T00:00:00');
+          fecha.setHours(0, 0, 0, 0);
+          const dias = Math.ceil((fecha - hoy) / (1000 * 60 * 60 * 24));
+          const color = dias < 0 ? 'var(--error)' : dias === 0 ? 'var(--error)' : dias <= 2 ? 'var(--alerta)' : 'var(--verde)';
+          const label = dias < 0 ? 'Vencida' : dias === 0 ? 'Hoy' : `${dias} día${dias === 1 ? '' : 's'}`;
+          return `<div class="tarea-item"><div class="tarea-color" style="background:${color};"></div><div style="flex:1;"><div class="tarea-nombre">${t.titulo}</div></div><div class="tarea-fecha"><div class="dias" style="color:${color};">${label}</div><div class="fecha-str">${fecha.toLocaleDateString('es-CO')}</div></div></div>`;
+        }).join('');
+      }
+    }
+
+    // Alertas de los hijos: alimentan Alertas nuevas, Comunicados y el dropdown de notificaciones
+    const { data: alertas } = await client.from('alertas').select('id,tipo,detalle,creada_en,estudiantes(nombre)').in('estudiante_id', ids).order('creada_en', { ascending: false });
+    const listaAlertas = alertas || [];
+    document.getElementById('padre-alertas-total').textContent = listaAlertas.length;
+    document.getElementById('padre-com-badge').textContent = `${listaAlertas.length} ${listaAlertas.length === 1 ? 'nueva' : 'nuevas'}`;
+
+    const iconosTipo = { nota_baja: '📊', inasistencias: '📅' };
+    const bgTipo = { nota_baja: 'var(--error-suave)', inasistencias: 'var(--alerta-suave)' };
+    const etiquetaTipo = { nota_baja: 'Nota baja', inasistencias: 'Inasistencias' };
+    const vacio = '<p style="text-align:center;color:var(--txt-muted);padding:1rem;">Sin alertas</p>';
+    const listaComun = document.getElementById('padre-comunicados-lista');
+    if (listaComun) {
+      listaComun.innerHTML = listaAlertas.length ? listaAlertas.slice(0, 4).map(a => `<div class="comunicado-item"><div class="com-ico" style="background:${bgTipo[a.tipo] || 'var(--verde-suave)'};">${iconosTipo[a.tipo] || '⚠️'}</div><div><div class="com-titulo">${etiquetaTipo[a.tipo] || 'Alerta'} — ${a.estudiantes?.nombre || 'Estudiante'}</div><div class="com-fecha">${a.detalle} · ${new Date(a.creada_en).toLocaleDateString('es-CO')}</div></div></div>`).join('') : vacio;
+    }
+    const notifLista = document.getElementById('padre-notif-lista');
+    if (notifLista) {
+      notifLista.innerHTML = listaAlertas.length ? listaAlertas.slice(0, 4).map(a => `<div class="notif-item notif-unread"><div class="notif-ico" style="background:${bgTipo[a.tipo] || 'var(--verde-suave)'};">${iconosTipo[a.tipo] || '⚠️'}</div><div><div class="notif-titulo">${etiquetaTipo[a.tipo] || 'Alerta'} — ${a.estudiantes?.nombre || 'Estudiante'}</div><div class="notif-fecha">${a.detalle}</div></div></div>`).join('') : '<p style="text-align:center;color:var(--txt-muted);padding:1rem;font-size:13px;">Sin notificaciones</p>';
+      document.getElementById('notifCount').textContent = `${listaAlertas.length} ${listaAlertas.length === 1 ? 'nueva' : 'nuevas'}`;
+    }
   } catch (error) {
     console.warn('No se pudieron cargar datos reales del padre.', error);
   }

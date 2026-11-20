@@ -130,6 +130,7 @@ const ESTUDIANTE_TAREAS = {
     document.getElementById('kpi-pendientes').textContent = pendientes;
     document.getElementById('kpi-entregadas').textContent = vencidas;
     document.getElementById('kpi-vence-hoy').textContent = hoy_exact;
+    actualizarBadgeTareas(pendientes);
   },
 
   cargarProximasFechas() {
@@ -144,8 +145,7 @@ const ESTUDIANTE_TAREAS = {
         const fecha = new Date(t.fecha_entrega);
         fecha.setHours(0, 0, 0, 0);
         return fecha >= hoy;
-      })
-      .slice(0, 3);
+      });
 
     if (proximas.length === 0) {
       container.innerHTML = '<p style="font-size:12px; color:var(--txt-muted); text-align:center; padding:1rem;">Sin próximas entregas</p>';

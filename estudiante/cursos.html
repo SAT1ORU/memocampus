@@ -82,7 +82,7 @@
         <span class="topbar-title">Mis materias</span>
       </div>
       <div class="topbar-right">
-        <button class="topbar-btn">🔔<div class="topbar-notif-dot"></div></button>
+        <button class="topbar-btn" onclick="mostrarNotificaciones()">🔔<div class="topbar-notif-dot"></div></button>
         <div class="topbar-avatar" data-user-avatar style="background:#3b6de8;">VG</div>
       </div>
     </header>
@@ -104,7 +104,7 @@
       </div>
 
       <div class="materia-tabs">
-        <button class="mtab active" onclick="filtrarArea(this,'todas')">Todas (11)</button>
+        <button class="mtab active" id="btn-todas" onclick="filtrarArea(this,'todas')">Todas (0)</button>
         <button class="mtab" onclick="filtrarArea(this,'ciencias')">Ciencias</button>
         <button class="mtab" onclick="filtrarArea(this,'humanidades')">Humanidades</button>
         <button class="mtab" onclick="filtrarArea(this,'matematicas')">Matemáticas</button>
@@ -163,8 +163,9 @@
       const colores = ['var(--mat-matematicas)','var(--mat-ciencias)','var(--mat-ingles)','var(--mat-español)','var(--mat-sociales)'];
       const emojis = ['➗','🔬','🌍','📖','🌎'];
       const grid = document.getElementById('materia-grid');
+      document.getElementById('btn-todas').textContent = `Todas (${materias.length})`;
       grid.innerHTML = materias.map((m, i) => `
-        <div class="materia-big-card">
+        <div class="materia-big-card" style="cursor:pointer;" onclick="abrirMateria('${m.nombre}')">
           <div class="materia-header-bar" style="background:${colores[i % colores.length]};"></div>
           <div class="materia-card-body">
             <div class="materia-top">
@@ -187,8 +188,27 @@
     } catch (error) { console.warn('Error cargando materias:', error); }
   }
 
+  const areaMap = {
+    ciencias: ['Ciencias Naturales'],
+    humanidades: ['Lenguaje', 'Inglés'],
+    matematicas: ['Matemáticas'],
+    sociales: ['Sociales', 'Ciencias Sociales'],
+    otros: ['Educación Física']
+  };
+
   function filtrarArea(btn, area) {
-    // Placeholder para mantener compatibilidad con filtros
+    document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const grid = document.getElementById('materia-grid');
+    if (area === 'todas') {
+      grid.querySelectorAll('.materia-big-card').forEach(c => c.style.display = '');
+    } else {
+      const keywords = areaMap[area] || [];
+      grid.querySelectorAll('.materia-big-card').forEach(card => {
+        const nombre = card.querySelector('h4')?.textContent || '';
+        card.style.display = keywords.some(k => nombre.includes(k)) ? '' : 'none';
+      });
+    }
   }
 
   function filtrar() {
@@ -196,6 +216,10 @@
     document.querySelectorAll('.materia-big-card').forEach(card => {
       card.style.display = card.innerText.toLowerCase().includes(q) ? '' : 'none';
     });
+  }
+
+  function abrirMateria(nombre) {
+    alert(`Entrando a ${nombre}\n\n(Funcionalidad en desarrollo)`);
   }
 
   document.addEventListener('DOMContentLoaded', cargarMaterias);

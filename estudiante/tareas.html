@@ -115,6 +115,7 @@
         <span class="topbar-title">Tareas</span>
       </div>
       <div class="topbar-right">
+        <button class="topbar-btn" onclick="mostrarNotificaciones()" style="background:none;border:none;font-size:1.2rem;cursor:pointer;">🔔</button>
         <div class="topbar-avatar" data-user-avatar
              style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;
                     justify-content:center;font-size:13px;font-weight:700;color:#fff;background:#3b6de8;">VG</div>
@@ -186,7 +187,7 @@
             <div class="flex-between mb-2">
               <h3 style="margin:0;">Próximas fechas</h3>
             </div>
-            <div style="display:flex;flex-direction:column;gap:10px;" id="proximas-fechas"></div>
+            <div style="display:flex;flex-direction:column;gap:10px;max-height:420px;overflow-y:auto;" id="proximas-fechas"></div>
           </div>
         </div>
       </div>

@@ -4,15 +4,9 @@ function cargarSidebarEstudiante() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
 
-  let tareasNoLeidas = 0;
-  try {
-    const data = localStorage.getItem('memocampus_tareas');
-    if (data) tareasNoLeidas = JSON.parse(data).filter(t => !t.entregada).length;
-  } catch { /* Ignorar datos locales inválidos. */ }
-
-  const badgeTareas = tareasNoLeidas > 0
-    ? `<span class="sidebar-badge">${tareasNoLeidas}</span>`
-    : `<span class="sidebar-badge">3</span>`;
+  let pendientes = 0;
+  try { pendientes = Number(localStorage.getItem('memocampus_tareas_pendientes')) || 0; } catch { /* Sin acceso a localStorage: sin badge. */ }
+  const badgeTareas = pendientes > 0 ? `<span class="sidebar-badge">${pendientes}</span>` : '';
 
   sidebar.innerHTML = `
     <div class="sidebar-logo">
@@ -65,6 +59,77 @@ function cargarSidebarEstudiante() {
     if (typeof AUTH !== 'undefined') AUTH.logout();
     else window.location.href = '../login.html';
   });
+}
+
+// Actualiza el badge de Tareas con el conteo real (lo llama estudiante-tareas.js)
+function actualizarBadgeTareas(n) {
+  try { localStorage.setItem('memocampus_tareas_pendientes', n); } catch { /* Sin localStorage: solo se actualiza la página actual. */ }
+  const link = document.querySelector('[data-page="tareas"]');
+  if (!link) return;
+  link.querySelector('.sidebar-badge')?.remove();
+  if (n > 0) link.insertAdjacentHTML('beforeend', `<span class="sidebar-badge">${n}</span>`);
+}
+
+// Mismas notificaciones no leídas que muestra notificaciones.html
+const NOTIFICACIONES_RECIENTES = [
+  { icono:'✅', bg:'#fef3c7', titulo:'Tarea vence hoy — Trigonometría', meta:'Matemáticas · Hoy' },
+  { icono:'📢', bg:'#dcfce7', titulo:'Nuevo comunicado — Semana de recuperación', meta:'Coordinación · 24 mar 2026' },
+  { icono:'📊', bg:'#eef2fd', titulo:'Nota registrada — Ciencias Naturales 4.5', meta:'Prof. Morales · Ayer' },
+];
+
+function mostrarNotificaciones() {
+  let modal = document.getElementById('modal-notif-rapida');
+  if (!modal) {
+    document.head.insertAdjacentHTML('beforeend', `<style>
+      .notif-rapida-overlay { display:none; position:fixed; inset:0; background:rgba(15,25,35,.45); backdrop-filter:blur(3px); z-index:800; align-items:flex-start; justify-content:flex-end; padding:72px 24px 0; }
+      .notif-rapida-overlay.open { display:flex; }
+      .notif-rapida-box { background:#fff; width:100%; max-width:380px; border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,.25); overflow:hidden; animation:nrIn .18s ease-out; }
+      @keyframes nrIn { from { opacity:0; transform:translateY(-8px) scale(.98); } to { opacity:1; transform:none; } }
+      .notif-rapida-head { background:linear-gradient(135deg,#3b6de8,#2454c7); color:#fff; padding:16px 18px; display:flex; justify-content:space-between; align-items:flex-start; }
+      .notif-rapida-titulo { font-weight:800; font-size:15px; }
+      .notif-rapida-sub { font-size:12px; opacity:.8; margin-top:2px; }
+      .notif-rapida-x { background:rgba(255,255,255,.18); border:none; color:#fff; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:13px; }
+      .notif-rapida-lista { padding:6px 0; max-height:360px; overflow-y:auto; }
+      .notif-rapida-item { display:flex; gap:12px; padding:12px 18px; align-items:flex-start; border-bottom:1px solid #eef0f4; }
+      .notif-rapida-item:last-child { border-bottom:none; }
+      .notif-rapida-ico { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+      .notif-rapida-tit { font-size:13px; font-weight:700; color:#0f1923; line-height:1.35; }
+      .notif-rapida-meta { font-size:11px; color:#8a94a6; margin-top:3px; }
+      .notif-rapida-ver { display:block; text-align:center; padding:12px; font-size:13px; font-weight:700; color:#3b6de8; text-decoration:none; background:#f5f7fb; border-top:1px solid #eef0f4; }
+      .notif-rapida-ver:hover { background:#eef2fd; }
+    </style>`);
+
+    modal = document.createElement('div');
+    modal.id = 'modal-notif-rapida';
+    modal.className = 'notif-rapida-overlay';
+    modal.innerHTML = `
+      <div class="notif-rapida-box" role="dialog" aria-modal="true" aria-label="Notificaciones">
+        <div class="notif-rapida-head">
+          <div>
+            <div class="notif-rapida-titulo">🔔 Notificaciones</div>
+            <div class="notif-rapida-sub">${NOTIFICACIONES_RECIENTES.length} sin leer</div>
+          </div>
+          <button class="notif-rapida-x" aria-label="Cerrar">✕</button>
+        </div>
+        <div class="notif-rapida-lista">
+          ${NOTIFICACIONES_RECIENTES.map(n => `
+            <div class="notif-rapida-item">
+              <div class="notif-rapida-ico" style="background:${n.bg};">${n.icono}</div>
+              <div>
+                <div class="notif-rapida-tit">${n.titulo}</div>
+                <div class="notif-rapida-meta">${n.meta}</div>
+              </div>
+            </div>`).join('')}
+        </div>
+        <a class="notif-rapida-ver" href="notificaciones.html">Ver todas las notificaciones →</a>
+      </div>`;
+    document.body.appendChild(modal);
+
+    const cerrar = () => modal.classList.remove('open');
+    modal.addEventListener('click', e => { if (e.target === modal || e.target.closest('.notif-rapida-x')) cerrar(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrar(); });
+  }
+  modal.classList.add('open');
 }
 
 // ✅ Llamada directa — no depende de DOMContentLoaded
